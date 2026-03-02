@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>GT-FCH Map — Local Preview</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.30/"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #viewDiv { height: 100%; width: 100%; font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+    #header {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+      background: linear-gradient(135deg, #003057 0%, #B3A369 100%);
+      color: #fff; padding: 10px 16px; display: flex; align-items: center;
+      gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.35); pointer-events: none;
+    }
+    #header .logo { font-size: 28px; line-height: 1; }
+    #header .title-block h1 { font-size: 16px; font-weight: 700; letter-spacing: .5px; }
+    #header .title-block p  { font-size: 11px; opacity: .85; margin-top: 2px; }
+
+    #preview-badge {
+      position: absolute; top: 60px; right: 14px; z-index: 10;
+      background: #ff6f00; color: #fff; font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 4px; letter-spacing: .5px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    }
+
+    #viewDiv { padding-top: 56px; }
+
+    #loadingOverlay {
+      position: absolute; inset: 0; background: rgba(0,48,87,.75);
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; z-index: 20; color: #fff; gap: 14px;
+      transition: opacity .4s;
+    }
+    #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 5px solid rgba(255,255,255,.3);
+      border-top-color: #B3A369;
+      border-radius: 50%; animation: spin .9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Filter panel ── */
+    #filter-panel {
+      position: absolute; top: 66px; left: 14px; background: #fff;
+      border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.28);
+      font-size: 13px; width: 230px; z-index: 10; overflow: hidden;
+    }
+    #filter-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #003057; color: #fff; padding: 9px 12px;
+      cursor: pointer; user-select: none;
+    }
+    #filter-header span { font-size: 13px; font-weight: 700; letter-spacing: .4px; }
+    #filter-toggle-icon { font-size: 11px; transition: transform .25s; }
+    #filter-toggle-icon.collapsed { transform: rotate(-90deg); }
+    #filter-body {
+      padding: 10px 12px 12px; overflow-y: auto; max-height: 420px;
+      transition: max-height .25s ease, padding .25s;
+    }
+    #filter-body.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; }
+
+    .filter-global-row { display: flex; gap: 6px; margin-bottom: 10px; }
+    .filter-global-row button {
+      flex: 1; padding: 4px 0; border: 1px solid #003057; border-radius: 4px;
+      background: #fff; color: #003057; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s;
+    }
+    .filter-global-row button:hover { background: #003057; color: #fff; }
+
+    .filter-group { margin-bottom: 10px; }
+    .filter-group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .filter-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #777; }
+    .filter-group-actions { display: flex; gap: 4px; }
+    .filter-group-actions button {
+      font-size: 10px; padding: 1px 6px; border: 1px solid #ccc;
+      border-radius: 3px; background: #f5f5f5; color: #444; cursor: pointer;
+    }
+    .filter-group-actions button:hover { background: #e0e0e0; }
+    .filter-divider { border: none; border-top: 1px solid #eee; margin: 10px 0; }
+
+    .filter-row { display: flex; align-items: center; gap: 9px; padding: 4px 0; }
+    .toggle-switch { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0; border-radius: 18px; background: #ccc;
+      cursor: pointer; transition: background .2s;
+    }
+    .toggle-track::after {
+      content: ""; position: absolute; width: 12px; height: 12px;
+      border-radius: 50%; background: #fff; top: 3px; left: 3px;
+      transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3);
+    }
+    .toggle-switch input:checked + .toggle-track { background: #003057; }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(16px); }
+
+    .swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+    .swatch.circle { border-radius: 50%; }
+    .swatch.line { height: 4px; border-radius: 2px; align-self: center; }
+    .filter-row label { cursor: pointer; color: #222; line-height: 1.2; font-size: 12px; }
+    .filter-row.layer-off label, .filter-row.layer-off .swatch { opacity: .4; }
+  </style>
+</head>
+<body>
+
+  <div id="loadingOverlay"><div class="spinner"></div><span>Loading GT-FCH Map...</span></div>
+
+  <div id="header">
+    <div class="logo">&#9851;</div>
+    <div class="title-block">
+      <h1>Georgia Tech Campus Food Circular Hub (GT-FCH)</h1>
+      <p>Campus waste &amp; food-resource infrastructure &middot; Local Preview</p>
+    </div>
+  </div>
+
+  <div id="preview-badge">LOCAL PREVIEW</div>
+  <div id="viewDiv"></div>
+
+  <!-- Filter Panel -->
+  <div id="filter-panel">
+    <div id="filter-header">
+      <span>&#9783; Layer Filters</span>
+      <span id="filter-toggle-icon">&#9660;</span>
+    </div>
+    <div id="filter-body">
+      <div class="filter-global-row">
+        <button id="btn-show-all">Show All</button>
+        <button id="btn-hide-all">Hide All</button>
+      </div>
+
+      <!-- Base Layers -->
+      <div class="filter-group" data-group="base">
+        <div class="filter-group-header">
+          <span class="filter-group-label">Base Layers</span>
+          <div class="filter-group-actions">
+            <button class="btn-group-all" data-group="base">All</button>
+            <button class="btn-group-none" data-group="base">None</button>
+          </div>
+        </div>
+        <div class="filter-row" data-layer="boundary">
+          <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          <div class="swatch" style="background:transparent;border:2px solid #003057;"></div>
+          <label>Campus Boundary</label>
+        </div>
+        <div class="filter-row" data-layer="buildings">
+          <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          <div class="swatch" style="background:#D4C9A8;border:1px solid #8C7B4E;"></div>
+          <label>Buildings</label>
+        </div>
+        <div class="filter-row" data-layer="streets">
+          <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          <div class="swatch line" style="background:#777;width:18px;"></div>
+          <label>Street Centerlines</label>
+        </div>
+        <div class="filter-row" data-layer="sidewalks">
+          <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          <div class="swatch line" style="background:#B3A369;width:18px;"></div>
+          <label>Sidewalks</label>
+        </div>
+      </div>
+
+      <hr class="filter-divider" />
+
+      <!-- Food Circular Hub -->
+      <div class="filter-group" data-group="fch">
+        <div class="filter-group-header">
+          <span class="filter-group-label">Food Circular Hub</span>
+          <div class="filter-group-actions">
+            <button class="btn-group-all" data-group="fch">All</button>
+            <button class="btn-group-none" data-group="fch">None</button>
+          </div>
+        </div>
+        <div class="filter-row" data-layer="compost">
+          <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          <div class="swatch circle" style="background:#4CAF50;border:2px solid #2E7D32;"></div>
+          <label>Compost Locations</label>
+        </div>
+        <div class="filter-row" data-layer="vending">
+          <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          <div class="swatch circle" style="background:#F57C00;border:2px solid #BF360C;"></div>
+          <label>Vending Machines</label>
+        </div>
+        <div class="filter-row" data-layer="recycling">
+          <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          <div class="swatch circle" style="background:#29B6F6;border:2px solid #0277BD;"></div>
+          <label>Recycling / Trash Cans</label>
+        </div>
+        <div class="filter-row" data-layer="indoor">
+          <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          <div class="swatch line" style="background:#AB47BC;width:18px;"></div>
+          <label>Indoor Trash Routes</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const BASE_URL = window.location.origin || "";
+
+  const GEOJSON = {
+    boundary:  `${BASE_URL}/geojson/campus_boundary.geojson`,
+    buildings: `${BASE_URL}/geojson/buildings.geojson`,
+    streets:   `${BASE_URL}/geojson/street_centerlines.geojson`,
+    sidewalks: `${BASE_URL}/geojson/sidewalks.geojson`,
+    compost:   `${BASE_URL}/geojson/compost_locations.geojson`,
+    vending:   `${BASE_URL}/geojson/vending_machines.geojson`,
+    recycling: `${BASE_URL}/geojson/recycling_trash_cans.geojson`,
+    indoor:    `${BASE_URL}/geojson/trash_recycling_indoor.geojson`,
+  };
+
+  const GT_CENTER = [-84.3963, 33.7756];
+
+  require([
+    "esri/Map",
+    "esri/views/MapView",
+    "esri/layers/GeoJSONLayer",
+    "esri/widgets/ScaleBar",
+    "esri/widgets/Compass",
+    "esri/widgets/Home",
+    "esri/widgets/Search",
+    "esri/widgets/Expand",
+    "esri/widgets/BasemapGallery",
+  ], function (Map, MapView, GeoJSONLayer, ScaleBar, Compass, Home, Search, Expand, BasemapGallery) {
+
+    function polyRenderer(fillColor, outlineColor, w = 1) {
+      return { type: "simple", symbol: { type: "simple-fill", color: fillColor, outline: { color: outlineColor, width: w } } };
+    }
+    function lineRenderer(color, width = 1.5) {
+      return { type: "simple", symbol: { type: "simple-line", color, width } };
+    }
+    function pointRenderer(color, outlineColor, size = 8) {
+      return { type: "simple", symbol: { type: "simple-marker", style: "circle", color, size, outline: { color: outlineColor, width: 1.2 } } };
+    }
+
+    // ── Layers ────────────────────────────────────────────────────────────────
+    const boundaryLayer = new GeoJSONLayer({
+      id: "boundary", title: "Campus Boundary", url: GEOJSON.boundary,
+      renderer: polyRenderer([0,48,87,0.08], [0,48,87,1], 2.5),
+      popupTemplate: { title: "Campus Boundary", content: [{ type: "fields" }] },
+    });
+
+    const buildingsLayer = new GeoJSONLayer({
+      id: "buildings", title: "Buildings", url: GEOJSON.buildings,
+      renderer: polyRenderer([212,201,168,0.75], [140,123,78,1], 0.5),
+      popupTemplate: { title: "{Name}", content: [{ type: "fields" }] },
+    });
+
+    const streetsLayer = new GeoJSONLayer({
+      id: "streets", title: "Street Centerlines", url: GEOJSON.streets,
+      renderer: lineRenderer([100,100,100,0.8], 1.8),
+      popupTemplate: { title: "{FULLNAME}", content: [{ type: "fields" }] },
+    });
+
+    const sidewalksLayer = new GeoJSONLayer({
+      id: "sidewalks", title: "Sidewalks", url: GEOJSON.sidewalks,
+      renderer: lineRenderer([179,163,105,0.9], 1.2),
+      popupTemplate: { title: "Sidewalk — {SURFTYPE}", content: [{ type: "fields" }] },
+    });
+
+    const compostLayer = new GeoJSONLayer({
+      id: "compost", title: "Compost Locations", url: GEOJSON.compost,
+      renderer: pointRenderer([76,175,80], [46,125,50], 12),
+      popupTemplate: { title: "Compost: {Location_N}", content: [{ type: "fields" }] },
+    });
+
+    const vendingLayer = new GeoJSONLayer({
+      id: "vending", title: "Vending Machines", url: GEOJSON.vending,
+      renderer: pointRenderer([245,124,0], [191,54,12], 10),
+      popupTemplate: { title: "Vending: {Building_N}", content: [{ type: "fields" }] },
+    });
+
+    const recyclingLayer = new GeoJSONLayer({
+      id: "recycling", title: "Recycling & Trash Cans", url: GEOJSON.recycling,
+      renderer: pointRenderer([41,182,246], [2,119,189], 9),
+      popupTemplate: { title: "{bin_type} — {location_n}", content: [{ type: "fields" }] },
+    });
+
+    const indoorLayer = new GeoJSONLayer({
+      id: "indoor", title: "Indoor Trash & Recycling Routes", url: GEOJSON.indoor,
+      renderer: lineRenderer([171,71,188,0.8], 1.5),
+      popupTemplate: { title: "{BinType} — {LocDesc}", content: [{ type: "fields" }] },
+    });
+
+    // ── Map & View ────────────────────────────────────────────────────────────
+    const map = new Map({
+      basemap: "streets-navigation-vector",
+      layers: [boundaryLayer, buildingsLayer, streetsLayer, sidewalksLayer,
+               indoorLayer, recyclingLayer, vendingLayer, compostLayer],
+    });
+
+    const view = new MapView({
+      container: "viewDiv", map,
+      center: GT_CENTER, zoom: 15,
+      constraints: { minZoom: 12, maxZoom: 21 },
+      popup: { dockEnabled: true, dockOptions: { position: "bottom-left", breakpoint: false } },
+    });
+
+    // ── Widgets ───────────────────────────────────────────────────────────────
+    view.ui.add(new Home({ view }), "top-left");
+    view.ui.add(new Compass({ view }), "top-left");
+    view.ui.add(new ScaleBar({ view, unit: "dual" }), "bottom-left");
+    view.ui.add(new Search({ view, locationEnabled: false }), { position: "top-right", index: 0 });
+    view.ui.add(new Expand({ view, content: new BasemapGallery({ view }), expandTooltip: "Change basemap" }), "top-right");
+
+    // ── Loading ───────────────────────────────────────────────────────────────
+    const overlay = document.getElementById("loadingOverlay");
+    Promise.allSettled(map.layers.map(l => l.load())).then(results => {
+      results.forEach((r, i) => {
+        if (r.status === "rejected")
+          console.warn(`Layer "${map.layers.getItemAt(i)?.title}" failed:`, r.reason?.message);
+      });
+      overlay.classList.add("hidden");
+    });
+
+    // ── Clustering ────────────────────────────────────────────────────────────
+    const clusterConfig = {
+      type: "cluster", clusterRadius: "60px",
+      popupTemplate: { title: "Cluster of {cluster_count} features", content: "Zoom in to see individual locations." },
+      clusterMinSize: "24px", clusterMaxSize: "48px",
+      labelingInfo: [{ labelExpressionInfo: { expression: "$feature.cluster_count" },
+        symbol: { type: "text", color: "#fff", font: { size: 12, weight: "bold" } },
+        labelPlacement: "center-center" }],
+    };
+    compostLayer.featureReduction  = clusterConfig;
+    vendingLayer.featureReduction   = { ...clusterConfig };
+    recyclingLayer.featureReduction = { ...clusterConfig };
+
+    // ── Filter panel ──────────────────────────────────────────────────────────
+    const layerMap = { boundary: boundaryLayer, buildings: buildingsLayer,
+      streets: streetsLayer, sidewalks: sidewalksLayer,
+      compost: compostLayer, vending: vendingLayer,
+      recycling: recyclingLayer, indoor: indoorLayer };
+
+    const groups = {
+      base: ["boundary", "buildings", "streets", "sidewalks"],
+      fch:  ["compost", "vending", "recycling", "indoor"],
+    };
+
+    function setLayerVisible(id, visible) {
+      const layer = layerMap[id]; if (!layer) return;
+      layer.visible = visible;
+      const row = document.querySelector(`.filter-row[data-layer="${id}"]`); if (!row) return;
+      row.classList.toggle("layer-off", !visible);
+      row.querySelector("input[type=checkbox]").checked = visible;
+    }
+
+    document.querySelectorAll(".filter-row[data-layer]").forEach(row => {
+      const id = row.dataset.layer;
+      const chk = row.querySelector("input[type=checkbox]");
+      chk.addEventListener("change", () => setLayerVisible(id, chk.checked));
+    });
+    document.querySelectorAll(".btn-group-all").forEach(btn =>
+      btn.addEventListener("click", () => groups[btn.dataset.group]?.forEach(id => setLayerVisible(id, true))));
+    document.querySelectorAll(".btn-group-none").forEach(btn =>
+      btn.addEventListener("click", () => groups[btn.dataset.group]?.forEach(id => setLayerVisible(id, false))));
+    document.getElementById("btn-show-all").addEventListener("click", () =>
+      Object.keys(layerMap).forEach(id => setLayerVisible(id, true)));
+    document.getElementById("btn-hide-all").addEventListener("click", () =>
+      Object.keys(layerMap).forEach(id => setLayerVisible(id, false)));
+
+    const filterBody = document.getElementById("filter-body");
+    const toggleIcon = document.getElementById("filter-toggle-icon");
+    document.getElementById("filter-header").addEventListener("click", () => {
+      const collapsed = filterBody.classList.toggle("collapsed");
+      toggleIcon.classList.toggle("collapsed", collapsed);
+    });
+
+  }); // end require
+  </script>
+</body>
+</html>

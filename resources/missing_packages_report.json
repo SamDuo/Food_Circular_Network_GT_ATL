@@ -1,0 +1,70 @@
+{
+  "available_files": [
+    "ARCH4017_Grocery_Matrix_-_farmer_markets_.csv",
+    "ARCH4017_Grocery_Matrix_-_food_pantries.csv",
+    "All_Fast_Food_Locations_in_Metro_Atlanta.lpkx",
+    "Atlanta_Fast_Food_Restaurants.lpkx",
+    "Atlanta_Grocery_Stores.lpkx",
+    "Atlanta_Metro_Area_Farmers_Markets.lpkx",
+    "Campus_Dining.lpkx",
+    "Community_Based_Organizations_-_Atlanta.lpkx",
+    "Fast_Food_on_GT_Campus.lpkx",
+    "Food_Processing_Facilities_in_the_Southeast.lpkx",
+    "Gardens_Farms_and_Orchards_-_Atlanta.lpkx",
+    "Hospitals_and_Health_Clinics_Atlanta.lpkx",
+    "Religious_Institutions_-_Metro_Atlanta.lpkx",
+    "Restaurant_Chains_-_GA.lpkx",
+    "Restaurants_and_Cafes_-_Atlanta.lpkx",
+    "Supermarkets_-_MetroATL.lpkx",
+    "US_Kroger_Network_v_Household_Income.mpkx"
+  ],
+  "categories": {
+    "Food Recovery Sources": {
+      "present": [
+        "All_Fast_Food_Locations_in_Metro_Atlanta.lpkx",
+        "Atlanta_Fast_Food_Restaurants.lpkx",
+        "Atlanta_Grocery_Stores.lpkx",
+        "Atlanta_Metro_Area_Farmers_Markets.lpkx",
+        "Restaurants_and_Cafes_-_Atlanta.lpkx",
+        "Restaurant_Chains_-_GA.lpkx",
+        "Supermarkets_-_MetroATL.lpkx",
+        "Fast_Food_on_GT_Campus.lpkx",
+        "US_Kroger_Network_v_Household_Income.mpkx"
+      ],
+      "missing": []
+    },
+    "Redistribution Nodes": {
+      "present": [
+        "Community_Based_Organizations_-_Atlanta.lpkx",
+        "Religious_Institutions_-_Metro_Atlanta.lpkx",
+        "Hospitals_and_Health_Clinics_Atlanta.lpkx",
+        "ARCH4017_Grocery_Matrix_-_food_pantries.csv"
+      ],
+      "missing": []
+    },
+    "Beneficiary Access Points": {
+      "present": [
+        "Campus_Dining.lpkx",
+        "ARCH4017_Grocery_Matrix_-_farmer_markets_.csv"
+      ],
+      "missing": [
+        "MARTA_Routes_(or)_MARTA_Stops (not found in current folder)",
+        "Food_Deserts_-_Atlanta (not found in current folder)",
+        "Public_Transit_Routes_Atlanta (not found in current folder)"
+      ]
+    },
+    "Circular/Compost Network": {
+      "present": [
+        "Gardens_Farms_and_Orchards_-_Atlanta.lpkx",
+        "Food_Processing_Facilities_in_the_Southeast.lpkx",
+        "CompostLocations.shp"
+      ],
+      "missing": []
+    }
+  },
+  "global_missing_recommended": [
+    "Food_Deserts_-_Atlanta (not found in current folder)",
+    "MARTA_Routes_(or)_MARTA_Stops (not found in current folder)",
+    "Public_Transit_Routes_Atlanta (not found in current folder)"
+  ]
+}

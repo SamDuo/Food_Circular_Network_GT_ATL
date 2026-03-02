@@ -1,0 +1,210 @@
+{
+  "campus_boundary": {
+    "file": "campus_boundary.geojson",
+    "count": 4,
+    "fields": [
+      "Area_Acre",
+      "Shape__Len",
+      "Shape__Are",
+      "AgencyID",
+      "lastUpdate",
+      "effectiveD",
+      "boundaryID",
+      "GlobalID"
+    ]
+  },
+  "buildings": {
+    "file": "buildings.geojson",
+    "count": 289,
+    "fields": [
+      "BldgNum",
+      "Address",
+      "Area",
+      "ASF",
+      "Category",
+      "Certificat",
+      "City",
+      "Constr_Dat",
+      "Facility",
+      "GT_Categor",
+      "Name",
+      "NonASF",
+      "Occup_Date",
+      "Ownership",
+      "Primary_Us",
+      "Region",
+      "Site",
+      "State",
+      "Status",
+      "Type",
+      "Zip",
+      "Shape__Len",
+      "Shape__Are"
+    ]
+  },
+  "street_centerlines": {
+    "file": "street_centerlines.geojson",
+    "count": 729,
+    "fields": [
+      "LINEARID",
+      "FULLNAME",
+      "RTTYP",
+      "MTFCC",
+      "Shape_Leng"
+    ]
+  },
+  "sidewalks": {
+    "file": "sidewalks.geojson",
+    "count": 806,
+    "fields": [
+      "FACILITYID",
+      "SURFTYPE",
+      "ADACOMPLY",
+      "CONDITION",
+      "WIDTH",
+      "INSTALLDAT",
+      "OWNEDBY",
+      "MAINTBY",
+      "LASTUPDATE",
+      "LASTEDITOR",
+      "Shape__Len",
+      "GlobalID",
+      "Status",
+      "CreationDa",
+      "Creator",
+      "EditDate",
+      "Editor"
+    ]
+  },
+  "compost_locations": {
+    "file": "compost_locations.geojson",
+    "count": 11,
+    "fields": [
+      "Location_N",
+      "Latitude",
+      "Longitude",
+      "Max_Total_",
+      "Descriptio",
+      "Type"
+    ]
+  },
+  "vending_machines": {
+    "file": "vending_machines.geojson",
+    "count": 197,
+    "fields": [
+      "Street_Add",
+      "Location_I",
+      "GT_Buildin",
+      "Type",
+      "OBJECTID_1",
+      "Bldg_Num",
+      "Building_N"
+    ]
+  },
+  "recycling_trash_cans": {
+    "file": "recycling_trash_cans.geojson",
+    "count": 752,
+    "fields": [
+      "globalid",
+      "CreationDa",
+      "Creator",
+      "EditDate",
+      "Editor",
+      "bin_type",
+      "location_n",
+      "receptacle",
+      "bin_condit",
+      "comments",
+      "recycling_",
+      "bin_type_o",
+      "bin_status",
+      "plannedDec",
+      "actualDeco"
+    ]
+  },
+  "trash_recycling_indoor": {
+    "file": "trash_recycling_indoor.geojson",
+    "count": 502,
+    "fields": [
+      "BinType",
+      "size",
+      "InOut",
+      "RRtype",
+      "recepticle",
+      "Comments",
+      "LocDesc",
+      "RecycleMat",
+      "FloorNumbe",
+      "Status",
+      "GlobalID"
+    ]
+  },
+  "food_recovery_sources": {
+    "file": "food_recovery_sources.geojson",
+    "count": 11314,
+    "fields": [
+      "display_name",
+      "sub_type",
+      "address",
+      "source_pkg",
+      "category"
+    ]
+  },
+  "redistribution_nodes": {
+    "file": "redistribution_nodes.geojson",
+    "count": 2629,
+    "fields": [
+      "display_name",
+      "sub_type",
+      "address",
+      "source_pkg",
+      "category"
+    ]
+  },
+  "beneficiary_access_points": {
+    "file": "beneficiary_access_points.geojson",
+    "count": 12,
+    "fields": [
+      "display_name",
+      "sub_type",
+      "address",
+      "source_pkg",
+      "category"
+    ]
+  },
+  "circular_economy": {
+    "file": "circular_economy.geojson",
+    "count": 127,
+    "fields": [
+      "display_name",
+      "sub_type",
+      "address",
+      "source_pkg",
+      "category"
+    ]
+  },
+  "network_flows": {
+    "file": "network_flows.geojson",
+    "count": 12,
+    "fields": [
+      "flow_id",
+      "from_type",
+      "to_type",
+      "from_name",
+      "to_name",
+      "lbs_per_week",
+      "flow_type"
+    ]
+  },
+  "campus_dining": {
+    "file": "campus_dining.geojson",
+    "count": 12,
+    "fields": [
+      "FID",
+      "Latitude",
+      "Longitude",
+      "Restaurant",
+      "Type_of_Food"
+    ]
+  }
+}

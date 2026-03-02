@@ -1,0 +1,147 @@
+[
+  {
+    "package": "All_Fast_Food_Locations_in_Metro_Atlanta.lpkx",
+    "type": ".lpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  },
+  {
+    "package": "Atlanta_Fast_Food_Restaurants.lpkx",
+    "type": ".lpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  },
+  {
+    "package": "Atlanta_Grocery_Stores.lpkx",
+    "type": ".lpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  },
+  {
+    "package": "Atlanta_Metro_Area_Farmers_Markets.lpkx",
+    "type": ".lpkx",
+    "service_urls": [
+      "https://services7.arcgis.com/lywOeXBd71oqDPrG/arcgis/rest/services/Atlanta_Metro_Area_Farmers_Markets/FeatureServer"
+    ],
+    "status": "query_error",
+    "feature_count": null,
+    "error": "{'code': 400, 'message': 'Invalid URL', 'details': ['Invalid URL']}",
+    "contains_data_files": false
+  },
+  {
+    "package": "Campus_Dining.lpkx",
+    "type": ".lpkx",
+    "service_urls": [
+      "https://services2.arcgis.com/I9cUOJUZvdGAJncI/arcgis/rest/services/campus_dining/FeatureServer"
+    ],
+    "status": "private_token_required",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": false
+  },
+  {
+    "package": "Community_Based_Organizations_-_Atlanta.lpkx",
+    "type": ".lpkx",
+    "service_urls": [
+      "https://services.arcgis.com/NuWFvHYDMVmmxMeM/arcgis/rest/services/Community_Based_Organizations/FeatureServer"
+    ],
+    "status": "public",
+    "feature_count": 25356,
+    "error": null,
+    "contains_data_files": false
+  },
+  {
+    "package": "Fast_Food_on_GT_Campus.lpkx",
+    "type": ".lpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  },
+  {
+    "package": "Food_Processing_Facilities_in_the_Southeast.lpkx",
+    "type": ".lpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  },
+  {
+    "package": "Gardens_Farms_and_Orchards_-_Atlanta.lpkx",
+    "type": ".lpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  },
+  {
+    "package": "Hospitals_and_Health_Clinics_Atlanta.lpkx",
+    "type": ".lpkx",
+    "service_urls": [
+      "https://services8.arcgis.com/JI7FiIRUMjk9p0vW/arcgis/rest/services/Hospitals_and_Health_Clinics_Atlanta/FeatureServer"
+    ],
+    "status": "public",
+    "feature_count": 55,
+    "error": null,
+    "contains_data_files": false
+  },
+  {
+    "package": "Religious_Institutions_-_Metro_Atlanta.lpkx",
+    "type": ".lpkx",
+    "service_urls": [
+      "https://services1.arcgis.com/AQDHTHDrZzfsFsB5/arcgis/rest/services/Census_Reference_WFL1/FeatureServer"
+    ],
+    "status": "public",
+    "feature_count": 20,
+    "error": null,
+    "contains_data_files": false
+  },
+  {
+    "package": "Restaurant_Chains_-_GA.lpkx",
+    "type": ".lpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  },
+  {
+    "package": "Restaurants_and_Cafes_-_Atlanta.lpkx",
+    "type": ".lpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  },
+  {
+    "package": "Supermarkets_-_MetroATL.lpkx",
+    "type": ".lpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  },
+  {
+    "package": "US_Kroger_Network_v_Household_Income.mpkx",
+    "type": ".mpkx",
+    "service_urls": [],
+    "status": "no_url",
+    "feature_count": null,
+    "error": null,
+    "contains_data_files": true
+  }
+]

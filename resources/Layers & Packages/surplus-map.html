@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real-Time Food Surplus Map</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.30/"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       CORE VARIABLES
+       ═══════════════════════════════════════════════════════ */
+    :root {
+      --header-h: 64px;
+      --bg-dark: #07090f;
+      --text: #e6ecf5;
+      --muted: #9ca6b8;
+      --gold: #b3a369;
+
+      /* Surplus & Route */
+      --surplus-critical: #ef5350;
+      --surplus-soon: #ffc107;
+      --surplus-stable: #66bb6a;
+      --route-teal: #b3a369;
+      --route-panel-w: 360px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RESET & BASE
+       ═══════════════════════════════════════════════════════ */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body, #app {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
+    }
+
+    #app { position: relative; background: #0c1118; color: var(--text); }
+
+    /* ═══════════════════════════════════════════════════════
+       TOPBAR
+       ═══════════════════════════════════════════════════════ */
+    #topbar {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 30;
+      height: var(--header-h); background: var(--bg-dark);
+      border-bottom: 1px solid #222a3b;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px;
+    }
+
+    #brandWrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+    #logoWrap {
+      width: 150px; height: 42px; border: none; border-radius: 8px;
+      background: transparent; overflow: hidden; flex-shrink: 0;
+    }
+    #logoWrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+    #titleWrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+    #titleWrap h1 { font-size: 27px; line-height: 1; font-weight: 700; color: #ffffff; }
+
+    #i2ceLink { color: #d6c890; text-decoration: none; font-weight: 700; font-size: 13px; }
+    #i2ceLink:hover { color: #f2e7bd; text-decoration: underline; }
+
+    .navLink {
+      color: var(--route-teal); text-decoration: none; font-size: 12px; font-weight: 700;
+      padding: 8px 14px; border: 1px solid rgba(179, 163, 105, 0.5); border-radius: 999px;
+      white-space: nowrap; transition: background 0.2s;
+    }
+    .navLink:hover { background: rgba(179, 163, 105, 0.12); }
+
+    /* ═══════════════════════════════════════════════════════
+       MAP & STATS
+       ═══════════════════════════════════════════════════════ */
+    #viewDiv { position: absolute; inset: 0; }
+
+    #statsRail {
+      position: absolute; top: 72px; right: 10px; z-index: 24;
+      display: grid; gap: 6px; width: 220px;
+    }
+    .statCard {
+      background: rgba(10, 14, 22, 0.88); border: 1px solid #2b3446;
+      border-radius: 8px; padding: 7px 10px;
+    }
+    .statLabel { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; }
+    .statValue { margin-top: 3px; font-size: 17px; font-weight: 800; color: #ffffff; }
+
+    /* ═══════════════════════════════════════════════════════
+       LAYER PANEL (surplus filters only)
+       ═══════════════════════════════════════════════════════ */
+    #layersToggle {
+      position: absolute; left: 12px; bottom: 88px; z-index: 26;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid #2d3442; background: #05080d; color: #ffffff; cursor: pointer;
+    }
+
+    #layerPanel {
+      position: absolute; top: 74px; left: 12px; z-index: 25;
+      width: 300px; max-height: calc(100vh - 170px); overflow-y: auto;
+      background: rgba(5, 8, 13, 0.95); border: 1px solid #2d3442;
+      border-radius: 10px; padding: 10px; display: none;
+    }
+    #layerPanel.open { display: block; }
+
+    .panelHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .panelHeader h3 { font-size: 12px; color: #aab4c6; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .panelBtn {
+      border: 1px solid #3a4254; background: #101621; color: #d8dde6;
+      font-size: 10px; font-weight: 700; border-radius: 6px; padding: 4px 6px; cursor: pointer;
+    }
+
+    .groupTitle {
+      margin: 9px 0 6px; font-size: 11px; color: #8e98aa;
+      text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px;
+    }
+
+    .layerRow { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 12px; }
+    .layerRow input { width: 14px; height: 14px; accent-color: var(--gold); cursor: pointer; }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════════════════
+       SURPLUS SUMMARY
+       ═══════════════════════════════════════════════════════ */
+    #surplusSummary {
+      margin-top: 8px; padding: 8px; background: #141924;
+      border-radius: 6px; font-size: 11px; color: var(--muted); line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ROUTE PANEL TOGGLE
+       ═══════════════════════════════════════════════════════ */
+    #routeToggle {
+      position: absolute; right: 12px; bottom: 88px; z-index: 26;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid #2d3442; background: #05080d; color: var(--route-teal);
+      cursor: pointer; font-size: 16px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #routeToggle:hover { background: #101a22; border-color: var(--route-teal); }
+
+    /* ═══════════════════════════════════════════════════════
+       ROUTE PANEL
+       ═══════════════════════════════════════════════════════ */
+    #routePanel {
+      position: absolute; top: var(--header-h); right: 0;
+      width: var(--route-panel-w); height: calc(100vh - var(--header-h));
+      overflow-y: auto; z-index: 27;
+      background: rgba(5, 8, 13, 0.96); border-left: 1px solid #2d3442;
+      display: none; padding: 0;
+    }
+    #routePanel.open { display: block; }
+
+    .rp-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 14px; border-bottom: 1px solid #222a3b;
+    }
+    .rp-header h3 { font-size: 13px; color: var(--route-teal); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+    .rp-close {
+      background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px;
+    }
+
+    .rp-body { padding: 14px; }
+
+    .rp-label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+
+    .rp-select {
+      width: 100%; padding: 8px 10px; background: #141924; color: var(--text);
+      border: 1px solid #2d3442; border-radius: 6px; font-size: 12px;
+      margin-bottom: 12px; cursor: pointer;
+    }
+    .rp-select:focus { border-color: var(--route-teal); outline: none; }
+
+    .rp-origin-wrap { position: relative; margin-bottom: 12px; }
+    .rp-origin-wrap .rp-select { margin-bottom: 0; cursor: text; }
+    .rp-suggestions {
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 40;
+      background: #141924; border: 1px solid #2d3442; border-top: none; border-radius: 0 0 6px 6px;
+      max-height: 200px; overflow-y: auto;
+    }
+    .rp-suggestions.open { display: block; }
+    .rp-sug-item {
+      padding: 8px 10px; font-size: 12px; color: var(--text); cursor: pointer;
+      border-bottom: 1px solid #1a2030;
+    }
+    .rp-sug-item:hover, .rp-sug-item.active { background: #1a2233; color: var(--route-teal); }
+    .rp-sug-item .rp-sug-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .rp-sug-geo { font-style: italic; }
+
+    .rp-chain-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .rp-chain-dot {
+      width: 22px; height: 22px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
+      color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .rp-chain-label { font-size: 11px; color: var(--muted); min-width: 90px; }
+    .rp-chain-row .rp-select { margin-bottom: 0; flex: 1; }
+
+    .rp-btn {
+      width: 100%; padding: 10px; border: 1px solid #3a4254; background: #101621;
+      color: #d8dde6; font-size: 12px; font-weight: 700; border-radius: 8px;
+      cursor: pointer; margin-bottom: 6px; text-align: center;
+    }
+    .rp-btn:hover { background: #1a2433; }
+    .rp-btn-primary {
+      background: var(--route-teal); color: #fff; border-color: var(--route-teal);
+      font-size: 13px; letter-spacing: 0.5px;
+    }
+    .rp-btn-primary:hover { background: #00a890; }
+
+    .rp-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+      margin: 14px 0; padding: 10px; background: #141924; border-radius: 8px;
+    }
+    .rp-stat-cell { text-align: center; padding: 6px; }
+    .rp-stat-value { font-size: 20px; font-weight: 800; color: #fff; }
+    .rp-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+    .rp-legs { margin-top: 10px; }
+    .rp-legs-title { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+    .rp-leg {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid #1a2030; font-size: 12px; color: var(--text);
+    }
+    .rp-leg span { color: var(--route-teal); font-weight: 700; }
+
+    .rp-apiNotice {
+      margin-bottom: 12px; padding: 10px; background: #2a2210;
+      border: 1px solid #5c4a0a; border-radius: 8px; font-size: 11px; color: #ffc107;
+    }
+    .rp-apiNotice input {
+      width: 100%; margin: 6px 0; padding: 6px 8px; background: #1a1a1a;
+      border: 1px solid #3a4254; border-radius: 4px; color: var(--text); font-size: 11px;
+    }
+    .rp-apiNotice button { margin-top: 4px; }
+
+    .rp-results { display: none; }
+    .rp-results.visible { display: block; }
+
+    .rp-spinner {
+      display: none; text-align: center; padding: 20px; color: var(--muted); font-size: 12px;
+    }
+    .rp-spinner.visible { display: block; }
+    .rp-spinner::before {
+      content: ''; display: block; width: 24px; height: 24px; margin: 0 auto 8px;
+      border: 3px solid #2d3442; border-top-color: var(--route-teal);
+      border-radius: 50%; animation: rpSpin 0.8s linear infinite;
+    }
+
+    @keyframes rpSpin { to { transform: rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════════════════
+       FLEET INTELLIGENCE PANEL
+       ═══════════════════════════════════════════════════════ */
+    .fleet-panel { margin-bottom: 14px; }
+
+    .fleet-section {
+      background: #141924; border: 1px solid #2d3442;
+      border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+    }
+    .fleet-section-title {
+      font-size: 10px; color: var(--route-teal); text-transform: uppercase;
+      font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .fleet-stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    }
+    .fleet-stat { text-align: center; padding: 4px; }
+    .fleet-stat-value { display: block; font-size: 16px; font-weight: 800; color: #ffffff; }
+    .fleet-stat-label { display: block; font-size: 9px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+    .ai-route-chain { font-size: 12px; color: var(--text); margin-bottom: 8px; line-height: 1.8; }
+    .ai-arrow { color: var(--route-teal); margin: 0 4px; font-weight: 700; }
+    .ai-stats-row { display: flex; gap: 12px; margin-bottom: 10px; }
+    .ai-highlight { font-size: 12px; font-weight: 700; color: var(--route-teal); }
+    .ai-actions { display: flex; gap: 6px; }
+
+    .capacity-ok   { color: #66bb6a; }
+    .capacity-warn { color: #ffc107; }
+    .capacity-full { color: #ef5350; }
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE RESPONSIVE
+       ═══════════════════════════════════════════════════════ */
+    @media (max-width: 760px) {
+      #topbar {
+        height: 82px; flex-direction: column; align-items: flex-start;
+        justify-content: center; gap: 4px;
+      }
+      #logoWrap { width: 120px; height: 34px; }
+      #titleWrap h1 { font-size: 20px; }
+      #statsRail { top: 90px; right: 8px; width: 160px; }
+
+      #routePanel {
+        top: auto; bottom: 0; left: 0; right: 0;
+        width: 100%; height: auto; max-height: 60vh;
+        border-left: none; border-top: 1px solid #2d3442;
+        border-radius: 16px 16px 0 0;
+      }
+      .fleet-stats-grid { gap: 4px; }
+      .fleet-stat-value { font-size: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- ═══ TOPBAR ═══ -->
+    <header id="topbar">
+      <div id="brandWrap">
+        <div id="logoWrap">
+          <img src="/resources/GT%20logo/Primary%20Logos/Georgia%20Tech%20One%20Line/GTOneLine_White.svg" alt="GT logo" />
+        </div>
+        <div id="titleWrap">
+          <h1>Real-Time Food Surplus Map</h1>
+          <a id="i2ceLink" href="https://sites.gatech.edu/i2ce/" target="_blank" rel="noopener">
+            Georgia Tech Circular Economy Lab [I2CE]
+          </a>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <a href="index.html" class="navLink">AFCN Dashboard</a>
+        <a href="fleet-analytics.html" class="navLink">Fleet Analytics</a>
+        <a href="gt-campus-hub.html" class="navLink">Campus Hub</a>
+      </div>
+    </header>
+
+    <!-- ═══ MAP ═══ -->
+    <div id="viewDiv"></div>
+    <section id="statsRail"></section>
+    <button id="layersToggle" type="button">L</button>
+
+    <!-- ═══ LAYER PANEL (surplus filters only) ═══ -->
+    <aside id="layerPanel">
+      <div class="panelHeader">
+        <h3>Surplus Filters</h3>
+        <div>
+          <button class="panelBtn" id="showAll" type="button">Show All</button>
+          <button class="panelBtn" id="hideAll" type="button">Hide All</button>
+        </div>
+      </div>
+
+      <div class="groupTitle" style="color:#ffc107">Real-Time Surplus</div>
+      <label class="layerRow"><input type="checkbox" data-surplus="Prepared Meals" checked /><span>Prepared Meals <small id="countPrepared" style="color:var(--muted)"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-surplus="Packaged Goods" checked /><span>Packaged Goods <small id="countPackaged" style="color:var(--muted)"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-surplus="Produce" checked /><span>Produce <small id="countProduce" style="color:var(--muted)"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-surplus="Bakery" checked /><span>Bakery <small id="countBakery" style="color:var(--muted)"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-surplus="Perishable" checked /><span>Perishable &lt;6hrs <small id="countPerishable" style="color:var(--muted)"></small></span></label>
+      <div id="surplusSummary"></div>
+    </aside>
+
+    <!-- ═══ ROUTE PANEL TOGGLE ═══ -->
+    <button id="routeToggle" type="button" title="Route Optimizer">R</button>
+
+    <!-- ═══ ROUTE OPTIMIZER PANEL ═══ -->
+    <aside id="routePanel">
+      <div class="rp-header">
+        <h3>Logistics Optimizer</h3>
+        <button class="rp-close" id="rpClose" type="button">&times;</button>
+      </div>
+      <div class="rp-body">
+        <!-- Fleet Intelligence -->
+        <div id="fleetPanel" class="fleet-panel">
+          <div class="fleet-section">
+            <div class="fleet-section-title">Fleet Status</div>
+            <div class="fleet-stats-grid">
+              <div class="fleet-stat"><span class="fleet-stat-value" id="fleetDrivers">--</span><span class="fleet-stat-label">Active Drivers</span></div>
+              <div class="fleet-stat"><span class="fleet-stat-value" id="fleetRefrig">--</span><span class="fleet-stat-label">Refrigerated</span></div>
+              <div class="fleet-stat"><span class="fleet-stat-value" id="fleetPickup">--</span><span class="fleet-stat-label">Avg Pickup</span></div>
+              <div class="fleet-stat"><span class="fleet-stat-value" id="fleetRecovered">--</span><span class="fleet-stat-label">lbs Today</span></div>
+            </div>
+          </div>
+          <div class="fleet-section" id="aiSuggestion" style="display:none">
+            <div class="fleet-section-title">AI Suggested Route</div>
+            <div class="ai-route-chain" id="aiRouteChain"></div>
+            <div class="ai-stats-row">
+              <span id="aiTimeSaved" class="ai-highlight"></span>
+              <span id="aiFoodSaved" class="ai-highlight"></span>
+            </div>
+            <div class="ai-actions">
+              <button class="rp-btn rp-btn-primary" id="aiAccept" type="button" style="flex:1">Accept Plan</button>
+              <button class="rp-btn" id="aiDismiss" type="button" style="flex:1">Dismiss</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Key Notice -->
+        <div id="rpApiNotice" class="rp-apiNotice" style="display:none">
+          <div>ArcGIS API key required for real-time routing</div>
+          <input id="rpApiKeyInput" type="text" placeholder="Paste your AAPK key here..." />
+          <button class="rp-btn" id="rpApiKeySave" type="button">Save Key</button>
+        </div>
+
+        <!-- Origin -->
+        <div class="rp-label">Origin</div>
+        <div class="rp-origin-wrap">
+          <input type="text" id="rpOrigin" class="rp-select" placeholder="Search address or select location..." autocomplete="off" />
+          <div id="rpOriginSuggestions" class="rp-suggestions"></div>
+        </div>
+
+        <!-- Vehicle Type -->
+        <div class="rp-label">Vehicle Type</div>
+        <select id="rpVehicle" class="rp-select">
+          <option value="Refrigerated Van">Refrigerated Van</option>
+          <option value="Dry Vehicle">Dry Vehicle</option>
+          <option value="Bike Courier">Bike Courier</option>
+        </select>
+
+        <!-- Route Chain -->
+        <div class="rp-label">Route Chain</div>
+        <div class="rp-chain-row">
+          <span class="rp-chain-dot" style="background:#3a4254">1</span>
+          <span class="rp-chain-label">Recovery</span>
+          <select id="rpStop1" class="rp-select"><option value="">Auto (smart priority)</option></select>
+        </div>
+        <div class="rp-chain-row">
+          <span class="rp-chain-dot" style="background:#3a4254">2</span>
+          <span class="rp-chain-label">Redistribution</span>
+          <select id="rpStop2" class="rp-select"><option value="">Auto (capacity-aware)</option></select>
+        </div>
+        <div class="rp-chain-row">
+          <span class="rp-chain-dot" style="background:#3a4254">3</span>
+          <span class="rp-chain-label">Beneficiary</span>
+          <select id="rpStop3" class="rp-select"><option value="">Auto (capacity-aware)</option></select>
+        </div>
+        <div class="rp-chain-row">
+          <span class="rp-chain-dot" style="background:#3a4254">4</span>
+          <span class="rp-chain-label">Compost</span>
+          <select id="rpStop4" class="rp-select"><option value="">Auto (nearest)</option></select>
+        </div>
+
+        <!-- Action Buttons -->
+        <button class="rp-btn" id="rpAutoSelect" type="button">Smart Auto-Select</button>
+        <button class="rp-btn rp-btn-primary" id="rpOptimize" type="button">OPTIMIZE ROUTE</button>
+        <button class="rp-btn" id="rpClear" type="button">Clear Route</button>
+
+        <!-- Spinner -->
+        <div class="rp-spinner" id="rpSpinner">Calculating route...</div>
+
+        <!-- Results -->
+        <div class="rp-results" id="rpResults">
+          <div class="rp-stats">
+            <div class="rp-stat-cell"><div class="rp-stat-value" id="rpDistance">--</div><div class="rp-stat-label">Distance</div></div>
+            <div class="rp-stat-cell"><div class="rp-stat-value" id="rpTime">--</div><div class="rp-stat-label">Time</div></div>
+            <div class="rp-stat-cell"><div class="rp-stat-value" id="rpVolume">--</div><div class="rp-stat-label">Volume</div></div>
+            <div class="rp-stat-cell"><div class="rp-stat-value" id="rpSaved">--</div><div class="rp-stat-label">Saved</div></div>
+          </div>
+          <div class="rp-legs">
+            <div class="rp-legs-title">Leg Breakdown</div>
+            <div id="rpLegsContainer"></div>
+          </div>
+          <button class="rp-btn" id="rpDirections" type="button" style="margin-top:10px">Open in Google Maps</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       CONSTANTS
+       ═══════════════════════════════════════════════════════ */
+    const CITY_VIEW = { center: [-84.388, 33.749], zoom: 11 };
+    const ROUTE_URL = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
+    const H = 3600000;
+    const NOW = Date.now();
+
+    const STATS = [
+      { label: "Food Diverted (lbs/wk)", value: 42500 },
+      { label: "Active Sources", value: 18 },
+      { label: "Redistribution Nodes", value: 15 },
+      { label: "People Served", value: 3200 },
+      { label: "CO2 Saved (kg/wk)", value: 8900 }
+    ];
+
+    const statsRail = document.getElementById("statsRail");
+    STATS.forEach((s) => {
+      const card = document.createElement("article");
+      card.className = "statCard";
+      card.innerHTML = `<div class="statLabel">${s.label}</div><div class="statValue">${Number(s.value).toLocaleString("en-US")}</div>`;
+      statsRail.appendChild(card);
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       MOCK SURPLUS DATA (30 entries, real coordinates)
+       ═══════════════════════════════════════════════════════ */
+    const MOCK_SURPLUS = [
+      // GT Campus entries moved to gt-campus-hub.html
+      // Restaurants (8)
+      { id:13, name:"Subway - College Park",       lng:-84.4464, lat:33.6635, food_type:"Packaged Goods", quantity_lbs:35,  hours_left:14.0, transport:"Dry Vehicle",      source_category:"Restaurant", notes:"Pre-made subs approaching date" },
+      { id:14, name:"McDonald's - Ponce City",     lng:-84.3074, lat:33.7903, food_type:"Prepared Meals", quantity_lbs:55,  hours_left:3.5,  transport:"Refrigerated Van", source_category:"Restaurant", notes:"Breakfast surplus" },
+      { id:15, name:"Moe's Southwest Grill",       lng:-84.3899, lat:33.7770, food_type:"Prepared Meals", quantity_lbs:70,  hours_left:1.2,  transport:"Refrigerated Van", source_category:"Restaurant", notes:"Lunch rush leftovers" },
+      { id:16, name:"Rosa's Pizza",                lng:-84.3895, lat:33.7558, food_type:"Prepared Meals", quantity_lbs:45,  hours_left:4.5,  transport:"Dry Vehicle",      source_category:"Restaurant", notes:"End of day pizza" },
+      { id:17, name:"Panera Bread - Midtown",      lng:-84.3750, lat:33.7830, food_type:"Packaged Goods", quantity_lbs:110, hours_left:18.0, transport:"Dry Vehicle",      source_category:"Restaurant", notes:"Day-end bread and pastry" },
+      { id:18, name:"Chipotle - Ponce",            lng:-84.3636, lat:33.7739, food_type:"Prepared Meals", quantity_lbs:80,  hours_left:2.0,  transport:"Refrigerated Van", source_category:"Restaurant", notes:"Catering order canceled" },
+      { id:19, name:"Sensational Subs",            lng:-84.3882, lat:33.7543, food_type:"Packaged Goods", quantity_lbs:25,  hours_left:20.0, transport:"Dry Vehicle",      source_category:"Restaurant", notes:"Wrapped subs" },
+      { id:20, name:"Alibaba's Turkish Food",      lng:-84.3896, lat:33.7558, food_type:"Packaged Goods", quantity_lbs:40,  hours_left:0.8,  transport:"Refrigerated Van", source_category:"Restaurant", notes:"Prepared Mediterranean platters" },
+      // Redistribution (5)
+      { id:21, name:"American Stroke Assoc.",      lng:-84.3612, lat:33.9356, food_type:"Perishable",     quantity_lbs:300, hours_left:1.5,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Donated dairy products" },
+      { id:22, name:"BDI Freeman Campus",          lng:-84.4404, lat:33.8130, food_type:"Produce",        quantity_lbs:250, hours_left:5.0,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Fresh vegetables from farm donation" },
+      { id:23, name:"Center for Visually Impaired",lng:-84.3872, lat:33.7748, food_type:"Produce",        quantity_lbs:180, hours_left:8.0,  transport:"Dry Vehicle",      source_category:"Redistribution", notes:"Root vegetables, long shelf life" },
+      { id:24, name:"Children's Healthcare Egleston",lng:-84.3204, lat:33.7938, food_type:"Perishable",   quantity_lbs:95,  hours_left:3.0,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Cafeteria excess" },
+      { id:25, name:"Children's Healthcare Spalding",lng:-84.3821, lat:33.7538, food_type:"Produce",      quantity_lbs:160, hours_left:0.5,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Fruit salad prep excess" },
+      // Urban Farms & Community (5)
+      { id:26, name:"Truly Living Well Farm",      lng:-84.4020, lat:33.7468, food_type:"Produce",        quantity_lbs:75,  hours_left:16.0, transport:"Dry Vehicle",      source_category:"Urban Farm", notes:"Weekly harvest surplus" },
+      { id:27, name:"Urban Food Forest at Browns Mill", lng:-84.3497, lat:33.7054, food_type:"Produce",   quantity_lbs:50,  hours_left:10.0, transport:"Dry Vehicle",      source_category:"Urban Farm", notes:"Community garden harvest" },
+      { id:28, name:"CO-Collegetown Farm",         lng:-84.4227, lat:33.7519, food_type:"Produce",        quantity_lbs:60,  hours_left:4.0,  transport:"Bike Courier",     source_category:"Urban Farm", notes:"Greenhouse tomatoes and herbs" },
+      { id:29, name:"Goodr Inc.",                  lng:-84.3729, lat:33.7627, food_type:"Bakery",         quantity_lbs:35,  hours_left:5.5,  transport:"Dry Vehicle",      source_category:"Food Recovery", notes:"Recovered baked goods for redistribution" },
+      { id:30, name:"Ben's Backyard",              lng:-84.4143, lat:33.7340, food_type:"Produce",        quantity_lbs:90,  hours_left:22.0, transport:"Dry Vehicle",      source_category:"Community", notes:"Community composting garden harvest" }
+    ];
+
+    MOCK_SURPLUS.forEach(s => {
+      s.expiration = new Date(NOW + s.hours_left * H).toISOString();
+      s.urgency = s.hours_left <= 2 ? "Critical" : s.hours_left <= 6 ? "Soon" : "Stable";
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       ROUTE CHAIN STOP OPTIONS
+       (Compost uses Fulton County permitted compost sites)
+       ═══════════════════════════════════════════════════════ */
+    const ROUTE_STOPS = {
+      origin: [
+        { name: "North Ave Dining Hall",       lng: -84.3918, lat: 33.7716 },
+        { name: "West Village Dining Commons", lng: -84.4061, lat: 33.7777 },
+        { name: "Brittain Dining Hall",        lng: -84.3898, lat: 33.7728 },
+        { name: "John Lewis Student Center",   lng: -84.3987, lat: 33.7745 },
+        { name: "Tech Square Dining Hub",      lng: -84.3913, lat: 33.7779 },
+        { name: "Clough Commons Cafe",         lng: -84.3952, lat: 33.7782 },
+        { name: "Nave Dining Concepts",        lng: -84.4004, lat: 33.7770 },
+        { name: "Klaus Bistro",                lng: -84.4011, lat: 33.7733 },
+        { name: "CRC Fuel Zone",               lng: -84.3989, lat: 33.7720 }
+      ],
+      foodRecovery: [
+        { name: "McDonald's - Ponce City",     lng: -84.3074, lat: 33.7903, transport: "Refrigerated Van" },
+        { name: "Moe's Southwest Grill",       lng: -84.3899, lat: 33.7770, transport: "Refrigerated Van" },
+        { name: "Panera Bread - Midtown",      lng: -84.3750, lat: 33.7830, transport: "Dry Vehicle" },
+        { name: "Chipotle - Ponce",            lng: -84.3636, lat: 33.7739, transport: "Refrigerated Van" },
+        { name: "Rosa's Pizza",                lng: -84.3895, lat: 33.7558, transport: "Dry Vehicle" },
+        { name: "Subway - College Park",       lng: -84.4464, lat: 33.6635, transport: "Dry Vehicle" }
+      ],
+      redistribution: [
+        { name: "Center for Visually Impaired",    lng: -84.3872, lat: 33.7748, cold_pct: 45, dry_pct: 60, accepting_perishable: true },
+        { name: "Children's Healthcare Egleston",  lng: -84.3204, lat: 33.7938, cold_pct: 72, dry_pct: 55, accepting_perishable: true },
+        { name: "Children's Healthcare Spalding",  lng: -84.3821, lat: 33.7538, cold_pct: 88, dry_pct: 40, accepting_perishable: true },
+        { name: "BDI Freeman Campus",              lng: -84.4404, lat: 33.8130, cold_pct: 30, dry_pct: 75, accepting_perishable: false },
+        { name: "American Stroke Assoc.",           lng: -84.3612, lat: 33.9356, cold_pct: 92, dry_pct: 85, accepting_perishable: true }
+      ],
+      beneficiary: [
+        { name: "North Ave Dining Hall",           lng: -84.3918, lat: 33.7716, cold_pct: 50, dry_pct: 35, accepting_perishable: true },
+        { name: "West Village Dining Commons",     lng: -84.4061, lat: 33.7777, cold_pct: 40, dry_pct: 30, accepting_perishable: true },
+        { name: "Brittain Dining Hall",            lng: -84.3898, lat: 33.7728, cold_pct: 55, dry_pct: 45, accepting_perishable: true },
+        { name: "Center for Visually Impaired",    lng: -84.3872, lat: 33.7748, cold_pct: 60, dry_pct: 70, accepting_perishable: true },
+        { name: "Children's Healthcare Spalding",  lng: -84.3821, lat: 33.7538, cold_pct: 91, dry_pct: 80, accepting_perishable: false }
+      ],
+      compost: [
+        { name: "GT Resource Recovery Yard",               lng: -84.4000, lat: 33.7767 },
+        { name: "CHaRM - Hard to Recycle Materials",       lng: -84.3840, lat: 33.7157 },
+        { name: "Ben's Backyard",                          lng: -84.4143, lat: 33.7340 },
+        { name: "CO-Collegetown Farm / Composting Lab",    lng: -84.4227, lat: 33.7519 },
+        { name: "CompostNow",                              lng: -84.4479, lat: 33.6880 },
+        { name: "Goodr Inc.",                              lng: -84.3729, lat: 33.7627 },
+        { name: "Truly Living Well",                       lng: -84.4020, lat: 33.7468 },
+        { name: "Urban Food Forest at Browns Mill",        lng: -84.3497, lat: 33.7054 },
+        { name: "Southern Green Industries",               lng: -84.4804, lat: 33.8262 },
+        { name: "Old Rucker Farm (Alpharetta)",            lng: -84.2980, lat: 34.0755 }
+      ]
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       FLEET MOCK DATA & SCORING CONSTANTS
+       ═══════════════════════════════════════════════════════ */
+    const MOCK_FLEET = {
+      total_drivers: 42, active_drivers: 38, refrigerated_vehicles: 8,
+      dry_vehicles: 18, bike_couriers: 12, walkin_volunteers: 4,
+      avg_pickup_min: 24, avg_delivery_min: 18,
+      routes_completed_today: 27, lbs_recovered_today: 12400
+    };
+
+    const SCORING_WEIGHTS = { URGENCY: 0.50, VOLUME: 0.30, DISTANCE: 0.20 };
+    const TRANSPORT_HIERARCHY = { "Refrigerated Van": 4, "Dry Vehicle": 3, "Bike Courier": 2, "Walk-in": 1 };
+
+    /* ═══════════════════════════════════════════════════════
+       UTILITY: Haversine distance (miles)
+       ═══════════════════════════════════════════════════════ */
+    function haversine(lat1, lon1, lat2, lon2) {
+      const R = 3959;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SCORING FUNCTIONS (Urgency-Aware Routing)
+       ═══════════════════════════════════════════════════════ */
+    function computeUrgencyScore(hoursRemaining) {
+      return 100 * Math.exp(-0.5 * Math.max(0, hoursRemaining));
+    }
+    function computeVolumeScore(lbs) {
+      return Math.min(100, 20 * Math.log10(lbs + 1));
+    }
+    function computeProximityScore(distMi) {
+      return 100 / (1 + distMi);
+    }
+    function computePriorityScore(item, fromPt) {
+      const hrs = Math.max(0, (new Date(item.expiration) - Date.now()) / 3600000);
+      const dist = haversine(fromPt.lat, fromPt.lng, item.lat, item.lng);
+      return (SCORING_WEIGHTS.URGENCY * computeUrgencyScore(hrs)) +
+             (SCORING_WEIGHTS.VOLUME  * computeVolumeScore(item.quantity_lbs)) +
+             (SCORING_WEIGHTS.DISTANCE * computeProximityScore(dist));
+    }
+    function isTransportCompatible(required, vehicleCap) {
+      return (TRANSPORT_HIERARCHY[vehicleCap] || 0) >= (TRANSPORT_HIERARCHY[required] || 0);
+    }
+    function computeCapacityScore(node, fromPt) {
+      const dist = haversine(fromPt.lat, fromPt.lng, node.lat, node.lng);
+      let penalty = 0;
+      if (node.cold_pct !== undefined && node.cold_pct > 90) penalty -= 50;
+      if (node.dry_pct  !== undefined && node.dry_pct  > 90) penalty -= 30;
+      return computeProximityScore(dist) + penalty;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ArcGIS AMD MODULES
+       ═══════════════════════════════════════════════════════ */
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/widgets/Home",
+      "esri/widgets/Compass",
+      "esri/widgets/ScaleBar",
+      "esri/widgets/Search",
+      "esri/rest/route",
+      "esri/rest/support/RouteParameters",
+      "esri/rest/support/FeatureSet",
+      "esri/layers/GraphicsLayer",
+      "esri/Graphic",
+      "esri/config"
+    ], function (Map, MapView, Home, Compass, ScaleBar, Search, routeSolver, RouteParameters, FeatureSet, GraphicsLayer, Graphic, esriConfig) {
+
+      /* ─── API Key ─── */
+      let hasApiKey = false;
+      function setApiKey(key) {
+        if (key) {
+          esriConfig.apiKey = key;
+          hasApiKey = true;
+          localStorage.setItem("afcn_arcgis_api_key", key);
+          const notice = document.getElementById("rpApiNotice");
+          if (notice) notice.style.display = "none";
+        }
+      }
+      const savedKey = localStorage.getItem("afcn_arcgis_api_key");
+      if (savedKey) setApiKey(savedKey);
+      const configReady = fetch("/api/config").then(r => r.json()).then(cfg => {
+        if (cfg.arcgisApiKey) setApiKey(cfg.arcgisApiKey);
+      }).catch(() => {});
+
+      /* ═══════════════════════════════════════════════════════
+         SURPLUS & ROUTE GRAPHICS LAYERS
+         ═══════════════════════════════════════════════════════ */
+      const surplusLayer = new GraphicsLayer({ id: "surplusLayer", title: "Real-Time Surplus" });
+      const routeLayer = new GraphicsLayer({ id: "routeLayer", title: "Optimized Route" });
+
+      /* ═══════════════════════════════════════════════════════
+         MAP & VIEW
+         ═══════════════════════════════════════════════════════ */
+      const map = new Map({
+        basemap: "dark-gray-vector",
+        layers: [routeLayer, surplusLayer]
+      });
+
+      const view = new MapView({
+        container: "viewDiv", map,
+        center: CITY_VIEW.center, zoom: CITY_VIEW.zoom,
+        ui: { components: ["zoom", "attribution"] },
+        popup: { dockEnabled: false }
+      });
+
+      view.padding = { top: 74 };
+      view.ui.add(new Home({ view }), "top-left");
+      view.ui.add(new Compass({ view }), "top-left");
+      view.ui.add(new ScaleBar({ view, unit: "dual" }), "bottom-left");
+      view.ui.add(new Search({ view, locationEnabled: false, allPlaceholder: "Search locations" }), { position: "top-left", index: 2 });
+
+      /* ═══════════════════════════════════════════════════════
+         SURPLUS RENDERING
+         ═══════════════════════════════════════════════════════ */
+      function urgencyColor(u) { return u === "Critical" ? "#ef5350" : u === "Soon" ? "#ffc107" : "#66bb6a"; }
+      function pinSize(lbs) { return lbs < 50 ? 14 : lbs <= 200 ? 18 : 22; }
+
+      function surplusPopupContent({ graphic }) {
+        const a = graphic.attributes;
+        const exp = new Date(a.expiration);
+        const remaining = exp - Date.now();
+        const hrs = Math.max(0, Math.floor(remaining / H));
+        const mins = Math.max(0, Math.floor((remaining % H) / 60000));
+        const timeStr = remaining > 0 ? `${hrs}h ${mins}m` : "EXPIRED";
+        const urgColor = urgencyColor(a.urgency);
+        const meals = Math.round(a.quantity_lbs * 0.6);
+        const escapedName = a.name.replace(/'/g, "\\'");
+
+        return `<div style="font-family:sans-serif;font-size:13px;line-height:1.7;min-width:220px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:700">${a.food_type}</span>
+            <span style="background:${urgColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${a.urgency}</span>
+          </div>
+          <div style="margin:4px 0"><strong>${a.quantity_lbs} lbs</strong> <span style="color:#888">(~${meals} meals)</span></div>
+          <div style="color:${urgColor};font-weight:600">Expires in ${timeStr}</div>
+          <div style="color:#666;margin:2px 0">Transport: ${a.transport}</div>
+          <div style="color:#888;font-size:12px;margin:2px 0">${a.notes}</div>
+          <button onclick="window._routeFromSurplus(${a.lng},${a.lat},'${escapedName}')"
+            style="margin-top:8px;width:100%;padding:8px;background:#b3a369;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px">
+            Route From Here
+          </button>
+        </div>`;
+      }
+
+      function renderSurplusLayer() {
+        surplusLayer.removeAll();
+        MOCK_SURPLUS.forEach(s => {
+          surplusLayer.add(new Graphic({
+            geometry: { type: "point", longitude: s.lng, latitude: s.lat },
+            symbol: {
+              type: "simple-marker", style: "circle",
+              color: urgencyColor(s.urgency),
+              size: pinSize(s.quantity_lbs),
+              outline: { color: "#ffffff", width: 1.5 }
+            },
+            attributes: { ...s },
+            popupTemplate: { title: "{name}", content: surplusPopupContent }
+          }));
+        });
+        filterSurplus();
+      }
+
+      /* ═══════════════════════════════════════════════════════
+         SURPLUS FILTERING
+         ═══════════════════════════════════════════════════════ */
+      function filterSurplus() {
+        const checked = new Set();
+        document.querySelectorAll("input[data-surplus]").forEach(cb => {
+          if (cb.checked) checked.add(cb.dataset.surplus);
+        });
+
+        let totalLbs = 0, criticalCount = 0;
+        const counts = { "Prepared Meals": 0, "Packaged Goods": 0, "Produce": 0, "Bakery": 0, "Perishable": 0 };
+
+        surplusLayer.graphics.forEach(g => {
+          const ft = g.attributes.food_type;
+          const visible = checked.has(ft);
+          g.visible = visible;
+          if (visible) {
+            totalLbs += g.attributes.quantity_lbs;
+            if (g.attributes.urgency === "Critical") criticalCount++;
+          }
+          counts[ft] = (counts[ft] || 0) + 1;
+        });
+
+        document.getElementById("countPrepared").textContent = `(${counts["Prepared Meals"]})`;
+        document.getElementById("countPackaged").textContent = `(${counts["Packaged Goods"]})`;
+        document.getElementById("countProduce").textContent = `(${counts["Produce"]})`;
+        document.getElementById("countBakery").textContent = `(${counts["Bakery"]})`;
+        document.getElementById("countPerishable").textContent = `(${counts["Perishable"]})`;
+
+        const meals = Math.round(totalLbs * 0.6);
+        document.getElementById("surplusSummary").innerHTML =
+          `<strong>${totalLbs.toLocaleString()} lbs</strong> available (~${meals} meals)<br>` +
+          `<span style="color:var(--surplus-critical)">${criticalCount} critical pickups needed</span>`;
+      }
+
+      document.querySelectorAll("input[data-surplus]").forEach(cb => {
+        cb.addEventListener("change", filterSurplus);
+      });
+
+      // Show All / Hide All control surplus filters
+      document.getElementById("showAll").addEventListener("click", () => {
+        document.querySelectorAll("input[data-surplus]").forEach(cb => { cb.checked = true; });
+        filterSurplus();
+      });
+      document.getElementById("hideAll").addEventListener("click", () => {
+        document.querySelectorAll("input[data-surplus]").forEach(cb => { cb.checked = false; });
+        filterSurplus();
+      });
+
+      document.getElementById("layersToggle").addEventListener("click", () => {
+        document.getElementById("layerPanel").classList.toggle("open");
+      });
+
+      /* ═══════════════════════════════════════════════════════
+         ROUTE PANEL LOGIC
+         ═══════════════════════════════════════════════════════ */
+      function populateSelect(id, options, showCapacity) {
+        const sel = document.getElementById(id);
+        options.forEach((opt, i) => {
+          const el = document.createElement("option");
+          el.value = i;
+          let label = opt.name;
+          if (showCapacity && opt.cold_pct !== undefined) {
+            const maxPct = Math.max(opt.cold_pct, opt.dry_pct || 0);
+            label += maxPct > 90 ? " [FULL]" : maxPct > 70 ? " [" + maxPct + "%]" : "";
+          }
+          if (opt.transport) label += " (" + opt.transport + ")";
+          el.textContent = label;
+          sel.appendChild(el);
+        });
+      }
+
+      /* ─── Origin search input with suggestions ─── */
+      let _selectedOrigin = null;   // { name, lat, lng }
+      let _geocodeTimer = null;
+
+      function initRouteDropdowns() {
+        const input = document.getElementById("rpOrigin");
+        const sugBox = document.getElementById("rpOriginSuggestions");
+
+        // Set default origin
+        _selectedOrigin = ROUTE_STOPS.origin[0];
+        input.value = _selectedOrigin.name;
+
+        // Show suggestions on focus
+        input.addEventListener("focus", () => { showOriginSuggestions(input.value); });
+
+        // Filter + geocode on input
+        input.addEventListener("input", () => {
+          const q = input.value.trim();
+          showOriginSuggestions(q);
+          clearTimeout(_geocodeTimer);
+          if (q.length >= 3) {
+            _geocodeTimer = setTimeout(() => geocodeOrigin(q), 400);
+          }
+        });
+
+        // Close suggestions on outside click
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest(".rp-origin-wrap")) sugBox.classList.remove("open");
+        });
+
+        populateSelect("rpStop1", ROUTE_STOPS.foodRecovery, false);
+        populateSelect("rpStop2", ROUTE_STOPS.redistribution, true);
+        populateSelect("rpStop3", ROUTE_STOPS.beneficiary, true);
+        populateSelect("rpStop4", ROUTE_STOPS.compost, false);
+      }
+
+      function showOriginSuggestions(query) {
+        const sugBox = document.getElementById("rpOriginSuggestions");
+        const q = (query || "").toLowerCase();
+        let html = "";
+        ROUTE_STOPS.origin.forEach((o, i) => {
+          if (!q || o.name.toLowerCase().includes(q)) {
+            html += `<div class="rp-sug-item" data-type="preset" data-idx="${i}">${o.name}</div>`;
+          }
+        });
+        // Keep existing geocode results if any
+        sugBox.querySelectorAll(".rp-sug-geo").forEach(el => {
+          html += el.outerHTML;
+        });
+        if (html) { sugBox.innerHTML = html; sugBox.classList.add("open"); wireOriginSugClicks(); }
+        else { sugBox.classList.remove("open"); }
+      }
+
+      async function geocodeOrigin(query) {
+        try {
+          const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=json&text=${encodeURIComponent(query)}&location=-84.39,33.77&maxSuggestions=4`;
+          const res = await fetch(url).then(r => r.json());
+          if (!res.suggestions || !res.suggestions.length) return;
+          const sugBox = document.getElementById("rpOriginSuggestions");
+          // Remove old geocode items
+          sugBox.querySelectorAll(".rp-sug-geo").forEach(el => el.remove());
+          res.suggestions.forEach(s => {
+            const div = document.createElement("div");
+            div.className = "rp-sug-item rp-sug-geo";
+            div.dataset.type = "geocode";
+            div.dataset.magicKey = s.magicKey;
+            div.dataset.text = s.text;
+            div.innerHTML = `${s.text}<div class="rp-sug-sub">Address result</div>`;
+            sugBox.appendChild(div);
+          });
+          sugBox.classList.add("open");
+          wireOriginSugClicks();
+        } catch(e) { /* geocoding unavailable */ }
+      }
+
+      function wireOriginSugClicks() {
+        const sugBox = document.getElementById("rpOriginSuggestions");
+        sugBox.querySelectorAll(".rp-sug-item").forEach(item => {
+          item.onclick = async function() {
+            const input = document.getElementById("rpOrigin");
+            if (this.dataset.type === "preset") {
+              const idx = parseInt(this.dataset.idx);
+              _selectedOrigin = ROUTE_STOPS.origin[idx];
+              input.value = _selectedOrigin.name;
+            } else if (this.dataset.type === "geocode") {
+              // Resolve geocode to coordinates
+              try {
+                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(this.dataset.text)}&magicKey=${this.dataset.magicKey}&outFields=*&maxLocations=1`;
+                const res = await fetch(url).then(r => r.json());
+                if (res.candidates && res.candidates.length) {
+                  const c = res.candidates[0];
+                  _selectedOrigin = { name: c.address, lng: c.location.x, lat: c.location.y };
+                  input.value = c.address;
+                  view.goTo({ center: [c.location.x, c.location.y], zoom: 15 }, { duration: 600 });
+                }
+              } catch(e) { /* geocoding failed */ }
+            } else if (this.dataset.type === "custom") {
+              _selectedOrigin = { name: this.dataset.name, lng: parseFloat(this.dataset.lng), lat: parseFloat(this.dataset.lat) };
+              input.value = this.dataset.name;
+            }
+            sugBox.classList.remove("open");
+          };
+        });
+      }
+
+      function getSelectedOrigin() {
+        return _selectedOrigin || ROUTE_STOPS.origin[0];
+      }
+
+      function findNearest(from, candidates) {
+        let minDist = Infinity, nearest = candidates[0];
+        candidates.forEach(c => {
+          const d = haversine(from.lat, from.lng, c.lat, c.lng);
+          if (d < minDist) { minDist = d; nearest = c; }
+        });
+        return nearest;
+      }
+
+      /* ─── Smart Selection: urgency + volume + transport + capacity ─── */
+      function smartSelectRecovery(fromPt, vehicleType) {
+        let bestScore = -Infinity, bestItem = null;
+        MOCK_SURPLUS.forEach(s => {
+          if (!isTransportCompatible(s.transport, vehicleType)) return;
+          const hrs = (new Date(s.expiration) - Date.now()) / 3600000;
+          if (hrs <= 0) return;
+          const score = computePriorityScore(s, fromPt);
+          if (score > bestScore) { bestScore = score; bestItem = s; }
+        });
+        if (!bestItem) return { source: "route_stops", stop: findNearest(fromPt, ROUTE_STOPS.foodRecovery) };
+        return { source: "surplus", stop: { name: bestItem.name, lng: bestItem.lng, lat: bestItem.lat }, surplusItem: bestItem, score: bestScore };
+      }
+
+      function smartSelectCapacityNode(fromPt, candidates, needsRefrig) {
+        let bestScore = -Infinity, bestNode = null, bestIdx = 0;
+        candidates.forEach((node, idx) => {
+          if (needsRefrig && node.accepting_perishable === false) return;
+          if (needsRefrig && node.cold_pct !== undefined && node.cold_pct > 95) return;
+          const score = computeCapacityScore(node, fromPt);
+          if (score > bestScore) { bestScore = score; bestNode = node; bestIdx = idx; }
+        });
+        if (!bestNode) { bestNode = findNearest(fromPt, candidates); bestIdx = candidates.indexOf(bestNode); }
+        return { node: bestNode, index: bestIdx };
+      }
+
+      function autoSelectNearest() {
+        const origin = getSelectedOrigin();
+        const vehicleType = document.getElementById("rpVehicle").value;
+
+        // Step 1: Smart food recovery (urgency + volume + distance + transport)
+        const recoveryResult = smartSelectRecovery(origin, vehicleType);
+        const recoveryStop = recoveryResult.stop;
+        const rpStop1 = document.getElementById("rpStop1");
+        const matchIdx = ROUTE_STOPS.foodRecovery.findIndex(r => r.name === recoveryStop.name);
+        if (matchIdx >= 0) {
+          rpStop1.value = matchIdx;
+        } else {
+          let customOpt = rpStop1.querySelector('option[value="surplus_custom"]');
+          if (!customOpt) { customOpt = document.createElement("option"); customOpt.value = "surplus_custom"; rpStop1.appendChild(customOpt); }
+          customOpt.textContent = recoveryStop.name + " (priority)";
+          customOpt.dataset.lng = recoveryStop.lng; customOpt.dataset.lat = recoveryStop.lat;
+          rpStop1.value = "surplus_custom";
+        }
+
+        // Determine if load needs refrigeration
+        const needsRefrig = vehicleType === "Refrigerated Van" ||
+          (recoveryResult.surplusItem && recoveryResult.surplusItem.transport === "Refrigerated Van");
+
+        // Step 2: Smart redistribution (capacity-aware)
+        const redistResult = smartSelectCapacityNode(recoveryStop, ROUTE_STOPS.redistribution, needsRefrig);
+        document.getElementById("rpStop2").value = redistResult.index;
+
+        // Step 3: Smart beneficiary (capacity-aware)
+        const benResult = smartSelectCapacityNode(redistResult.node, ROUTE_STOPS.beneficiary, needsRefrig);
+        document.getElementById("rpStop3").value = benResult.index;
+
+        // Step 4: Compost — nearest (no capacity data)
+        const nearestCompost = findNearest(benResult.node, ROUTE_STOPS.compost);
+        document.getElementById("rpStop4").value = ROUTE_STOPS.compost.indexOf(nearestCompost);
+      }
+
+      function getAllStops() {
+        const origin = getSelectedOrigin();
+        const stops = [origin];
+        const categories = ["foodRecovery", "redistribution", "beneficiary", "compost"];
+        const selectors = ["rpStop1", "rpStop2", "rpStop3", "rpStop4"];
+        let prevPoint = origin;
+
+        categories.forEach((cat, i) => {
+          const sel = document.getElementById(selectors[i]);
+          let stop;
+          if (sel.value === "" || sel.value === null) {
+            stop = findNearest(prevPoint, ROUTE_STOPS[cat]);
+            sel.value = ROUTE_STOPS[cat].indexOf(stop);
+          } else if (sel.value === "surplus_custom") {
+            const opt = sel.querySelector('option[value="surplus_custom"]');
+            stop = { name: opt.textContent.replace(" (priority)", "").replace(" (AI)", ""), lng: parseFloat(opt.dataset.lng), lat: parseFloat(opt.dataset.lat) };
+          } else {
+            stop = ROUTE_STOPS[cat][parseInt(sel.value)];
+          }
+          stops.push(stop);
+          prevPoint = stop;
+        });
+        return stops;
+      }
+
+      let currentStops = [];
+
+      async function calculateRoute() {
+        const spinner = document.getElementById("rpSpinner");
+        const results = document.getElementById("rpResults");
+        spinner.classList.add("visible");
+        results.classList.remove("visible");
+        routeLayer.removeAll();
+
+        const stops = getAllStops();
+        currentStops = stops;
+
+        const origin = stops[0];
+        let baselineDist = 0;
+        for (let i = 1; i < stops.length; i++) {
+          baselineDist += 2 * haversine(origin.lat, origin.lng, stops[i].lat, stops[i].lng);
+        }
+
+        const totalVolume = MOCK_SURPLUS.reduce((sum, s) => sum + s.quantity_lbs, 0);
+
+        if (hasApiKey) {
+          try {
+            const stopGraphics = stops.map(s => new Graphic({
+              geometry: { type: "point", longitude: s.lng, latitude: s.lat }
+            }));
+
+            const params = new RouteParameters({
+              stops: new FeatureSet({ features: stopGraphics }),
+              returnDirections: true,
+              outSpatialReference: { wkid: 4326 },
+              startTime: new Date()
+            });
+
+            const result = await routeSolver.solve(ROUTE_URL, params);
+            const routeResult = result.routeResults[0];
+            const routeGeom = routeResult.route.geometry;
+            const attrs = routeResult.route.attributes;
+            const miles = attrs.Total_Miles || (attrs.Total_Kilometers ? attrs.Total_Kilometers * 0.621371 : 0);
+            const minutes = attrs.Total_TravelTime || 0;
+
+            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: [0, 191, 165, 0.3], width: 8 } }));
+            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: "#b3a369", width: 4 } }));
+
+            drawStopMarkers(stops);
+
+            const saved = baselineDist > 0 ? Math.round((1 - miles / baselineDist) * 100) : 0;
+            displayStats(miles.toFixed(1) + " mi", Math.round(minutes) + " min", totalVolume.toLocaleString() + " lbs", Math.max(0, saved) + "%", stops);
+
+            view.goTo(routeGeom.extent.expand(1.3)).catch(() => {});
+          } catch (err) {
+            console.warn("Route API failed, using fallback:", err.message);
+            displayFallbackRoute(stops, baselineDist, totalVolume);
+          }
+        } else {
+          displayFallbackRoute(stops, baselineDist, totalVolume);
+        }
+
+        spinner.classList.remove("visible");
+        results.classList.add("visible");
+      }
+
+      function displayFallbackRoute(stops, baselineDist, totalVolume) {
+        for (let i = 0; i < stops.length - 1; i++) {
+          routeLayer.add(new Graphic({
+            geometry: { type: "polyline", paths: [[[stops[i].lng, stops[i].lat], [stops[i + 1].lng, stops[i + 1].lat]]] },
+            symbol: { type: "simple-line", color: "#b3a369", width: 3, style: "dash" }
+          }));
+        }
+        drawStopMarkers(stops);
+
+        let chainDist = 0;
+        for (let i = 0; i < stops.length - 1; i++) {
+          chainDist += haversine(stops[i].lat, stops[i].lng, stops[i + 1].lat, stops[i + 1].lng);
+        }
+        const estTime = Math.round((chainDist / 25) * 60);
+        const saved = baselineDist > 0 ? Math.round((1 - chainDist / baselineDist) * 100) : 0;
+        displayStats(chainDist.toFixed(1) + " mi (est.)", estTime + " min (est.)", totalVolume.toLocaleString() + " lbs", Math.max(0, saved) + "%", stops);
+
+        const lngs = stops.map(s => s.lng), lats = stops.map(s => s.lat);
+        view.goTo({ target: { type: "extent", xmin: Math.min(...lngs) - 0.02, ymin: Math.min(...lats) - 0.02, xmax: Math.max(...lngs) + 0.02, ymax: Math.max(...lats) + 0.02, spatialReference: { wkid: 4326 } } }).catch(() => {});
+      }
+
+      function drawStopMarkers(stops) {
+        stops.forEach((stop, i) => {
+          routeLayer.add(new Graphic({
+            geometry: { type: "point", longitude: stop.lng, latitude: stop.lat },
+            symbol: {
+              type: "simple-marker", style: "circle",
+              color: "#b3a369",
+              size: i === 0 ? 16 : 14,
+              outline: { color: "#ffffff", width: 2 }
+            },
+            attributes: { name: stop.name, order: i },
+            popupTemplate: { title: i === 0 ? "Origin: {name}" : `Stop ${i}: {name}` }
+          }));
+          routeLayer.add(new Graphic({
+            geometry: { type: "point", longitude: stop.lng, latitude: stop.lat },
+            symbol: { type: "text", text: i === 0 ? "O" : String(i), color: "#ffffff", font: { size: 9, weight: "bold" }, yoffset: 0 }
+          }));
+        });
+      }
+
+      function displayStats(dist, time, volume, saved, stops) {
+        document.getElementById("rpDistance").textContent = dist;
+        document.getElementById("rpTime").textContent = time;
+        document.getElementById("rpVolume").textContent = volume;
+        document.getElementById("rpSaved").textContent = saved;
+
+        const container = document.getElementById("rpLegsContainer");
+        container.innerHTML = "";
+        for (let i = 0; i < stops.length - 1; i++) {
+          const legDist = haversine(stops[i].lat, stops[i].lng, stops[i + 1].lat, stops[i + 1].lng);
+          const div = document.createElement("div");
+          div.className = "rp-leg";
+          div.innerHTML = `${stops[i].name} &rarr; ${stops[i + 1].name} <span>${legDist.toFixed(1)} mi</span>`;
+          container.appendChild(div);
+        }
+
+        // Urgency context for the recovery pickup
+        const recoveryStop = stops[1];
+        if (recoveryStop) {
+          const match = MOCK_SURPLUS.find(s => s.name === recoveryStop.name);
+          if (match) {
+            const hrsLeft = Math.max(0, (new Date(match.expiration) - Date.now()) / 3600000);
+            const urgLabel = hrsLeft <= 2 ? "CRITICAL" : hrsLeft <= 6 ? "SOON" : "STABLE";
+            const urgColor = hrsLeft <= 2 ? "#ef5350" : hrsLeft <= 6 ? "#ffc107" : "#66bb6a";
+            const urgDiv = document.createElement("div");
+            urgDiv.style.cssText = "margin-top:8px;padding:6px 8px;background:#141924;border-radius:6px;font-size:11px;";
+            urgDiv.innerHTML = `<span style="color:${urgColor};font-weight:700">${urgLabel}</span> pickup: ${match.quantity_lbs} lbs ${match.food_type} — ${hrsLeft.toFixed(1)}h remaining<br><span style="color:var(--muted)">Transport: ${match.transport}</span>`;
+            container.appendChild(urgDiv);
+          }
+        }
+
+        document.getElementById("rpDirections").style.display = "block";
+      }
+
+      function clearRoute() {
+        routeLayer.removeAll();
+        document.getElementById("rpResults").classList.remove("visible");
+        document.getElementById("rpDistance").textContent = "--";
+        document.getElementById("rpTime").textContent = "--";
+        document.getElementById("rpVolume").textContent = "--";
+        document.getElementById("rpSaved").textContent = "--";
+        document.getElementById("rpLegsContainer").innerHTML = "";
+        currentStops = [];
+      }
+
+      function openGoogleMapsDirections() {
+        if (currentStops.length < 2) return;
+        const origin = currentStops[0];
+        const dest = currentStops[currentStops.length - 1];
+        const waypoints = currentStops.slice(1, -1).map(s => `${s.lat},${s.lng}`).join("|");
+        const url = `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${dest.lat},${dest.lng}&waypoints=${waypoints}`;
+        window.open(url, "_blank");
+      }
+
+      /* ═══════════════════════════════════════════════════════
+         FLEET INTELLIGENCE & AI SUGGESTION
+         ═══════════════════════════════════════════════════════ */
+      function populateFleetPanel() {
+        document.getElementById("fleetDrivers").textContent = MOCK_FLEET.active_drivers;
+        document.getElementById("fleetRefrig").textContent = MOCK_FLEET.refrigerated_vehicles;
+        document.getElementById("fleetPickup").textContent = MOCK_FLEET.avg_pickup_min + " min";
+        document.getElementById("fleetRecovered").textContent = MOCK_FLEET.lbs_recovered_today.toLocaleString();
+      }
+
+      function generateAISuggestion() {
+        const origin = getSelectedOrigin();
+        const vehicleType = document.getElementById("rpVehicle").value;
+
+        const recoveryResult = smartSelectRecovery(origin, vehicleType);
+        if (!recoveryResult.stop) return;
+        const recoveryStop = recoveryResult.stop;
+        const needsRefrig = vehicleType === "Refrigerated Van" ||
+          (recoveryResult.surplusItem && recoveryResult.surplusItem.transport === "Refrigerated Van");
+
+        const redistResult = smartSelectCapacityNode(recoveryStop, ROUTE_STOPS.redistribution, needsRefrig);
+        const benResult = smartSelectCapacityNode(redistResult.node, ROUTE_STOPS.beneficiary, needsRefrig);
+        const compostStop = findNearest(benResult.node, ROUTE_STOPS.compost);
+
+        const chain = [origin, recoveryStop, redistResult.node, benResult.node, compostStop];
+        const shortName = s => s.name.split(" - ")[0].split(" / ")[0].substring(0, 22);
+        document.getElementById("aiRouteChain").innerHTML = chain.map(shortName).join(' <span class="ai-arrow">&#8594;</span> ');
+
+        let chainDist = 0;
+        for (let i = 0; i < chain.length - 1; i++) chainDist += haversine(chain[i].lat, chain[i].lng, chain[i + 1].lat, chain[i + 1].lng);
+        let baselineDist = 0;
+        for (let i = 1; i < chain.length; i++) baselineDist += 2 * haversine(origin.lat, origin.lng, chain[i].lat, chain[i].lng);
+        const savedPct = baselineDist > 0 ? Math.round((1 - chainDist / baselineDist) * 100) : 0;
+        const criticalLbs = MOCK_SURPLUS.filter(s => s.urgency === "Critical").reduce((sum, s) => sum + s.quantity_lbs, 0);
+
+        document.getElementById("aiTimeSaved").textContent = "Time Saved: " + Math.max(0, savedPct) + "%";
+        document.getElementById("aiFoodSaved").textContent = "Food at Risk: " + criticalLbs.toLocaleString() + " lbs";
+
+        window._aiSuggestion = { recoveryResult, redistIdx: redistResult.index, benIdx: benResult.index, compostIdx: ROUTE_STOPS.compost.indexOf(compostStop) };
+        document.getElementById("aiSuggestion").style.display = "block";
+      }
+
+      function acceptAISuggestion() {
+        if (!window._aiSuggestion) return;
+        const s = window._aiSuggestion;
+        const rpStop1 = document.getElementById("rpStop1");
+        const matchIdx = ROUTE_STOPS.foodRecovery.findIndex(r => r.name === s.recoveryResult.stop.name);
+        if (matchIdx >= 0) {
+          rpStop1.value = matchIdx;
+        } else {
+          let customOpt = rpStop1.querySelector('option[value="surplus_custom"]');
+          if (!customOpt) { customOpt = document.createElement("option"); customOpt.value = "surplus_custom"; rpStop1.appendChild(customOpt); }
+          customOpt.textContent = s.recoveryResult.stop.name + " (AI)";
+          customOpt.dataset.lng = s.recoveryResult.stop.lng; customOpt.dataset.lat = s.recoveryResult.stop.lat;
+          rpStop1.value = "surplus_custom";
+        }
+        document.getElementById("rpStop2").value = s.redistIdx;
+        document.getElementById("rpStop3").value = s.benIdx;
+        document.getElementById("rpStop4").value = s.compostIdx;
+        document.getElementById("aiSuggestion").style.display = "none";
+        calculateRoute();
+      }
+
+      function dismissAISuggestion() {
+        document.getElementById("aiSuggestion").style.display = "none";
+        window._aiSuggestion = null;
+      }
+
+      /* ═══════════════════════════════════════════════════════
+         ROUTE FROM SURPLUS PIN (global handler)
+         ═══════════════════════════════════════════════════════ */
+      window._routeFromSurplus = function (lng, lat, name) {
+        view.popup.close();
+        const panel = document.getElementById("routePanel");
+        panel.classList.add("open");
+
+        _selectedOrigin = { name: name, lng: lng, lat: lat };
+        document.getElementById("rpOrigin").value = name;
+
+        autoSelectNearest();
+        calculateRoute();
+      };
+
+      /* ═══════════════════════════════════════════════════════
+         EVENT WIRING
+         ═══════════════════════════════════════════════════════ */
+      document.getElementById("routeToggle").addEventListener("click", () => {
+        document.getElementById("routePanel").classList.toggle("open");
+      });
+      document.getElementById("rpClose").addEventListener("click", () => {
+        document.getElementById("routePanel").classList.remove("open");
+      });
+
+      document.getElementById("rpApiKeySave").addEventListener("click", () => {
+        const key = document.getElementById("rpApiKeyInput").value.trim();
+        if (key) {
+          localStorage.setItem("afcn_arcgis_api_key", key);
+          esriConfig.apiKey = key;
+          hasApiKey = true;
+          document.getElementById("rpApiNotice").style.display = "none";
+        }
+      });
+
+      document.getElementById("rpAutoSelect").addEventListener("click", autoSelectNearest);
+      document.getElementById("rpOptimize").addEventListener("click", calculateRoute);
+      document.getElementById("rpClear").addEventListener("click", clearRoute);
+      document.getElementById("rpDirections").addEventListener("click", openGoogleMapsDirections);
+
+      // Fleet Intelligence & AI Suggestion events
+      document.getElementById("aiAccept").addEventListener("click", acceptAISuggestion);
+      document.getElementById("aiDismiss").addEventListener("click", dismissAISuggestion);
+      document.getElementById("rpOrigin").addEventListener("change", () => {
+        if (document.getElementById("aiSuggestion").style.display !== "none") generateAISuggestion();
+      });
+      document.getElementById("rpVehicle").addEventListener("change", () => {
+        if (document.getElementById("aiSuggestion").style.display !== "none") generateAISuggestion();
+      });
+
+      /* ═══════════════════════════════════════════════════════
+         INITIALIZATION
+         ═══════════════════════════════════════════════════════ */
+      view.when(() => {
+        renderSurplusLayer();
+        initRouteDropdowns();
+        populateFleetPanel();
+
+        // Open route panel by default
+        document.getElementById("routePanel").classList.add("open");
+
+        configReady.finally(() => {
+          if (!hasApiKey) {
+            document.getElementById("rpApiNotice").style.display = "block";
+          }
+          generateAISuggestion();
+        });
+      });
+
+    });
+  </script>
+</body>
+</html>

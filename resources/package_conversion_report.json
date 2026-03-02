@@ -1,0 +1,126 @@
+{
+  "packages": [
+    {
+      "package": "All_Fast_Food_Locations_in_Metro_Atlanta.lpkx",
+      "status": "ok",
+      "source": "arch4017_base_atlanta.gdb:allfastfoodlocationsinmetroatlanta_XYTableToPoint",
+      "method": "local_gdb",
+      "rows": 1487,
+      "file": "pkg_all_fast_food_locations_in_metro_atlanta.geojson"
+    },
+    {
+      "package": "Atlanta_Fast_Food_Restaurants.lpkx",
+      "status": "ok",
+      "source": "default.gdb:Points",
+      "method": "local_gdb",
+      "rows": 141,
+      "file": "pkg_atlanta_fast_food_restaurants.geojson"
+    },
+    {
+      "package": "Atlanta_Grocery_Stores.lpkx",
+      "status": "ok",
+      "source": "arch4017_1b_map2atlantascale.gdb:Atlanta_groceries",
+      "method": "local_gdb",
+      "rows": 296,
+      "file": "pkg_atlanta_grocery_stores.geojson"
+    },
+    {
+      "package": "Atlanta_Metro_Area_Farmers_Markets.lpkx",
+      "status": "ok",
+      "source": "https://services7.arcgis.com/lywOeXBd71oqDPrG/arcgis/rest/services/Atlanta_Metro_Area_Farmers_Markets/FeatureServer/1",
+      "method": "service_query",
+      "rows": 30,
+      "file": "pkg_atlanta_metro_area_farmers_markets.geojson"
+    },
+    {
+      "package": "Campus_Dining.lpkx",
+      "status": "failed",
+      "source": null,
+      "rows": 0
+    },
+    {
+      "package": "Community_Based_Organizations_-_Atlanta.lpkx",
+      "status": "ok",
+      "source": "https://services.arcgis.com/NuWFvHYDMVmmxMeM/arcgis/rest/services/Community_Based_Organizations/FeatureServer/0",
+      "method": "service_query",
+      "rows": 2000,
+      "file": "pkg_community_based_organizations_atlanta.geojson"
+    },
+    {
+      "package": "Fast_Food_on_GT_Campus.lpkx",
+      "status": "ok",
+      "source": "default.gdb:OnCampusFastFood",
+      "method": "local_gdb",
+      "rows": 17,
+      "file": "pkg_fast_food_on_gt_campus.geojson"
+    },
+    {
+      "package": "Food_Processing_Facilities_in_the_Southeast.lpkx",
+      "status": "ok",
+      "source": "fast_food_processing_&_manufacturing.gdb:FoodProcessingFacilitiesintheSoutheast_XYTableToPoint",
+      "method": "local_gdb",
+      "rows": 82,
+      "file": "pkg_food_processing_facilities_in_the_southeast.geojson"
+    },
+    {
+      "package": "Gardens_Farms_and_Orchards_-_Atlanta.lpkx",
+      "status": "ok",
+      "source": "myproject.gdb:GardensFarmsandOrchards_ExportFeatures",
+      "method": "local_gdb",
+      "rows": 35,
+      "file": "pkg_gardens_farms_and_orchards_atlanta.geojson"
+    },
+    {
+      "package": "Hospitals_and_Health_Clinics_Atlanta.lpkx",
+      "status": "ok",
+      "source": "https://services8.arcgis.com/JI7FiIRUMjk9p0vW/arcgis/rest/services/Hospitals_and_Health_Clinics_Atlanta/FeatureServer/0",
+      "method": "service_query",
+      "rows": 55,
+      "file": "pkg_hospitals_and_health_clinics_atlanta.geojson"
+    },
+    {
+      "package": "Religious_Institutions_-_Metro_Atlanta.lpkx",
+      "status": "ok",
+      "source": "https://services1.arcgis.com/AQDHTHDrZzfsFsB5/arcgis/rest/services/Census_Reference_WFL1/FeatureServer/5",
+      "method": "service_query",
+      "rows": 574,
+      "file": "pkg_religious_institutions_metro_atlanta.geojson"
+    },
+    {
+      "package": "Restaurant_Chains_-_GA.lpkx",
+      "status": "ok",
+      "source": "myproject3.gdb:Georgia_Restaurants_All_Chains_XYTableToPoint",
+      "method": "local_gdb",
+      "rows": 2247,
+      "file": "pkg_restaurant_chains_ga.geojson"
+    },
+    {
+      "package": "Restaurants_and_Cafes_-_Atlanta.lpkx",
+      "status": "ok",
+      "source": "myproject.gdb:Restaurants_and_Cafes",
+      "method": "local_gdb",
+      "rows": 6769,
+      "file": "pkg_restaurants_and_cafes_atlanta.geojson"
+    },
+    {
+      "package": "Supermarkets_-_MetroATL.lpkx",
+      "status": "failed",
+      "source": null,
+      "rows": 0
+    },
+    {
+      "package": "US_Kroger_Network_v_Household_Income.mpkx",
+      "status": "ok",
+      "source": "arch4017_base_national.gdb:Food_Distribut_Kroger",
+      "method": "local_gdb",
+      "rows": 27,
+      "file": "pkg_us_kroger_network_v_household_income.geojson"
+    }
+  ],
+  "category_counts": {
+    "food_recovery": 11014,
+    "redistribution": 2629,
+    "beneficiary": 12,
+    "circular_compost": 127
+  }
+}

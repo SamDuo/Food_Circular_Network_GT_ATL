@@ -1,0 +1,305 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.4002,
+                                                                  33.7553
+                                                              ],
+                                                              [
+                                                                  -84.4178,
+                                                                  33.7559
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  1,
+                                            "from_type":  "FoodRecovery",
+                                            "to_type":  "Redistribution",
+                                            "from_name":  "Mercedes-Benz Stadium",
+                                            "to_name":  "Atlanta Community Food Bank HQ",
+                                            "lbs_per_week":  1800,
+                                            "flow_type":  "Primary"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.3963,
+                                                                  33.7571
+                                                              ],
+                                                              [
+                                                                  -84.3694,
+                                                                  33.7589
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  2,
+                                            "from_type":  "FoodRecovery",
+                                            "to_type":  "Redistribution",
+                                            "from_name":  "State Farm Arena",
+                                            "to_name":  "Second Helpings Atlanta",
+                                            "lbs_per_week":  1400,
+                                            "flow_type":  "Primary"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.3672,
+                                                                  33.7721
+                                                              ],
+                                                              [
+                                                                  -84.382,
+                                                                  33.7793
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  3,
+                                            "from_type":  "FoodRecovery",
+                                            "to_type":  "Redistribution",
+                                            "from_name":  "Ponce City Market",
+                                            "to_name":  "Midtown Assistance Center",
+                                            "lbs_per_week":  900,
+                                            "flow_type":  "Primary"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.4178,
+                                                                  33.7559
+                                                              ],
+                                                              [
+                                                                  -84.3829,
+                                                                  33.7528
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  4,
+                                            "from_type":  "Redistribution",
+                                            "to_type":  "BeneficiaryAccess",
+                                            "from_name":  "Atlanta Community Food Bank HQ",
+                                            "to_name":  "Grady Memorial Hospital Clinic",
+                                            "lbs_per_week":  1100,
+                                            "flow_type":  "Secondary"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.3694,
+                                                                  33.7589
+                                                              ],
+                                                              [
+                                                                  -84.3948,
+                                                                  33.7742
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  5,
+                                            "from_type":  "Redistribution",
+                                            "to_type":  "BeneficiaryAccess",
+                                            "from_name":  "Second Helpings Atlanta",
+                                            "to_name":  "GT Student Center Pantry (GT-FCH Hub)",
+                                            "lbs_per_week":  500,
+                                            "flow_type":  "Secondary"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.4192,
+                                                                  33.735
+                                                              ],
+                                                              [
+                                                                  -84.4,
+                                                                  33.74
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  6,
+                                            "from_type":  "Redistribution",
+                                            "to_type":  "BeneficiaryAccess",
+                                            "from_name":  "Community Fridge - West End",
+                                            "to_name":  "CHRIS 180 Mobile Food Truck",
+                                            "lbs_per_week":  420,
+                                            "flow_type":  "Secondary"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.3829,
+                                                                  33.7528
+                                                              ],
+                                                              [
+                                                                  -84.387,
+                                                                  33.761
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  7,
+                                            "from_type":  "BeneficiaryAccess",
+                                            "to_type":  "CircularEconomy",
+                                            "from_name":  "Grady Memorial Hospital Clinic",
+                                            "to_name":  "CompostNow Atlanta HQ",
+                                            "lbs_per_week":  260,
+                                            "flow_type":  "Circular"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.3948,
+                                                                  33.7742
+                                                              ],
+                                                              [
+                                                                  -84.3963,
+                                                                  33.7756
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  8,
+                                            "from_type":  "BeneficiaryAccess",
+                                            "to_type":  "CircularEconomy",
+                                            "from_name":  "GT Student Center Pantry (GT-FCH Hub)",
+                                            "to_name":  "GT Campus Compost Hub (GT-FCH)",
+                                            "lbs_per_week":  140,
+                                            "flow_type":  "Circular"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.3672,
+                                                                  33.7721
+                                                              ],
+                                                              [
+                                                                  -84.445,
+                                                                  33.725
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  9,
+                                            "from_type":  "FoodRecovery",
+                                            "to_type":  "CircularEconomy",
+                                            "from_name":  "Ponce City Market",
+                                            "to_name":  "Eco-Cycle Solutions (Animal Feed)",
+                                            "lbs_per_week":  320,
+                                            "flow_type":  "Circular"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.445,
+                                                                  33.725
+                                                              ],
+                                                              [
+                                                                  -84.46,
+                                                                  33.71
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  10,
+                                            "from_type":  "CircularEconomy",
+                                            "to_type":  "CircularEconomy",
+                                            "from_name":  "Eco-Cycle Solutions (Animal Feed)",
+                                            "to_name":  "Atlanta BioGas (Anaerobic Digestion)",
+                                            "lbs_per_week":  280,
+                                            "flow_type":  "Circular"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.3931,
+                                                                  33.7146
+                                                              ],
+                                                              [
+                                                                  -84.3801,
+                                                                  33.7556
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  11,
+                                            "from_type":  "BeneficiaryAccess",
+                                            "to_type":  "CircularEconomy",
+                                            "from_name":  "Southside Medical Center",
+                                            "to_name":  "Good Samaritan Compost Drop",
+                                            "lbs_per_week":  150,
+                                            "flow_type":  "Circular"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "LineString",
+                                          "coordinates":  [
+                                                              [
+                                                                  -84.342,
+                                                                  33.694
+                                                              ],
+                                                              [
+                                                                  -84.327,
+                                                                  33.684
+                                                              ]
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "flow_id":  12,
+                                            "from_type":  "CircularEconomy",
+                                            "to_type":  "CircularEconomy",
+                                            "from_name":  "City of Atlanta Compost - Constitution Road",
+                                            "to_name":  "Browns Mill Urban Farm",
+                                            "lbs_per_week":  210,
+                                            "flow_type":  "Secondary"
+                                        }
+                     }
+                 ]
+}

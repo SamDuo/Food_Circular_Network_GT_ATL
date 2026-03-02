@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT Campus Food Circular Hub</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.30/"></script>
+  <!-- Chart.js loaded lazily in initAdminCharts() to avoid AMD/UMD conflict with ArcGIS Dojo loader -->
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       CORE VARIABLES
+       ═══════════════════════════════════════════════════════ */
+    :root {
+      --header-h: 64px;
+      --bg-dark: #07090f;
+      --text: #e6ecf5;
+      --muted: #9ca6b8;
+      --gold: #b3a369;
+
+      /* Admin palette: glaucous base + warm accents */
+      --admin-bg: #1a2a3a;
+      --admin-surface: #243444;
+      --admin-surface-raised: #2e3e4e;
+      --admin-border: #3a4e5e;
+      --admin-text: #e8edf2;
+      --admin-text-muted: #92a4b8;
+      --admin-accent-primary: #e8a87c;
+      --admin-accent-secondary: #d4775b;
+      --admin-critical: #e85d4a;
+      --admin-warning: #f2c572;
+      --admin-stable: #7ec8a0;
+      --admin-info: #7db8d4;
+
+      --surplus-critical: #ef5350;
+      --surplus-soon: #ffc107;
+      --surplus-stable: #66bb6a;
+      --route-teal: #b3a369;
+      --route-panel-w: 340px;
+      --home-panel-w: 300px;
+
+      --pin-dining: #f4d35e;
+      --pin-vendor: #f57c00;
+      --pin-event: #e040fb;
+      --pin-pantry: #29b6f6;
+      --pin-volunteer: #26a69a;
+      --pin-compost: #4caf50;
+      --pin-mutual: #78909c;
+      --pin-sustainability: #8d6e63;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RESET & BASE
+       ═══════════════════════════════════════════════════════ */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body, #app {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
+    }
+
+    #app { position: relative; background: #0c1118; color: var(--text); }
+
+    /* ═══════════════════════════════════════════════════════
+       TOPBAR
+       ═══════════════════════════════════════════════════════ */
+    #topbar {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 30;
+      height: var(--header-h); background: var(--bg-dark);
+      border-bottom: 1px solid #222a3b;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px;
+    }
+
+    #brandWrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+    #logoWrap {
+      width: 150px; height: 42px; border: none; border-radius: 8px;
+      background: transparent; overflow: hidden; flex-shrink: 0;
+    }
+    #logoWrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+    #titleWrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+    #titleWrap h1 { font-size: 22px; line-height: 1; font-weight: 700; color: #ffffff; }
+
+    #i2ceLink { color: #d6c890; text-decoration: none; font-weight: 700; font-size: 13px; }
+    #i2ceLink:hover { color: #f2e7bd; text-decoration: underline; }
+
+    .navLinks { display: flex; gap: 8px; flex-shrink: 0; }
+    .navLink {
+      color: var(--route-teal); text-decoration: none; font-size: 12px; font-weight: 700;
+      padding: 8px 14px; border: 1px solid rgba(179, 163, 105, 0.5); border-radius: 999px;
+      white-space: nowrap; transition: background 0.2s;
+    }
+    .navLink:hover { background: rgba(179, 163, 105, 0.12); }
+    .navLink.active { background: rgba(179, 163, 105, 0.2); border-color: var(--route-teal); }
+
+    /* ═══════════════════════════════════════════════════════
+       MAP
+       ═══════════════════════════════════════════════════════ */
+    #viewDiv { position: absolute; inset: 0; }
+
+    /* ═══════════════════════════════════════════════════════
+       HOME PANEL (left sidebar)
+       ═══════════════════════════════════════════════════════ */
+    #homePanel {
+      position: absolute; top: 74px; left: 12px; z-index: 25;
+      width: var(--home-panel-w); max-height: calc(100vh - 90px); overflow-y: auto;
+      background: rgba(5, 8, 13, 0.95); border: 1px solid #2d3442;
+      border-radius: 10px; padding: 14px;
+    }
+
+    .hp-title {
+      font-size: 14px; font-weight: 700; color: var(--gold);
+      margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    .hp-stats {
+      background: #141924; border-radius: 8px; padding: 10px 12px;
+      margin-bottom: 12px; font-size: 12px; line-height: 1.8;
+    }
+    .hp-stats .val { color: #fff; font-weight: 700; }
+
+    .hp-impact {
+      background: #1a1210; border: 1px solid #3a2a1a; border-radius: 8px;
+      padding: 10px 12px; margin-bottom: 12px; font-size: 12px; line-height: 1.8;
+    }
+    .hp-impact .imp-label { color: var(--surplus-soon); font-size: 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+
+    /* ─── Campus Food Impact Banner (top center) ─── */
+    #impactBanner {
+      position: absolute; top: 74px; left: 50%; transform: translateX(-50%); z-index: 25;
+      display: flex; align-items: center; gap: 20px;
+      background: rgba(5, 8, 13, 0.92); border: 1px solid #3a2a1a;
+      border-radius: 10px; padding: 10px 24px;
+      backdrop-filter: blur(8px);
+    }
+    #impactBanner .ib-label {
+      color: var(--gold); font-size: 11px; text-transform: uppercase;
+      font-weight: 700; letter-spacing: 0.8px; white-space: nowrap;
+    }
+    #impactBanner .ib-stat {
+      text-align: center; font-size: 12px; color: var(--text); line-height: 1.4; white-space: nowrap;
+    }
+    #impactBanner .ib-stat .ib-num {
+      font-size: 22px; font-weight: 800; display: block;
+    }
+    #impactBanner .ib-stat .ib-sub {
+      font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    #impactBanner .ib-divider {
+      width: 1px; height: 36px; background: #3a2a1a;
+    }
+
+    .hp-btn {
+      width: 100%; padding: 9px; margin-bottom: 6px;
+      background: #101621; border: 1px solid #3a4254; color: #d8dde6;
+      font-size: 12px; font-weight: 700; border-radius: 8px;
+      cursor: pointer; text-align: center; transition: background 0.2s;
+    }
+    .hp-btn:hover { background: #1a2433; }
+    .hp-btn-external { color: var(--route-teal); border-color: rgba(179,163,105,0.4); }
+
+    .hp-admin-link {
+      display: block; width: 100%; margin-top: 10px; font-size: 11px; color: var(--muted);
+      text-decoration: underline; cursor: pointer; text-align: center;
+      background: none; border: none; padding: 4px 0;
+      position: relative; z-index: 2;
+    }
+    .hp-admin-link:hover { color: var(--route-teal); }
+
+    /* ═══════════════════════════════════════════════════════
+       FILTER SECTION (below home panel content)
+       ═══════════════════════════════════════════════════════ */
+    .hp-divider {
+      border: none; border-top: 1px solid #2d3442; margin: 12px 0;
+    }
+
+    .groupTitle {
+      margin: 6px 0; font-size: 11px; color: #8e98aa;
+      text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px;
+    }
+
+    .layerRow { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; cursor: pointer; }
+    .layerRow input { width: 14px; height: 14px; accent-color: var(--gold); cursor: pointer; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .lr-count { color: var(--muted); font-size: 11px; }
+
+    .filter-row { margin-bottom: 8px; }
+    .filter-label { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 3px; }
+    .filter-select {
+      width: 100%; padding: 6px 8px; background: #141924; color: var(--text);
+      border: 1px solid #2d3442; border-radius: 6px; font-size: 11px; cursor: pointer;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ROUTE PANEL (right side)
+       ═══════════════════════════════════════════════════════ */
+    #routeToggle {
+      position: absolute; right: 12px; bottom: 88px; z-index: 26;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid #2d3442; background: #05080d; color: var(--route-teal);
+      cursor: pointer; font-size: 16px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #routeToggle:hover { background: #101a22; border-color: var(--route-teal); }
+
+    #routePanel {
+      position: absolute; top: var(--header-h); right: 0;
+      width: var(--route-panel-w); height: calc(100vh - var(--header-h));
+      overflow-y: auto; z-index: 27;
+      background: rgba(5, 8, 13, 0.96); border-left: 1px solid #2d3442;
+      display: none; padding: 0;
+    }
+    #routePanel.open { display: block; }
+
+    .rp-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 14px; border-bottom: 1px solid #222a3b;
+    }
+    .rp-header h3 { font-size: 13px; color: var(--route-teal); text-transform: uppercase; font-weight: 700; }
+    .rp-close { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+
+    .rp-body { padding: 14px; }
+    .rp-label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .rp-select {
+      width: 100%; padding: 8px 10px; background: #141924; color: var(--text);
+      border: 1px solid #2d3442; border-radius: 6px; font-size: 12px;
+      margin-bottom: 12px; cursor: pointer;
+    }
+
+    .rp-origin-wrap { position: relative; margin-bottom: 12px; }
+    .rp-origin-wrap .rp-select { margin-bottom: 0; cursor: text; }
+    .rp-suggestions {
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 40;
+      background: #141924; border: 1px solid #2d3442; border-top: none; border-radius: 0 0 6px 6px;
+      max-height: 200px; overflow-y: auto;
+    }
+    .rp-suggestions.open { display: block; }
+    .rp-sug-item {
+      padding: 8px 10px; font-size: 12px; color: var(--text); cursor: pointer;
+      border-bottom: 1px solid #1a2030;
+    }
+    .rp-sug-item:hover, .rp-sug-item.active { background: #1a2233; color: var(--route-teal); }
+    .rp-sug-item .rp-sug-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .rp-sug-geo { font-style: italic; }
+
+    .rp-mode-toggle { display: flex; gap: 6px; margin-bottom: 12px; }
+    .rp-mode-btn {
+      flex: 1; padding: 8px; text-align: center; font-size: 12px; font-weight: 700;
+      border: 1px solid #3a4254; background: #101621; color: #d8dde6;
+      border-radius: 8px; cursor: pointer;
+    }
+    .rp-mode-btn.active { background: var(--route-teal); color: #fff; border-color: var(--route-teal); }
+
+    .rp-chain-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .rp-chain-dot {
+      width: 22px; height: 22px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
+      color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0; background: #3a4254;
+    }
+    .rp-chain-label { font-size: 11px; color: var(--muted); min-width: 80px; }
+    .rp-chain-row .rp-select { margin-bottom: 0; flex: 1; }
+
+    .rp-btn {
+      width: 100%; padding: 10px; border: 1px solid #3a4254; background: #101621;
+      color: #d8dde6; font-size: 12px; font-weight: 700; border-radius: 8px;
+      cursor: pointer; margin-bottom: 6px; text-align: center;
+    }
+    .rp-btn:hover { background: #1a2433; }
+    .rp-btn-primary { background: var(--route-teal); color: #fff; border-color: var(--route-teal); }
+    .rp-btn-primary:hover { background: #00a890; }
+
+    .rp-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+      margin: 14px 0; padding: 10px; background: #141924; border-radius: 8px;
+    }
+    .rp-stat-cell { text-align: center; padding: 6px; }
+    .rp-stat-value { font-size: 20px; font-weight: 800; color: #fff; }
+    .rp-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+    .rp-legs { margin-top: 10px; }
+    .rp-legs-title { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+    .rp-leg {
+      display: flex; justify-content: space-between; padding: 6px 0;
+      border-bottom: 1px solid #1a2030; font-size: 12px; color: var(--text);
+    }
+    .rp-leg span { color: var(--route-teal); font-weight: 700; }
+
+    .rp-spinner { display: none; text-align: center; padding: 20px; color: var(--muted); font-size: 12px; }
+    .rp-spinner.visible { display: block; }
+    .rp-spinner::before {
+      content: ''; display: block; width: 24px; height: 24px; margin: 0 auto 8px;
+      border: 3px solid #2d3442; border-top-color: var(--route-teal);
+      border-radius: 50%; animation: rpSpin 0.8s linear infinite;
+    }
+
+    .rp-results { display: none; }
+    .rp-results.visible { display: block; }
+
+    @keyframes rpSpin { to { transform: rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════════════════
+       MODALS
+       ═══════════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50;
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #0c1118; border: 1px solid #2d3442; border-radius: 12px;
+      padding: 20px; width: 380px; max-width: 95vw; max-height: 85vh; overflow-y: auto;
+    }
+    .modal h3 { font-size: 14px; color: var(--gold); margin-bottom: 14px; }
+    .modal label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; margin-top: 10px; }
+    .modal input, .modal select, .modal textarea {
+      width: 100%; padding: 8px 10px; background: #141924; color: var(--text);
+      border: 1px solid #2d3442; border-radius: 6px; font-size: 12px;
+    }
+    .modal textarea { min-height: 60px; resize: vertical; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .modal-actions button { flex: 1; }
+
+    /* ═══════════════════════════════════════════════════════
+       ADMIN VIEW
+       ═══════════════════════════════════════════════════════ */
+    #app.admin-mode #homePanel,
+    #app.admin-mode #impactBanner,
+    #app.admin-mode #routeToggle,
+    #app.admin-mode #routePanel {
+      display: none !important;
+    }
+
+    #adminView {
+      position: absolute; top: var(--header-h); right: 0; bottom: 0;
+      width: min(48vw, 720px); min-width: 520px;
+      z-index: 28; background: rgba(26, 42, 58, 0.96);
+      border-left: 1px solid var(--admin-border); overflow-y: auto;
+      display: none; padding: 14px;
+      backdrop-filter: blur(8px);
+      color: var(--admin-text);
+    }
+    #adminView.open { display: block; }
+
+    .admin-header {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .admin-title-wrap h2 { font-size: 16px; color: var(--admin-accent-primary); }
+    .admin-sub { font-size: 11px; color: var(--admin-text-muted); margin-top: 2px; }
+
+    .admin-header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .admin-back, .admin-btn {
+      color: #ffffff; text-decoration: none; font-size: 11px; font-weight: 700;
+      cursor: pointer; border: 1px solid #e2a089;
+      padding: 6px 10px; border-radius: 999px;
+      background: var(--admin-accent-secondary);
+    }
+    .admin-back:hover, .admin-btn:hover { background: #de8a71; }
+    .admin-timestamp { font-size: 10px; color: var(--admin-text-muted); }
+
+    .admin-warning {
+      display: none; margin: 10px 0; padding: 10px 12px;
+      border: 1px solid #e8c88a;
+      background: rgba(242, 197, 114, 0.16);
+      color: #fff3d8; border-radius: 8px; font-size: 11px;
+    }
+    .admin-warning.open { display: block; }
+
+    .admin-filter-state {
+      margin: 8px 0 12px; font-size: 11px; color: var(--admin-text-muted);
+      min-height: 18px; display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .afs-pill {
+      border: 1px solid var(--admin-border); border-radius: 999px; padding: 3px 8px;
+      background: var(--admin-surface-raised); color: var(--admin-text);
+    }
+
+    .charts-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .chart-card {
+      background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 10px; padding: 12px;
+    }
+    .chart-card.large { grid-column: span 2; }
+    .chart-card h4 {
+      font-size: 11px; color: var(--admin-accent-primary); text-transform: uppercase;
+      letter-spacing: 0.4px; margin-bottom: 8px;
+    }
+    .chart-card canvas { width: 100% !important; max-height: 220px; }
+
+    .admin-card-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;
+    }
+    .admin-card-sub { font-size: 10px; color: var(--admin-text-muted); }
+
+    #adminTreemap {
+      width: 100%; height: 260px; background: var(--admin-surface-raised); border: 1px solid var(--admin-border); border-radius: 8px;
+      position: relative;
+    }
+    #adminTreemap svg { width: 100%; height: 100%; display: block; }
+    .tree-tip {
+      position: absolute; pointer-events: none; z-index: 2;
+      background: rgba(26, 42, 58, 0.94);
+      border: 1px solid var(--admin-border); border-radius: 6px;
+      padding: 8px; font-size: 11px; color: var(--admin-text); display: none;
+      min-width: 150px;
+    }
+    .tree-badge {
+      display: inline-block; font-size: 10px; margin-left: 5px; padding: 1px 5px;
+      border-radius: 999px; border: 1px solid var(--admin-border); color: var(--admin-text); background: var(--admin-surface-raised);
+    }
+
+    #adminMatrixWrap { display: grid; gap: 8px; }
+    #adminMatrix {
+      width: 100%; overflow: auto; border: 1px solid var(--admin-border); border-radius: 8px; background: var(--admin-surface-raised);
+      max-height: 300px; padding: 8px;
+    }
+    .matrix-grid {
+      display: grid; grid-template-columns: 120px repeat(9, minmax(62px, 1fr)); gap: 4px;
+      min-width: 760px;
+    }
+    .mx-head {
+      font-size: 10px; color: var(--admin-text-muted); text-align: center; padding: 4px 2px;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .mx-row-label {
+      font-size: 10px; color: var(--admin-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      align-self: center; padding-right: 4px;
+    }
+    .mx-cell {
+      border: 1px solid var(--admin-border); border-radius: 4px; min-height: 34px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 10px;
+      color: #ffffff; background: var(--admin-bg);
+    }
+    .mx-cell:hover, .mx-cell:focus { outline: none; border-color: var(--admin-accent-primary); }
+    .mx-cell.is-active { box-shadow: 0 0 0 2px rgba(232, 168, 124, 0.62) inset; }
+    .matrix-controls {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      font-size: 10px; color: var(--admin-text-muted);
+    }
+
+    .admin-empty {
+      width: 100%; height: 100%; min-height: 120px; display: flex;
+      align-items: center; justify-content: center; text-align: center;
+      color: var(--admin-text-muted); font-size: 12px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE
+       ═══════════════════════════════════════════════════════ */
+    @media (max-width: 760px) {
+      #topbar { height: 82px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; }
+      #logoWrap { width: 120px; height: 34px; }
+      #titleWrap h1 { font-size: 17px; }
+      #homePanel { width: calc(100vw - 24px); top: 90px; }
+      #routePanel {
+        top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: auto;
+        max-height: 60vh; border-left: none; border-top: 1px solid #2d3442; border-radius: 16px 16px 0 0;
+      }
+      #adminView {
+        top: 82px; left: 0; right: 0; bottom: 0;
+        width: 100%; min-width: 0; border-left: none; border-top: 1px solid var(--admin-border);
+      }
+      .charts-grid { grid-template-columns: 1fr; }
+      .chart-card.large { grid-column: span 1; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- ═══ TOPBAR ═══ -->
+    <header id="topbar">
+      <div id="brandWrap">
+        <div id="logoWrap">
+          <img src="/resources/GT%20logo/Primary%20Logos/Georgia%20Tech%20One%20Line/GTOneLine_White.svg" alt="GT logo" />
+        </div>
+        <div id="titleWrap">
+          <h1>GT Food Circular Hub</h1>
+          <a id="i2ceLink" href="https://sites.gatech.edu/i2ce/" target="_blank" rel="noopener">
+            Georgia Tech Circular Economy Lab [I2CE]
+          </a>
+        </div>
+      </div>
+      <div class="navLinks">
+        <a href="index.html" class="navLink">AFCN Dashboard</a>
+        <a href="surplus-map.html" class="navLink">Surplus Map</a>
+        <a href="fleet-analytics.html" class="navLink">Fleet Analytics</a>
+        <a href="gt-campus-hub.html" class="navLink active">Campus Hub</a>
+      </div>
+    </header>
+
+    <!-- ═══ MAP ═══ -->
+    <div id="viewDiv"></div>
+
+    <!-- ═══ CAMPUS FOOD IMPACT BANNER (top center) ═══ -->
+    <div id="impactBanner">
+      <div class="ib-label">Campus Food<br>Impact</div>
+      <div class="ib-divider"></div>
+      <div class="ib-stat">
+        <span class="ib-num" style="color:var(--surplus-critical)">420</span>
+        <span class="ib-sub">lbs wasted / day</span>
+      </div>
+      <div class="ib-divider"></div>
+      <div class="ib-stat">
+        <span class="ib-num" style="color:var(--surplus-stable)">350</span>
+        <span class="ib-sub">students could feed</span>
+      </div>
+      <div class="ib-divider"></div>
+      <div class="ib-stat">
+        <span class="ib-num" style="color:var(--gold)">12</span>
+        <span class="ib-sub">halls reporting</span>
+      </div>
+    </div>
+
+    <!-- ═══ HOME PANEL (left) ═══ -->
+    <aside id="homePanel">
+      <div class="hp-title">Georgia Tech Food Circular Hub</div>
+
+      <!-- Live summary -->
+      <div class="hp-stats" id="hpStats">
+        <div>Available: <span class="val" id="hpLbs">--</span> lbs</div>
+        <div>Dining halls reporting: <span class="val" id="hpHalls">--</span></div>
+        <div>Closing soon: <span class="val" id="hpClosing">--</span></div>
+      </div>
+
+      <!-- Quick Buttons -->
+      <button class="hp-btn" id="btnReportSurplus" type="button">Report Surplus</button>
+      <button class="hp-btn" id="btnFindPantry" type="button">Find Campus Pantry</button>
+      <button class="hp-btn" id="btnJoinPickup" type="button">Join Pickup Team</button>
+      <button class="hp-btn" id="btnEventScheduler" type="button">Food Event Scheduler</button>
+      <a class="hp-btn hp-btn-external" href="https://gatech.campuslabs.com/engage/events?perks=FreeFood" target="_blank" rel="noopener">
+        Free Food Events &#x2197;
+      </a>
+
+      <button class="hp-admin-link" id="adminToggle" type="button">For administrator, click here</button>
+
+      <hr class="hp-divider" />
+
+      <!-- Category Filters -->
+      <div class="groupTitle" style="color:var(--gold)">Map Layers</div>
+      <label class="layerRow"><input type="checkbox" data-cat="dining" checked /><span class="dot" style="background:var(--pin-dining)"></span><span>Dining Halls <small class="lr-count" id="cntDining"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-cat="vendor" checked /><span class="dot" style="background:var(--pin-vendor)"></span><span>Campus Vendors <small class="lr-count" id="cntVendor"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-cat="event" checked /><span class="dot" style="background:var(--pin-event)"></span><span>Events <small class="lr-count" id="cntEvent"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-cat="pantry" checked /><span class="dot" style="background:var(--pin-pantry)"></span><span>Pantry <small class="lr-count" id="cntPantry"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-cat="volunteer" checked /><span class="dot" style="background:var(--pin-volunteer)"></span><span>Volunteers <small class="lr-count" id="cntVolunteer"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-cat="compost" checked /><span class="dot" style="background:var(--pin-compost)"></span><span>Compost <small class="lr-count" id="cntCompost"></small></span></label>
+      <label class="layerRow"><input type="checkbox" data-cat="mutual" checked /><span class="dot" style="background:var(--pin-mutual)"></span><span>Mutual Aid <small class="lr-count" id="cntMutual"></small></span></label>
+
+      <hr class="hp-divider" />
+
+      <!-- Dropdown filters -->
+      <div class="groupTitle">Filters</div>
+      <div class="filter-row">
+        <div class="filter-label">Time Remaining</div>
+        <select class="filter-select" id="filterTime">
+          <option value="all">All</option>
+          <option value="critical">Closing Soon (&lt;2h)</option>
+          <option value="soon">Available Soon (&lt;6h)</option>
+          <option value="stable">Available Later</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <div class="filter-label">Refrigeration</div>
+        <select class="filter-select" id="filterRefrig">
+          <option value="any">Any</option>
+          <option value="yes">Refrigeration Required</option>
+          <option value="no">No Refrigeration</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <div class="filter-label">Portion Size</div>
+        <select class="filter-select" id="filterPortion">
+          <option value="all">All Sizes</option>
+          <option value="small">Small (&lt;50 lbs)</option>
+          <option value="medium">Medium (50-200 lbs)</option>
+          <option value="large">Large (200+ lbs)</option>
+        </select>
+      </div>
+    </aside>
+
+    <!-- ═══ ROUTE PANEL TOGGLE ═══ -->
+    <button id="routeToggle" type="button" title="Route Optimizer">R</button>
+
+    <!-- ═══ ROUTE OPTIMIZER ═══ -->
+    <aside id="routePanel">
+      <div class="rp-header">
+        <h3>Campus Route Optimizer</h3>
+        <button class="rp-close" id="rpClose" type="button">&times;</button>
+      </div>
+      <div class="rp-body">
+        <div class="rp-label">Origin</div>
+        <div class="rp-origin-wrap">
+          <input type="text" id="rpOrigin" class="rp-select" placeholder="Search address or select location..." autocomplete="off" />
+          <div id="rpOriginSuggestions" class="rp-suggestions"></div>
+        </div>
+
+        <div class="rp-label">Transport Mode</div>
+        <div class="rp-mode-toggle">
+          <button class="rp-mode-btn active" data-mode="walk" type="button">Walk (3 mph)</button>
+          <button class="rp-mode-btn" data-mode="bike" type="button">Bike (10 mph)</button>
+        </div>
+
+        <div class="rp-label">Route Chain</div>
+        <div class="rp-chain-row">
+          <span class="rp-chain-dot">1</span>
+          <span class="rp-chain-label">Food Source</span>
+          <select id="rpStop1" class="rp-select"><option value="">Auto (nearest)</option></select>
+        </div>
+        <div class="rp-chain-row">
+          <span class="rp-chain-dot">2</span>
+          <span class="rp-chain-label">Distribution</span>
+          <select id="rpStop2" class="rp-select"><option value="">Auto (nearest)</option></select>
+        </div>
+        <div class="rp-chain-row">
+          <span class="rp-chain-dot">3</span>
+          <span class="rp-chain-label">Compost</span>
+          <select id="rpStop3" class="rp-select"><option value="">Auto (nearest)</option></select>
+        </div>
+
+        <button class="rp-btn" id="rpAutoSelect" type="button">Auto-Select Nearest</button>
+        <button class="rp-btn rp-btn-primary" id="rpOptimize" type="button">OPTIMIZE ROUTE</button>
+        <button class="rp-btn" id="rpClear" type="button">Clear Route</button>
+
+        <div class="rp-spinner" id="rpSpinner">Calculating route...</div>
+
+        <div class="rp-results" id="rpResults">
+          <div class="rp-stats">
+            <div class="rp-stat-cell"><div class="rp-stat-value" id="rpDistance">--</div><div class="rp-stat-label">Distance</div></div>
+            <div class="rp-stat-cell"><div class="rp-stat-value" id="rpTime">--</div><div class="rp-stat-label">Time</div></div>
+            <div class="rp-stat-cell"><div class="rp-stat-value" id="rpVolume">--</div><div class="rp-stat-label">Volume</div></div>
+          </div>
+          <div class="rp-legs">
+            <div class="rp-legs-title">Leg Breakdown</div>
+            <div id="rpLegsContainer"></div>
+          </div>
+          <button class="rp-btn" id="rpDirections" type="button" style="margin-top:10px">Open in Google Maps</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══ MODALS ═══ -->
+    <div class="modal-overlay" id="modalReportSurplus">
+      <div class="modal">
+        <h3>Report Surplus</h3>
+        <label>Location</label>
+        <select id="rsLocation"></select>
+        <label>Food Type</label>
+        <select id="rsType"><option>Prepared Meals</option><option>Packaged Goods</option><option>Produce</option><option>Bakery</option><option>Perishable</option></select>
+        <label>Quantity (lbs)</label>
+        <input id="rsQty" type="number" min="1" value="50" />
+        <label>Hours Until Expiration</label>
+        <input id="rsHours" type="number" min="0.5" step="0.5" value="3" />
+        <label>Transport</label>
+        <select id="rsTransport"><option>Walk-in</option><option>Bike Courier</option><option>Dry Vehicle</option><option>Refrigerated Van</option></select>
+        <label>Notes</label>
+        <textarea id="rsNotes" placeholder="Any details..."></textarea>
+        <div class="modal-actions">
+          <button class="rp-btn rp-btn-primary" id="rsSubmit" type="button">Submit</button>
+          <button class="rp-btn" id="rsCancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modalJoinPickup">
+      <div class="modal">
+        <h3>Join Pickup Team</h3>
+        <label>Your Name</label>
+        <input id="jpName" type="text" placeholder="e.g., Alex Kim" />
+        <label>Availability</label>
+        <select id="jpAvail"><option>Weekday mornings</option><option>Weekday afternoons</option><option>Weekday evenings</option><option>Weekends</option><option>Flexible</option></select>
+        <label>Transport Method</label>
+        <select id="jpTransport"><option>Walk</option><option>Bike</option><option>Vehicle</option></select>
+        <div class="modal-actions">
+          <button class="rp-btn rp-btn-primary" id="jpSubmit" type="button">Join</button>
+          <button class="rp-btn" id="jpCancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modalEventScheduler">
+      <div class="modal">
+        <h3>Food Event Scheduler</h3>
+        <label>Event Name</label>
+        <input id="esName" type="text" placeholder="e.g., ACM Free Pizza Night" />
+        <label>Organization</label>
+        <input id="esOrg" type="text" placeholder="e.g., ACM @ GT" />
+        <label>Location</label>
+        <select id="esLocation"></select>
+        <label>Date &amp; Time</label>
+        <input id="esDate" type="datetime-local" />
+        <label>Food Type</label>
+        <select id="esType"><option>Prepared Meals</option><option>Packaged Goods</option><option>Produce</option><option>Bakery</option></select>
+        <label>Estimated Quantity (lbs)</label>
+        <input id="esQty" type="number" min="5" value="30" />
+        <div class="modal-actions">
+          <button class="rp-btn rp-btn-primary" id="esSubmit" type="button">Schedule</button>
+          <button class="rp-btn" id="esCancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ADMIN VIEW ═══ -->
+    <div id="adminView">
+      <div class="admin-header">
+        <div class="admin-title-wrap">
+          <h2>Administrator Coordination View</h2>
+          <div class="admin-sub">Operational triage: map-linked analytics</div>
+        </div>
+        <div class="admin-header-actions">
+          <span class="admin-timestamp" id="adminUpdatedAt">Updated --</span>
+          <button class="admin-btn" id="adminClearFilters" type="button">Clear Filters</button>
+          <span class="admin-back" id="adminBack">Back to Student View</span>
+        </div>
+      </div>
+
+      <div class="admin-warning" id="adminWarning"></div>
+      <div class="admin-filter-state" id="adminFilterState"></div>
+
+      <div class="charts-grid">
+        <div class="chart-card large">
+          <div class="admin-card-head">
+            <h4>Surplus by Source + Urgency</h4>
+            <span class="admin-card-sub">Click block to filter map</span>
+          </div>
+          <div id="adminTreemap" aria-live="polite">
+            <div class="tree-tip" id="treeTip"></div>
+          </div>
+        </div>
+
+        <div class="chart-card large">
+          <div class="admin-card-head">
+            <h4>Hour x Location Bottleneck Matrix</h4>
+            <span class="admin-card-sub">Rows capped to Top 10 by default</span>
+          </div>
+          <div id="adminMatrixWrap">
+            <div id="adminMatrix"></div>
+            <div class="matrix-controls">
+              <span id="adminMatrixMeta">--</span>
+              <button class="admin-btn" id="adminMatrixToggle" type="button">Show All Rows</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h4>Waste Patterns by Weekday</h4>
+          <canvas id="chartWaste"></canvas>
+        </div>
+        <div class="chart-card">
+          <h4>Student Pantry Usage (6 months)</h4>
+          <canvas id="chartPantry"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       CONSTANTS
+       ═══════════════════════════════════════════════════════ */
+    const CAMPUS_VIEW = { center: [-84.3963, 33.7756], zoom: 15 };
+    const ROUTE_URL = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
+    const H = 3600000;
+    const NOW = Date.now();
+    const BASE_URL = window.location.href.includes("localhost") ? "" : "";
+
+    /**
+     * @typedef {Object} AdminFact
+     * @property {string} fact_id
+     * @property {string} ts_iso
+     * @property {"dining"|"event"|"vendor"} source_type
+     * @property {string} source_name
+     * @property {string} location_name
+     * @property {string} hour_bucket
+     * @property {string} weekday
+     * @property {number} quantity_lbs
+     * @property {"Critical"|"Soon"|"Stable"} urgency
+     * @property {string} transport
+     */
+
+    /**
+     * @typedef {Object} AdminFilterState
+     * @property {string|null} source_name
+     * @property {string|null} urgency
+     * @property {string|null} location_name
+     * @property {string|null} hour_bucket
+     */
+
+    /**
+     * @typedef {Object} AdminSelection
+     * @property {"treemap"|"matrix"|"map"|null} origin
+     * @property {string|null} key
+     */
+
+    /* ═══════════════════════════════════════════════════════
+       MOCK DATA: Campus Menus (daily per dining hall)
+       ═══════════════════════════════════════════════════════ */
+    const CAMPUS_MENUS = {
+      "North Ave Dining Hall": [
+        { item: "Grilled Chicken Breast", healthy: true },
+        { item: "Caesar Salad Bar", healthy: true },
+        { item: "Pasta Primavera", healthy: false },
+        { item: "Fresh Fruit Station", healthy: true },
+        { item: "Chocolate Chip Cookies", healthy: false }
+      ],
+      "West Village Dining Commons": [
+        { item: "Stir-Fry Vegetables", healthy: true },
+        { item: "BBQ Pulled Pork", healthy: false },
+        { item: "Brown Rice Bowl", healthy: true },
+        { item: "Garden Salad", healthy: true },
+        { item: "Banana Pudding", healthy: false }
+      ],
+      "Brittain Dining Hall": [
+        { item: "Baked Salmon", healthy: true },
+        { item: "Roasted Broccoli", healthy: true },
+        { item: "Mac and Cheese", healthy: false },
+        { item: "Whole Wheat Rolls", healthy: true },
+        { item: "Ice Cream Bar", healthy: false }
+      ],
+      "John Lewis Student Center Food Court": [
+        { item: "Teriyaki Chicken Bowl", healthy: true },
+        { item: "Pepperoni Pizza Slice", healthy: false },
+        { item: "Grilled Veggie Wrap", healthy: true },
+        { item: "French Fries", healthy: false },
+        { item: "Fruit Smoothie", healthy: true }
+      ],
+      "Nave Dining Concepts": [
+        { item: "Turkey Avocado Wrap", healthy: true },
+        { item: "Greek Yogurt Parfait", healthy: true },
+        { item: "Blueberry Muffin", healthy: false },
+        { item: "Mixed Berry Cup", healthy: true }
+      ],
+      "Tech Square Dining Hub": [
+        { item: "Grilled Chicken Sandwich", healthy: true },
+        { item: "Black Bean Burger", healthy: true },
+        { item: "Loaded Nachos", healthy: false },
+        { item: "Side Salad", healthy: true }
+      ],
+      "Clough Commons Cafe": [
+        { item: "Oat Milk Latte", healthy: true },
+        { item: "Croissant", healthy: false },
+        { item: "Fresh Fruit Cup", healthy: true },
+        { item: "Scone", healthy: false }
+      ],
+      "Ferst District Cafe": [
+        { item: "Turkey Club Sandwich", healthy: true },
+        { item: "Tomato Soup", healthy: true },
+        { item: "Chips & Salsa", healthy: false }
+      ],
+      "Klaus Bistro": [
+        { item: "Bagel with Cream Cheese", healthy: false },
+        { item: "Hard-Boiled Eggs", healthy: true },
+        { item: "Granola Bar", healthy: true }
+      ],
+      "Exhibition Hall Express": [
+        { item: "Boxed Chicken Meal", healthy: true },
+        { item: "Pasta Salad", healthy: false },
+        { item: "Apple", healthy: true }
+      ],
+      "Crosland Tower Coffee Bar": [
+        { item: "Drip Coffee", healthy: true },
+        { item: "Danish Pastry", healthy: false },
+        { item: "Banana", healthy: true }
+      ],
+      "CRC Fuel Zone": [
+        { item: "Protein Smoothie", healthy: true },
+        { item: "Acai Bowl", healthy: true },
+        { item: "Energy Bar", healthy: true },
+        { item: "Fresh Juice", healthy: true }
+      ]
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       MOCK DATA: Campus Surplus
+       ═══════════════════════════════════════════════════════ */
+    const CAMPUS_SURPLUS = [
+      { id:1,  name:"North Ave Dining Hall",       lng:-84.3918, lat:33.7716, food_type:"Prepared Meals", quantity_lbs:120, hours_left:1.5,  transport:"Walk-in",          cat:"dining", notes:"Post-lunch surplus, pickup at loading dock" },
+      { id:2,  name:"West Village Dining Commons", lng:-84.4061, lat:33.7777, food_type:"Prepared Meals", quantity_lbs:85,  hours_left:3.0,  transport:"Walk-in",          cat:"dining", notes:"Dinner prep overflow" },
+      { id:3,  name:"Brittain Dining Hall",        lng:-84.3898, lat:33.7728, food_type:"Prepared Meals", quantity_lbs:200, hours_left:8.0,  transport:"Walk-in",          cat:"dining", notes:"Tomorrow lunch prep started early" },
+      { id:4,  name:"John Lewis Student Center",   lng:-84.3987, lat:33.7745, food_type:"Prepared Meals", quantity_lbs:45,  hours_left:1.0,  transport:"Bike Courier",     cat:"dining", notes:"Leftover catering from event" },
+      { id:5,  name:"Nave Dining Concepts",        lng:-84.4004, lat:33.7770, food_type:"Bakery",         quantity_lbs:30,  hours_left:4.0,  transport:"Walk-in",          cat:"dining", notes:"Day-old pastries and breads" },
+      { id:6,  name:"Tech Square Dining Hub",      lng:-84.3913, lat:33.7779, food_type:"Prepared Meals", quantity_lbs:150, hours_left:10.0, transport:"Bike Courier",     cat:"dining", notes:"Packaged sandwiches, tomorrow expiry" },
+      { id:7,  name:"Clough Commons Cafe",         lng:-84.3952, lat:33.7782, food_type:"Bakery",         quantity_lbs:25,  hours_left:12.0, transport:"Walk-in",          cat:"dining", notes:"Muffins and cookies from today" },
+      { id:8,  name:"Ferst District Cafe",         lng:-84.4037, lat:33.7763, food_type:"Prepared Meals", quantity_lbs:60,  hours_left:2.5,  transport:"Bike Courier",     cat:"dining", notes:"Unsold wraps and salads" },
+      { id:9,  name:"Klaus Bistro",                lng:-84.4011, lat:33.7733, food_type:"Bakery",         quantity_lbs:15,  hours_left:1.8,  transport:"Walk-in",          cat:"dining", notes:"Bagels and cream cheese" },
+      { id:10, name:"Exhibition Hall Express",     lng:-84.3969, lat:33.7723, food_type:"Prepared Meals", quantity_lbs:90,  hours_left:7.0,  transport:"Bike Courier",     cat:"dining", notes:"Boxed meals from conference" },
+      { id:11, name:"Crosland Tower Coffee Bar",   lng:-84.3928, lat:33.7754, food_type:"Bakery",         quantity_lbs:20,  hours_left:5.0,  transport:"Walk-in",          cat:"dining", notes:"Pastry case clearance" },
+      { id:12, name:"CRC Fuel Zone",               lng:-84.3989, lat:33.7720, food_type:"Prepared Meals", quantity_lbs:40,  hours_left:9.0,  transport:"Walk-in",          cat:"dining", notes:"Smoothie bar excess fruit" }
+    ];
+
+    CAMPUS_SURPLUS.forEach(s => {
+      s.expiration = new Date(NOW + s.hours_left * H).toISOString();
+      s.urgency = s.hours_left <= 2 ? "Critical" : s.hours_left <= 6 ? "Soon" : "Stable";
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       MOCK DATA: Campus Events
+       ═══════════════════════════════════════════════════════ */
+    const CAMPUS_EVENTS = [
+      { id:101, event_name:"SGA Town Hall — Free Pizza",       org:"Student Government Association", lng:-84.3963, lat:33.7756, building:"Student Center",     food_type:"Prepared Meals", est_lbs:50,  hours_left:3,  cat_type:"Student Org" },
+      { id:102, event_name:"ACM Free Pizza Night",             org:"ACM @ GT",                      lng:-84.4011, lat:33.7733, building:"Klaus Building",      food_type:"Prepared Meals", est_lbs:40,  hours_left:5,  cat_type:"Student Org" },
+      { id:103, event_name:"GT Sustainability Club Mixer",     org:"Sustainability Club",           lng:-84.3952, lat:33.7782, building:"Clough Commons",      food_type:"Prepared Meals", est_lbs:30,  hours_left:7,  cat_type:"Student Org" },
+      { id:104, event_name:"Theta Chi Philanthropy BBQ",       org:"Theta Chi Fraternity",          lng:-84.3935, lat:33.7740, building:"Greek Row",           food_type:"Prepared Meals", est_lbs:80,  hours_left:2,  cat_type:"Greek Life" },
+      { id:105, event_name:"Alpha Phi Spring Social",          org:"Alpha Phi Sorority",            lng:-84.3945, lat:33.7735, building:"Greek Row",           food_type:"Bakery",         est_lbs:35,  hours_left:4,  cat_type:"Greek Life" },
+      { id:106, event_name:"Kappa Alpha Order Cookout",        org:"Kappa Alpha Order",             lng:-84.3940, lat:33.7738, building:"Greek Row",           food_type:"Prepared Meals", est_lbs:60,  hours_left:1.5,cat_type:"Greek Life" },
+      { id:107, event_name:"ML Research Symposium Lunch",      org:"College of Computing",          lng:-84.3958, lat:33.7780, building:"Coda Building",       food_type:"Prepared Meals", est_lbs:70,  hours_left:6,  cat_type:"Research" },
+      { id:108, event_name:"BME Seminar Reception",            org:"BME Department",                lng:-84.3975, lat:33.7795, building:"Whitaker Building",   food_type:"Bakery",         est_lbs:25,  hours_left:8,  cat_type:"Research" },
+      { id:109, event_name:"Post-Game Tailgate Surplus",       org:"GT Athletics",                  lng:-84.3928, lat:33.7710, building:"Bobby Dodd Stadium",  food_type:"Prepared Meals", est_lbs:150, hours_left:1,  cat_type:"Athletics" },
+      { id:110, event_name:"Track Team Pasta Night",           org:"GT Track & Field",              lng:-84.3989, lat:33.7720, building:"CRC",                 food_type:"Prepared Meals", est_lbs:45,  hours_left:10, cat_type:"Athletics" },
+      { id:111, event_name:"HackGT Midnight Snacks",          org:"HackGT",                        lng:-84.4011, lat:33.7733, building:"Klaus Building",      food_type:"Packaged Goods", est_lbs:60,  hours_left:0.5,cat_type:"Student Org" },
+      { id:112, event_name:"Cultural Night Food Fair",         org:"International Student Org",     lng:-84.3987, lat:33.7745, building:"Student Center",      food_type:"Prepared Meals", est_lbs:90,  hours_left:2.5,cat_type:"Student Org" }
+    ];
+
+    CAMPUS_EVENTS.forEach(e => {
+      e.expiration = new Date(NOW + e.hours_left * H).toISOString();
+      e.urgency = e.hours_left <= 2 ? "Critical" : e.hours_left <= 6 ? "Soon" : "Stable";
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       MOCK DATA: Distribution (pantry, mutual aid, fridges)
+       ═══════════════════════════════════════════════════════ */
+    const CAMPUS_DISTRIBUTION = [
+      { id:201, name:"Klemis Kitchen (GT Food Pantry)", lng:-84.3955, lat:33.7738, type:"pantry",     hours:"Mon-Fri 10a-4p",        items:45, capacity:200, notes:"Flag Building, open to all GT students with BuzzCard" },
+      { id:202, name:"Dean of Students Pantry Annex",   lng:-84.3970, lat:33.7750, type:"pantry",     hours:"Tue-Thu 12p-3p",        items:20, capacity:80,  notes:"Smithgall Student Services Building" },
+      { id:203, name:"Glenn Hall Community Fridge",      lng:-84.3905, lat:33.7725, type:"mutual_aid", hours:"24/7",                  items:12, capacity:30,  notes:"Lobby fridge, student-stocked" },
+      { id:204, name:"Woodruff Residence Hall Fridge",   lng:-84.3920, lat:33.7765, type:"mutual_aid", hours:"24/7",                  items:8,  capacity:25,  notes:"2nd floor common room" },
+      { id:205, name:"Towers Residence Mutual Aid",      lng:-84.3942, lat:33.7715, type:"mutual_aid", hours:"24/7",                  items:15, capacity:35,  notes:"Ground floor kitchen area" },
+      { id:206, name:"Graduate Living Center Shelf",     lng:-84.4050, lat:33.7790, type:"mutual_aid", hours:"24/7",                  items:6,  capacity:20,  notes:"Non-perishable shelf near mailboxes" }
+    ];
+
+    /* ═══════════════════════════════════════════════════════
+       MOCK DATA: Volunteers
+       ═══════════════════════════════════════════════════════ */
+    const CAMPUS_VOLUNTEERS = [
+      { id:301, name:"Alex K.",   lng:-84.3963, lat:33.7756, transport:"Bike",    avail:"Weekday afternoons", status:"Available" },
+      { id:302, name:"Jamie L.",  lng:-84.3918, lat:33.7716, transport:"Walk",    avail:"Weekday evenings",   status:"Available" },
+      { id:303, name:"Sam P.",    lng:-84.4061, lat:33.7777, transport:"Walk",    avail:"Weekends",           status:"Busy" },
+      { id:304, name:"Jordan M.", lng:-84.3987, lat:33.7745, transport:"Bike",    avail:"Flexible",           status:"Available" },
+      { id:305, name:"Taylor R.", lng:-84.3952, lat:33.7782, transport:"Vehicle", avail:"Weekday mornings",   status:"Available" },
+      { id:306, name:"Casey W.",  lng:-84.4004, lat:33.7770, transport:"Bike",    avail:"Weekday afternoons", status:"Available" }
+    ];
+
+    /* ═══════════════════════════════════════════════════════
+       MOCK DATA: Sustainability / Urban Ag
+       ═══════════════════════════════════════════════════════ */
+    const CAMPUS_SUSTAINABILITY = [
+      { id:401, name:"GT Urban Agriculture Lab",      lng:-84.4020, lat:33.7780, type:"urban_ag",       desc:"Research garden behind Instructional Center", accepts_compost:true },
+      { id:402, name:"Sustainability Next Lab",        lng:-84.3958, lat:33.7790, type:"sustainability", desc:"Brook Byers Institute research center",       accepts_compost:false },
+      { id:403, name:"Campus Composting Research Hub", lng:-84.4000, lat:33.7767, type:"urban_ag",       desc:"Pilot composting facility, accepts food waste", accepts_compost:true }
+    ];
+
+    /* ═══════════════════════════════════════════════════════
+       MOCK DATA: Admin Chart Data
+       ═══════════════════════════════════════════════════════ */
+    const ADMIN_DATA = {
+      surplus_labels: Array.from({length:14}, (_,i) => { const d = new Date(); d.setDate(d.getDate()-13+i); return (d.getMonth()+1)+'/'+d.getDate(); }),
+      surplus_north: [110,95,130,140,120,85,90,115,125,100,135,120,110,95],
+      surplus_west:  [80,70,90,85,75,60,65,80,95,70,85,90,80,75],
+      surplus_brittain:[95,100,110,90,80,70,85,100,105,90,95,110,95,85],
+      surplus_jlsc:  [40,35,50,45,55,30,35,40,50,45,55,40,35,45],
+      waste_labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+      waste_values: [520,480,450,510,390,280,260],
+      pantry_labels: ["Sep","Oct","Nov","Dec","Jan","Feb"],
+      pantry_visits: [120,145,160,180,200,210],
+      pantry_items:  [340,410,480,520,590,630],
+      event_labels: ["Student Org","Greek Life","Research","Athletics"],
+      event_waste:  [85,120,45,95]
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       CAMPUS ROUTE STOPS
+       ═══════════════════════════════════════════════════════ */
+    const CAMPUS_ROUTE_STOPS = {
+      origin: [
+        { name:"North Ave Dining Hall",       lng:-84.3918, lat:33.7716 },
+        { name:"West Village Dining Commons", lng:-84.4061, lat:33.7777 },
+        { name:"Brittain Dining Hall",        lng:-84.3898, lat:33.7728 },
+        { name:"John Lewis Student Center",   lng:-84.3987, lat:33.7745 },
+        { name:"Tech Square Dining Hub",      lng:-84.3913, lat:33.7779 },
+        { name:"Clough Commons Cafe",         lng:-84.3952, lat:33.7782 },
+        { name:"CRC Fuel Zone",               lng:-84.3989, lat:33.7720 }
+      ],
+      foodSource: CAMPUS_SURPLUS.map(s => ({ name: s.name, lng: s.lng, lat: s.lat })),
+      distribution: CAMPUS_DISTRIBUTION.map(d => ({ name: d.name, lng: d.lng, lat: d.lat })),
+      compost: [
+        { name:"GT Resource Recovery Yard",  lng:-84.4000, lat:33.7767 },
+        { name:"Campus Composting Hub",      lng:-84.4020, lat:33.7780 },
+        { name:"GT Urban Agriculture Lab",   lng:-84.4020, lat:33.7780 }
+      ]
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       UTILITY: Haversine distance (miles)
+       ═══════════════════════════════════════════════════════ */
+    function haversine(lat1, lon1, lat2, lon2) {
+      const R = 3959;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function findNearest(fromLat, fromLng, candidates) {
+      let best = null, bestDist = Infinity;
+      candidates.forEach(c => {
+        const d = haversine(fromLat, fromLng, c.lat, c.lng);
+        if (d < bestDist) { bestDist = d; best = c; }
+      });
+      return best;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ArcGIS MAP SETUP
+       ═══════════════════════════════════════════════════════ */
+    require([
+      "esri/Map", "esri/views/MapView",
+      "esri/layers/GeoJSONLayer", "esri/layers/GraphicsLayer",
+      "esri/Graphic"
+    ], function(ArcGISMap, MapView, GeoJSONLayer, GraphicsLayer, Graphic) {
+
+      /* ─── API Key (lazy-loaded only when routing is triggered) ─── */
+      let hasApiKey = false;
+      let routeModule = null, RouteParameters = null, FeatureSet = null;
+
+      /* ─── Graphics Layers ─── */
+      const surplusLayer    = new GraphicsLayer({ title: "Campus Surplus" });
+      const eventLayer      = new GraphicsLayer({ title: "Campus Events" });
+      const distributionLayer = new GraphicsLayer({ title: "Distribution" });
+      const volunteerLayer  = new GraphicsLayer({ title: "Volunteers" });
+      const sustainLayer    = new GraphicsLayer({ title: "Sustainability" });
+      const routeLayer      = new GraphicsLayer({ title: "Route" });
+
+      /* ─── GeoJSON Layers (full absolute URLs like index.html) ─── */
+      const geoBase = window.location.origin + "/geojson";
+
+      const gtBuildings = new GeoJSONLayer({
+        id: "gtBuildings", url: geoBase + "/buildings.geojson", title: "Buildings",
+        renderer: { type: "simple", symbol: { type: "simple-fill", color: [212,201,168,0.25], outline: { color: [212,201,168,0.5], width: 0.5 } } }
+      });
+      const gtSidewalks = new GeoJSONLayer({
+        id: "gtSidewalks", url: geoBase + "/sidewalks.geojson", title: "Sidewalks",
+        renderer: { type: "simple", symbol: { type: "simple-line", color: [179,163,105,0.4], width: 1 } }
+      });
+      const gtCompost = new GeoJSONLayer({
+        id: "gtCompost", url: geoBase + "/compost_locations.geojson", title: "Compost Locations",
+        renderer: { type: "simple", symbol: { type: "simple-marker", color: "#4caf50", size: 10, outline: { color: "#fff", width: 1 } } },
+        popupTemplate: { title: "{Location_N}", content: [{ type: "fields", fieldInfos: [
+          { fieldName: "Type", label: "Type" },
+          { fieldName: "Max_Total_", label: "Capacity" },
+          { fieldName: "Descriptio", label: "Pickup Info" }
+        ]}]}
+      });
+      const gtVending = new GeoJSONLayer({
+        id: "gtVending", url: geoBase + "/vending_machines.geojson", title: "Vending Machines",
+        visible: false,
+        renderer: { type: "simple", symbol: { type: "simple-marker", color: "#f57c00", size: 7, outline: { color: "#fff", width: 0.5 } } },
+        popupTemplate: { title: "{Building_N}", content: [{ type: "fields", fieldInfos: [
+          { fieldName: "Type", label: "Type" },
+          { fieldName: "Location_I", label: "Location" }
+        ]}]}
+      });
+
+      /* ─── Map & View ─── */
+      const map = new ArcGISMap({
+        basemap: "dark-gray-vector",
+        layers: [gtBuildings, gtSidewalks, gtCompost, gtVending,
+                 surplusLayer, eventLayer, distributionLayer, volunteerLayer, sustainLayer, routeLayer]
+      });
+
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: CAMPUS_VIEW.center,
+        zoom: CAMPUS_VIEW.zoom,
+        ui: { components: ["zoom", "attribution"] },
+        popup: { dockEnabled: false }
+      });
+      view.padding = { top: 64 };
+
+      const appEl = document.getElementById("app");
+      const adminView = document.getElementById("adminView");
+      const adminWarning = document.getElementById("adminWarning");
+      const adminFilterStateEl = document.getElementById("adminFilterState");
+      const adminUpdatedAtEl = document.getElementById("adminUpdatedAt");
+      const matrixToggleBtn = document.getElementById("adminMatrixToggle");
+      const matrixMetaEl = document.getElementById("adminMatrixMeta");
+      const matrixHost = document.getElementById("adminMatrix");
+      const treemapHost = document.getElementById("adminTreemap");
+
+      let localStorageWarnings = [];
+      const localStorageWarningSet = new Set();
+      let adminMode = false;
+      let chartsInitialized = false;
+      let showAllMatrixRows = false;
+      let chartWaste = null;
+      let chartPantry = null;
+      let d3Ready = false;
+      let adminFacts = [];
+      let adminFilterEmptyState = false;
+      let dailyRefreshTimeout = null;
+      let dailyRefreshInterval = null;
+      let liveRefreshInterval = null;
+
+      /** @type {AdminFilterState} */
+      const adminFilterState = {
+        source_name: null,
+        urgency: null,
+        location_name: null,
+        hour_bucket: null
+      };
+
+      /** @type {AdminSelection} */
+      const adminSelection = { origin: null, key: null };
+      const matrixViewState = { rows: [], cols: [], cells: [] };
+
+      function debounce(fn, waitMs) {
+        let t = null;
+        return function() {
+          const args = arguments;
+          clearTimeout(t);
+          t = setTimeout(() => fn.apply(null, args), waitMs);
+        };
+      }
+
+      function safeArrayFromStorage(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) {
+            const msg = `Storage key "${key}" was not an array and was ignored.`;
+            if (!localStorageWarningSet.has(msg)) {
+              localStorageWarningSet.add(msg);
+              localStorageWarnings.push(msg);
+            }
+            return [];
+          }
+          return parsed;
+        } catch (err) {
+          const msg = `Storage key "${key}" is unavailable or malformed and was ignored.`;
+          if (!localStorageWarningSet.has(msg)) {
+            localStorageWarningSet.add(msg);
+            localStorageWarnings.push(msg);
+          }
+          console.warn("localStorage payload unavailable/malformed:", key, err);
+          return [];
+        }
+      }
+
+      function pushStorageArray(key, value) {
+        try {
+          const saved = safeArrayFromStorage(key);
+          saved.push(value);
+          localStorage.setItem(key, JSON.stringify(saved));
+        } catch (err) {
+          const msg = `Storage key "${key}" could not be written.`;
+          if (!localStorageWarningSet.has(msg)) {
+            localStorageWarningSet.add(msg);
+            localStorageWarnings.push(msg);
+          }
+          console.warn("localStorage write failed:", key, err);
+        }
+      }
+
+      function toNumber(v) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+      }
+
+      function isValidPoint(obj) {
+        if (!obj || typeof obj !== "object") return false;
+        const lng = toNumber(obj.lng);
+        const lat = toNumber(obj.lat);
+        return lng !== null && lat !== null;
+      }
+
+      function sanitizeVolunteerRecords(arr) {
+        let syntheticId = 1;
+        return arr
+          .filter(v => isValidPoint(v))
+          .map(v => ({
+            id: v.id || `vol-${syntheticId++}`,
+            name: v.name || "Volunteer",
+            lng: Number(v.lng),
+            lat: Number(v.lat),
+            transport: v.transport || "Walk",
+            avail: v.avail || "Flexible",
+            status: v.status || "Available"
+          }));
+      }
+
+      function showAdminWarning(msgs) {
+        if (!msgs || msgs.length === 0) {
+          adminWarning.textContent = "";
+          adminWarning.classList.remove("open");
+          return;
+        }
+        adminWarning.textContent = msgs.join(" ");
+        adminWarning.classList.add("open");
+      }
+
+      function urgencyColor(u) {
+        return u === "Critical" ? "#E85D4A" : u === "Soon" ? "#F2C572" : "#7EC8A0";
+      }
+
+      function urgencyRank(u) {
+        if (u === "Critical") return 3;
+        if (u === "Soon") return 2;
+        return 1;
+      }
+
+      function urgencyBadge(u) {
+        if (u === "Critical") return "C";
+        if (u === "Soon") return "S";
+        return "T";
+      }
+
+      function pinSize(lbs) {
+        return lbs < 50 ? 12 : lbs <= 200 ? 16 : 20;
+      }
+
+      function getHourBucket(dateLike) {
+        const d = new Date(dateLike);
+        if (Number.isNaN(d.getTime())) return "Unknown";
+        const h = d.getHours();
+        const start = h - (h % 2);
+        const end = start + 1;
+        return `${String(start).padStart(2, "0")}:00-${String(end).padStart(2, "0")}:59`;
+      }
+
+      function getWeekdayShort(dateLike) {
+        const d = new Date(dateLike);
+        if (Number.isNaN(d.getTime())) return "Mon";
+        return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+      }
+
+      function refreshUpdatedTimestamp() {
+        const now = new Date();
+        adminUpdatedAtEl.textContent = `Updated ${now.toLocaleTimeString()}`;
+      }
+
+      /* ═══════════════════════════════════════════════════════
+         RENDER SURPLUS PINS (dining halls)
+         ═══════════════════════════════════════════════════════ */
+
+      function buildDiningPopup(s) {
+        const menu = CAMPUS_MENUS[s.name];
+        const timeLeft = Math.max(0, (new Date(s.expiration) - Date.now()) / 60000);
+        const hrs = Math.floor(timeLeft / 60), mins = Math.round(timeLeft % 60);
+        const urgBadge = `<span style="color:${urgencyColor(s.urgency)}; font-weight:700">● ${s.urgency}</span>`;
+
+        let menuHtml = "";
+        if (menu) {
+          menuHtml = "<div style='margin:8px 0'><strong>Today's Menu:</strong><br>" +
+            menu.map(m => `<span style="margin-left:6px">• ${m.item}${m.healthy ? ' <span style="color:#66bb6a; font-size:11px">&#x1F957; Healthy</span>' : ''}</span>`).join("<br>") +
+            "</div>";
+        }
+
+        return `<div style="font-size:13px; max-width:300px">
+          <div style="font-size:15px; font-weight:700; margin-bottom:6px">${s.name}</div>
+          <div style="color:#9ca6b8; font-size:11px; line-height:1.6">
+            &#x1F4CD; <span class="popup-address"></span><br>
+            &#x1F4DE; <span class="popup-phone"></span><br>
+            &#x1F552; <span class="popup-hours"></span><br>
+            &#x1F517; <a href="" class="popup-url" target="_blank" style="color:#b3a369"></a>
+          </div>
+          ${menuHtml}
+          <div style="margin-top:6px"><strong>Available:</strong> ${s.quantity_lbs} lbs</div>
+          <div><strong>Expires:</strong> ${hrs}h ${mins}m remaining</div>
+          <div><strong>Urgency:</strong> ${urgBadge}</div>
+          <div><strong>Transport:</strong> ${s.transport}</div>
+          <div style="color:#9ca6b8; font-size:11px; margin-top:4px">${s.notes}</div>
+        </div>`;
+      }
+
+      function makeSurplusSymbol(attrs, mode) {
+        const isActive = mode === "active";
+        const isMuted = mode === "muted";
+        const alpha = isMuted ? 0.32 : 0.95;
+        let color = [102, 187, 106, alpha];
+        if (attrs.urgency === "Critical") color = [239, 83, 80, alpha];
+        if (attrs.urgency === "Soon") color = [255, 193, 7, alpha];
+        return {
+          type: "simple-marker",
+          color: color,
+          size: pinSize(attrs.quantity_lbs || 0),
+          outline: {
+            color: isActive ? "#ffffff" : "#d9dfeb",
+            width: isActive ? 2.6 : 1.3
+          },
+          style: "circle"
+        };
+      }
+
+      function makeEventSymbol(attrs, mode) {
+        const isActive = mode === "active";
+        const isMuted = mode === "muted";
+        const alpha = isMuted ? 0.3 : 0.9;
+        return {
+          type: "simple-marker",
+          color: [224, 64, 251, alpha],
+          size: pinSize(attrs.est_lbs || attrs.quantity_lbs || 0),
+          outline: {
+            color: isActive ? "#ffffff" : "#d9dfeb",
+            width: isActive ? 2.6 : 1.3
+          },
+          style: "circle"
+        };
+      }
+
+      function normalizeGraphicFacts(g) {
+        if (!g || !g.attributes) return null;
+        const a = g.attributes;
+        if (a.pinCat === "dining") {
+          return {
+            source_type: "dining",
+            source_name: a.name || "",
+            location_name: a.name || "",
+            hour_bucket: getHourBucket(a.expiration || Date.now()),
+            urgency: a.urgency || "Stable"
+          };
+        }
+        if (a.pinCat === "event") {
+          return {
+            source_type: "event",
+            source_name: a.event_name || "",
+            location_name: a.building || a.event_name || "",
+            hour_bucket: getHourBucket(a.expiration || Date.now()),
+            urgency: a.urgency || "Stable"
+          };
+        }
+        return null;
+      }
+
+      function graphicPassesAdminFilters(g, fs) {
+        const fact = normalizeGraphicFacts(g);
+        if (!fact) return true;
+        if (fs.source_name && fact.source_name !== fs.source_name) return false;
+        if (fs.urgency && fact.urgency !== fs.urgency) return false;
+        if (fs.location_name && fact.location_name !== fs.location_name) return false;
+        if (fs.hour_bucket && fact.hour_bucket !== fs.hour_bucket) return false;
+        return true;
+      }
+
+      function renderSurplusPins() {
+        surplusLayer.removeAll();
+        CAMPUS_SURPLUS.forEach(s => {
+          surplusLayer.add(new Graphic({
+            geometry: { type: "point", longitude: s.lng, latitude: s.lat },
+            symbol: makeSurplusSymbol(s, "normal"),
+            attributes: { ...s, pinCat: "dining" },
+            popupTemplate: { title: s.name, content: buildDiningPopup(s) }
+          }));
+        });
+      }
+
+      /* ═══════════════════════════════════════════════════════
+         RENDER EVENT PINS
+         ═══════════════════════════════════════════════════════ */
+      function renderEventPins() {
+        eventLayer.removeAll();
+        CAMPUS_EVENTS.forEach(e => {
+          const timeLeft = Math.max(0, (new Date(e.expiration) - Date.now()) / 60000);
+          const hrs = Math.floor(timeLeft / 60), mins = Math.round(timeLeft % 60);
+
+          eventLayer.add(new Graphic({
+            geometry: { type: "point", longitude: e.lng, latitude: e.lat },
+            symbol: makeEventSymbol(e, "normal"),
+            attributes: { ...e, pinCat: "event" },
+            popupTemplate: {
+              title: e.event_name,
+              content: `<div style="font-size:13px; max-width:300px">
+                <div style="color:#e040fb; font-weight:700; margin-bottom:4px">${e.cat_type}: ${e.org}</div>
+                <div>&#x1F4CD; ${e.building}</div>
+                <div>&#x1F552; ${hrs}h ${mins}m remaining</div>
+                <div>&#x1F355; ${e.food_type} (~${e.est_lbs} lbs)</div>
+                <div style="margin-top:8px; color:#9ca6b8; font-size:11px">
+                  <a href="https://gatech.campuslabs.com/engage/events?perks=FreeFood" target="_blank" style="color:#b3a369">View all free food events on GT Engage &#x2197;</a>
+                </div>
+              </div>`
+            }
+          }));
+        });
+      }
+
+      /* ═══════════════════════════════════════════════════════
+         RENDER DISTRIBUTION PINS (pantry + mutual aid)
+         ═══════════════════════════════════════════════════════ */
+      function renderDistributionPins() {
+        distributionLayer.removeAll();
+        CAMPUS_DISTRIBUTION.forEach(d => {
+          const color = d.type === "pantry" ? "#29b6f6" : "#78909c";
+          const cat = d.type === "pantry" ? "pantry" : "mutual";
+
+          distributionLayer.add(new Graphic({
+            geometry: { type: "point", longitude: d.lng, latitude: d.lat },
+            symbol: { type: "simple-marker", color: color, size: 12, outline: { color: "#fff", width: 1.5 } },
+            attributes: { ...d, pinCat: cat },
+            popupTemplate: {
+              title: d.name,
+              content: `<div style="font-size:13px">
+                <div>&#x1F552; ${d.hours}</div>
+                <div>Items available: <strong>${d.items}</strong> / ${d.capacity}</div>
+                <div style="color:#9ca6b8; font-size:11px; margin-top:4px">${d.notes}</div>
+              </div>`
+            }
+          }));
+        });
+      }
+
+      /* ═══════════════════════════════════════════════════════
+         RENDER VOLUNTEER PINS
+         ═══════════════════════════════════════════════════════ */
+      function renderVolunteerPins() {
+        volunteerLayer.removeAll();
+        const merged = sanitizeVolunteerRecords([...CAMPUS_VOLUNTEERS, ...safeArrayFromStorage("ch_volunteers")]);
+        const unique = new Map();
+        merged.forEach(v => {
+          const key = `${v.id || ""}::${v.name || ""}::${v.lng || ""}::${v.lat || ""}`;
+          if (!unique.has(key)) unique.set(key, v);
+        });
+        Array.from(unique.values()).forEach(v => {
+          volunteerLayer.add(new Graphic({
+            geometry: { type: "point", longitude: v.lng, latitude: v.lat },
+            symbol: { type: "simple-marker", color: "#26a69a", size: 10, outline: { color: "#fff", width: 1 } },
+            attributes: { ...v, pinCat: "volunteer" },
+            popupTemplate: {
+              title: `Volunteer: ${v.name}`,
+              content: `<div style="font-size:13px">
+                <div>&#x1F6B2; Transport: ${v.transport}</div>
+                <div>&#x1F552; ${v.avail}</div>
+                <div>Status: <strong>${v.status}</strong></div>
+              </div>`
+            }
+          }));
+        });
+      }
+
+      /* ═══════════════════════════════════════════════════════
+         RENDER SUSTAINABILITY PINS
+         ═══════════════════════════════════════════════════════ */
+      function renderSustainPins() {
+        sustainLayer.removeAll();
+        CAMPUS_SUSTAINABILITY.forEach(s => {
+          sustainLayer.add(new Graphic({
+            geometry: { type: "point", longitude: s.lng, latitude: s.lat },
+            symbol: { type: "simple-marker", color: "#8d6e63", size: 10, outline: { color: "#fff", width: 1 } },
+            attributes: { ...s, pinCat: "sustainability" },
+            popupTemplate: {
+              title: s.name,
+              content: `<div style="font-size:13px">
+                <div>${s.desc}</div>
+                <div>Accepts compost: <strong>${s.accepts_compost ? "Yes" : "No"}</strong></div>
+              </div>`
+            }
+          }));
+        });
+      }
+
+      /* ─── Initial render ─── */
+      function safeRender(label, fn) {
+        try {
+          fn();
+        } catch (err) {
+          const msg = `${label} render failed`;
+          if (!localStorageWarningSet.has(msg)) {
+            localStorageWarningSet.add(msg);
+            localStorageWarnings.push(msg);
+          }
+          console.error(msg, err);
+        }
+      }
+
+      safeRender("Surplus", renderSurplusPins);
+      safeRender("Events", renderEventPins);
+      safeRender("Distribution", renderDistributionPins);
+      safeRender("Volunteers", renderVolunteerPins);
+      safeRender("Sustainability", renderSustainPins);
+
+      /* ═══════════════════════════════════════════════════════
+         UPDATE SUMMARY STATS
+         ═══════════════════════════════════════════════════════ */
+      function updateStats() {
+        const totalLbs = CAMPUS_SURPLUS.reduce((s, c) => s + c.quantity_lbs, 0) +
+                         CAMPUS_EVENTS.reduce((s, c) => s + c.est_lbs, 0);
+        const reporting = new Set(CAMPUS_SURPLUS.map(s => s.name)).size;
+        const closing = CAMPUS_SURPLUS.filter(s => s.urgency === "Critical" || s.urgency === "Soon").length +
+                        CAMPUS_EVENTS.filter(e => e.urgency === "Critical" || e.urgency === "Soon").length;
+
+        document.getElementById("hpLbs").textContent = totalLbs.toLocaleString();
+        document.getElementById("hpHalls").textContent = reporting;
+        document.getElementById("hpClosing").textContent = closing;
+      }
+      updateStats();
+
+      /* ═══════════════════════════════════════════════════════
+         UPDATE CATEGORY COUNTS
+         ═══════════════════════════════════════════════════════ */
+      function updateCounts() {
+        document.getElementById("cntDining").textContent = `(${CAMPUS_SURPLUS.length})`;
+        document.getElementById("cntVendor").textContent = "(17)";
+        document.getElementById("cntEvent").textContent = `(${CAMPUS_EVENTS.length})`;
+        const pantries = CAMPUS_DISTRIBUTION.filter(d => d.type === "pantry").length;
+        document.getElementById("cntPantry").textContent = `(${pantries})`;
+        const allVols = sanitizeVolunteerRecords([...CAMPUS_VOLUNTEERS, ...safeArrayFromStorage("ch_volunteers")]);
+        const volIds = new Set(allVols.map(v => `${v.id || ""}-${v.name || ""}-${v.lng || ""}-${v.lat || ""}`));
+        const vols = volIds.size;
+        document.getElementById("cntVolunteer").textContent = `(${vols})`;
+        document.getElementById("cntCompost").textContent = "(11)";
+        const mutuals = CAMPUS_DISTRIBUTION.filter(d => d.type !== "pantry").length;
+        document.getElementById("cntMutual").textContent = `(${mutuals})`;
+      }
+      updateCounts();
+
+      /* ═══════════════════════════════════════════════════════
+         FILTER LOGIC
+         ═══════════════════════════════════════════════════════ */
+      function getCheckedCats() {
+        const cats = {};
+        document.querySelectorAll("[data-cat]").forEach(cb => { cats[cb.dataset.cat] = cb.checked; });
+        return cats;
+      }
+
+      function applyFilters() {
+        const cats = getCheckedCats();
+        const timeF = document.getElementById("filterTime").value;
+        const refF = document.getElementById("filterRefrig").value;
+        const portF = document.getElementById("filterPortion").value;
+
+        function passesFilters(g) {
+          const a = g.attributes;
+          if (!a) return true;
+
+          // Time filter
+          if (timeF !== "all" && a.urgency) {
+            if (timeF === "critical" && a.urgency !== "Critical") return false;
+            if (timeF === "soon" && a.urgency !== "Critical" && a.urgency !== "Soon") return false;
+            if (timeF === "stable" && a.urgency !== "Stable") return false;
+          }
+
+          // Refrigeration filter
+          if (refF !== "any" && a.transport) {
+            const needsRefrig = a.transport === "Refrigerated Van";
+            if (refF === "yes" && !needsRefrig) return false;
+            if (refF === "no" && needsRefrig) return false;
+          }
+
+          // Portion size filter
+          const lbs = a.quantity_lbs || a.est_lbs || 0;
+          if (portF !== "all" && lbs > 0) {
+            if (portF === "small" && lbs >= 50) return false;
+            if (portF === "medium" && (lbs < 50 || lbs > 200)) return false;
+            if (portF === "large" && lbs <= 200) return false;
+          }
+
+          return true;
+        }
+
+        // Surplus (dining)
+        surplusLayer.graphics.forEach(g => {
+          g._baseVisible = cats.dining && passesFilters(g);
+          g.visible = g._baseVisible;
+          g.symbol = makeSurplusSymbol(g.attributes, "normal");
+        });
+        // Events
+        eventLayer.graphics.forEach(g => {
+          g._baseVisible = cats.event && passesFilters(g);
+          g.visible = g._baseVisible;
+          g.symbol = makeEventSymbol(g.attributes, "normal");
+        });
+        // Distribution
+        distributionLayer.graphics.forEach(g => {
+          const cat = g.attributes.pinCat;
+          g._baseVisible = (cat === "pantry" ? cats.pantry : cats.mutual);
+          g.visible = g._baseVisible;
+        });
+        // Volunteers
+        volunteerLayer.graphics.forEach(g => {
+          g._baseVisible = cats.volunteer;
+          g.visible = g._baseVisible;
+        });
+        // Sustainability
+        sustainLayer.graphics.forEach(g => {
+          g._baseVisible = true;
+          g.visible = true;
+        });
+        // Compost GeoJSON
+        gtCompost.visible = cats.compost;
+        // Vendor GeoJSON
+        gtVending.visible = cats.vendor;
+
+        debouncedApplyAdminFilters();
+      }
+
+      // Wire filter controls
+      document.querySelectorAll("[data-cat]").forEach(cb => cb.addEventListener("change", applyFilters));
+      document.getElementById("filterTime").addEventListener("change", applyFilters);
+      document.getElementById("filterRefrig").addEventListener("change", applyFilters);
+      document.getElementById("filterPortion").addEventListener("change", applyFilters);
+
+      // Initial: show vendors
+      gtVending.visible = true;
+
+      /* ═══════════════════════════════════════════════════════
+         QUICK ACTION: Find Campus Pantry
+         ═══════════════════════════════════════════════════════ */
+      document.getElementById("btnFindPantry").addEventListener("click", () => {
+        const pantry = CAMPUS_DISTRIBUTION.find(d => d.type === "pantry");
+        if (pantry) {
+          view.goTo({ center: [pantry.lng, pantry.lat], zoom: 17 }, { duration: 800 });
+          // Find and open the pantry graphic popup
+          distributionLayer.graphics.forEach(g => {
+            if (g.attributes.id === pantry.id) {
+              view.popup.open({ features: [g], location: g.geometry });
+            }
+          });
+        }
+      });
+
+      /* ═══════════════════════════════════════════════════════
+         QUICK ACTION: Report Surplus Modal
+         ═══════════════════════════════════════════════════════ */
+      const modalRS = document.getElementById("modalReportSurplus");
+      const rsLocSel = document.getElementById("rsLocation");
+
+      // Populate location dropdown
+      CAMPUS_ROUTE_STOPS.origin.forEach(o => {
+        rsLocSel.innerHTML += `<option value="${o.name}" data-lng="${o.lng}" data-lat="${o.lat}">${o.name}</option>`;
+      });
+
+      document.getElementById("btnReportSurplus").addEventListener("click", () => modalRS.classList.add("open"));
+      document.getElementById("rsCancel").addEventListener("click", () => modalRS.classList.remove("open"));
+      document.getElementById("rsSubmit").addEventListener("click", () => {
+        const opt = rsLocSel.selectedOptions[0];
+        const entry = {
+          id: Date.now(),
+          name: opt.value,
+          lng: parseFloat(opt.dataset.lng),
+          lat: parseFloat(opt.dataset.lat),
+          food_type: document.getElementById("rsType").value,
+          quantity_lbs: parseInt(document.getElementById("rsQty").value) || 50,
+          hours_left: parseFloat(document.getElementById("rsHours").value) || 3,
+          transport: document.getElementById("rsTransport").value,
+          cat: "dining",
+          notes: document.getElementById("rsNotes").value || "User-reported surplus",
+          created_at: new Date().toISOString()
+        };
+        entry.expiration = new Date(Date.now() + entry.hours_left * H).toISOString();
+        entry.urgency = entry.hours_left <= 2 ? "Critical" : entry.hours_left <= 6 ? "Soon" : "Stable";
+
+        // Save to localStorage
+        pushStorageArray("ch_surplus", entry);
+
+        // Add pin
+        CAMPUS_SURPLUS.push(entry);
+        renderSurplusPins();
+        applyFilters();
+
+        updateStats();
+        updateCounts();
+        refreshAdminAnalytics();
+        modalRS.classList.remove("open");
+      });
+
+      /* ═══════════════════════════════════════════════════════
+         QUICK ACTION: Join Pickup Team Modal
+         ═══════════════════════════════════════════════════════ */
+      const modalJP = document.getElementById("modalJoinPickup");
+      document.getElementById("btnJoinPickup").addEventListener("click", () => modalJP.classList.add("open"));
+      document.getElementById("jpCancel").addEventListener("click", () => modalJP.classList.remove("open"));
+      document.getElementById("jpSubmit").addEventListener("click", () => {
+        const vol = {
+          id: Date.now(),
+          name: document.getElementById("jpName").value || "Volunteer",
+          lng: CAMPUS_VIEW.center[0] + (Math.random() - 0.5) * 0.005,
+          lat: CAMPUS_VIEW.center[1] + (Math.random() - 0.5) * 0.003,
+          transport: document.getElementById("jpTransport").value,
+          avail: document.getElementById("jpAvail").value,
+          status: "Available",
+          created_at: new Date().toISOString()
+        };
+
+        pushStorageArray("ch_volunteers", vol);
+
+        CAMPUS_VOLUNTEERS.push(vol);
+        renderVolunteerPins();
+        applyFilters();
+        updateCounts();
+        refreshAdminAnalytics();
+        modalJP.classList.remove("open");
+      });
+
+      /* ═══════════════════════════════════════════════════════
+         QUICK ACTION: Event Scheduler Modal
+         ═══════════════════════════════════════════════════════ */
+      const modalES = document.getElementById("modalEventScheduler");
+      const esLocSel = document.getElementById("esLocation");
+      CAMPUS_ROUTE_STOPS.origin.forEach(o => {
+        esLocSel.innerHTML += `<option value="${o.name}" data-lng="${o.lng}" data-lat="${o.lat}">${o.name}</option>`;
+      });
+
+      document.getElementById("btnEventScheduler").addEventListener("click", () => {
+        // Set default datetime to 2 hours from now
+        const dt = new Date(Date.now() + 2 * H);
+        document.getElementById("esDate").value = dt.toISOString().slice(0, 16);
+        modalES.classList.add("open");
+      });
+      document.getElementById("esCancel").addEventListener("click", () => modalES.classList.remove("open"));
+      document.getElementById("esSubmit").addEventListener("click", () => {
+        const opt = esLocSel.selectedOptions[0];
+        const dateVal = document.getElementById("esDate").value;
+        const hoursLeft = Math.max(0.5, (new Date(dateVal) - Date.now()) / H);
+
+        const evt = {
+          id: Date.now(),
+          event_name: document.getElementById("esName").value || "Food Event",
+          org: document.getElementById("esOrg").value || "Campus Org",
+          lng: parseFloat(opt.dataset.lng),
+          lat: parseFloat(opt.dataset.lat),
+          building: opt.value,
+          food_type: document.getElementById("esType").value,
+          est_lbs: parseInt(document.getElementById("esQty").value) || 30,
+          hours_left: hoursLeft,
+          cat_type: "Student Org",
+          created_at: new Date().toISOString()
+        };
+        evt.expiration = new Date(Date.now() + evt.hours_left * H).toISOString();
+        evt.urgency = evt.hours_left <= 2 ? "Critical" : evt.hours_left <= 6 ? "Soon" : "Stable";
+
+        pushStorageArray("ch_events", evt);
+
+        CAMPUS_EVENTS.push(evt);
+        renderEventPins();
+        applyFilters();
+        updateStats();
+        updateCounts();
+        refreshAdminAnalytics();
+        modalES.classList.remove("open");
+      });
+
+      /* ═══════════════════════════════════════════════════════
+         ROUTE OPTIMIZER
+         ═══════════════════════════════════════════════════════ */
+      const rpPanel = document.getElementById("routePanel");
+      document.getElementById("routeToggle").addEventListener("click", () => rpPanel.classList.toggle("open"));
+      document.getElementById("rpClose").addEventListener("click", () => rpPanel.classList.remove("open"));
+
+      // Transport mode toggle
+      let transportSpeed = 3; // mph (walk default)
+      document.querySelectorAll(".rp-mode-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".rp-mode-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          transportSpeed = btn.dataset.mode === "bike" ? 10 : 3;
+        });
+      });
+
+      // Origin search input with suggestions
+      let _selectedOrigin = CAMPUS_ROUTE_STOPS.origin[0];
+      let _geocodeTimer = null;
+      const rpOriginInput = document.getElementById("rpOrigin");
+      const rpOriginSugs = document.getElementById("rpOriginSuggestions");
+      rpOriginInput.value = _selectedOrigin.name;
+
+      function showOriginSuggestions(query) {
+        const q = (query || "").toLowerCase();
+        let html = "";
+        CAMPUS_ROUTE_STOPS.origin.forEach((o, i) => {
+          if (!q || o.name.toLowerCase().includes(q))
+            html += `<div class="rp-sug-item" data-type="preset" data-idx="${i}">${o.name}</div>`;
+        });
+        rpOriginSugs.querySelectorAll(".rp-sug-geo").forEach(el => { html += el.outerHTML; });
+        if (html) { rpOriginSugs.innerHTML = html; rpOriginSugs.classList.add("open"); wireOriginClicks(); }
+        else rpOriginSugs.classList.remove("open");
+      }
+
+      async function geocodeOrigin(query) {
+        try {
+          const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=json&text=${encodeURIComponent(query)}&location=-84.39,33.77&maxSuggestions=4`;
+          const res = await fetch(url).then(r => r.json());
+          if (!res.suggestions || !res.suggestions.length) return;
+          rpOriginSugs.querySelectorAll(".rp-sug-geo").forEach(el => el.remove());
+          res.suggestions.forEach(s => {
+            const div = document.createElement("div");
+            div.className = "rp-sug-item rp-sug-geo";
+            div.dataset.type = "geocode"; div.dataset.magicKey = s.magicKey; div.dataset.text = s.text;
+            div.innerHTML = `${s.text}<div class="rp-sug-sub">Address result</div>`;
+            rpOriginSugs.appendChild(div);
+          });
+          rpOriginSugs.classList.add("open");
+          wireOriginClicks();
+        } catch(e) {}
+      }
+
+      function wireOriginClicks() {
+        rpOriginSugs.querySelectorAll(".rp-sug-item").forEach(item => {
+          item.onclick = async function() {
+            if (this.dataset.type === "preset") {
+              _selectedOrigin = CAMPUS_ROUTE_STOPS.origin[parseInt(this.dataset.idx)];
+              rpOriginInput.value = _selectedOrigin.name;
+            } else if (this.dataset.type === "geocode") {
+              try {
+                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(this.dataset.text)}&magicKey=${this.dataset.magicKey}&outFields=*&maxLocations=1`;
+                const res = await fetch(url).then(r => r.json());
+                if (res.candidates && res.candidates.length) {
+                  const c = res.candidates[0];
+                  _selectedOrigin = { name: c.address, lng: c.location.x, lat: c.location.y };
+                  rpOriginInput.value = c.address;
+                  view.goTo({ center: [c.location.x, c.location.y], zoom: 16 }, { duration: 600 });
+                }
+              } catch(e) {}
+            }
+            rpOriginSugs.classList.remove("open");
+          };
+        });
+      }
+
+      rpOriginInput.addEventListener("focus", () => showOriginSuggestions(rpOriginInput.value));
+      rpOriginInput.addEventListener("input", () => {
+        const q = rpOriginInput.value.trim();
+        showOriginSuggestions(q);
+        clearTimeout(_geocodeTimer);
+        if (q.length >= 3) _geocodeTimer = setTimeout(() => geocodeOrigin(q), 400);
+      });
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".rp-origin-wrap")) rpOriginSugs.classList.remove("open");
+      });
+
+      // Populate stop dropdowns
+      function populateStops(selId, stops) {
+        const sel = document.getElementById(selId);
+        const first = sel.options[0].outerHTML;
+        sel.innerHTML = first;
+        stops.forEach((s, i) => { sel.innerHTML += `<option value="${i}">${s.name}</option>`; });
+      }
+      populateStops("rpStop1", CAMPUS_ROUTE_STOPS.foodSource);
+      populateStops("rpStop2", CAMPUS_ROUTE_STOPS.distribution);
+      populateStops("rpStop3", CAMPUS_ROUTE_STOPS.compost);
+
+      // Auto-select nearest
+      document.getElementById("rpAutoSelect").addEventListener("click", () => {
+        const origin = _selectedOrigin || CAMPUS_ROUTE_STOPS.origin[0];
+
+        const s1 = findNearest(origin.lat, origin.lng, CAMPUS_ROUTE_STOPS.foodSource);
+        if (s1) document.getElementById("rpStop1").value = CAMPUS_ROUTE_STOPS.foodSource.indexOf(s1);
+
+        const from1 = s1 || origin;
+        const s2 = findNearest(from1.lat, from1.lng, CAMPUS_ROUTE_STOPS.distribution);
+        if (s2) document.getElementById("rpStop2").value = CAMPUS_ROUTE_STOPS.distribution.indexOf(s2);
+
+        const from2 = s2 || from1;
+        const s3 = findNearest(from2.lat, from2.lng, CAMPUS_ROUTE_STOPS.compost);
+        if (s3) document.getElementById("rpStop3").value = CAMPUS_ROUTE_STOPS.compost.indexOf(s3);
+      });
+
+      // Get all stops for route
+      function getAllStops() {
+        const origin = _selectedOrigin || CAMPUS_ROUTE_STOPS.origin[0];
+        const stops = [{ ...origin, label: "Origin" }];
+
+        const s1v = document.getElementById("rpStop1").value;
+        const s2v = document.getElementById("rpStop2").value;
+        const s3v = document.getElementById("rpStop3").value;
+
+        if (s1v !== "") stops.push({ ...CAMPUS_ROUTE_STOPS.foodSource[parseInt(s1v)], label: "Food Source" });
+        else {
+          const n = findNearest(origin.lat, origin.lng, CAMPUS_ROUTE_STOPS.foodSource);
+          if (n) stops.push({ ...n, label: "Food Source" });
+        }
+
+        const last1 = stops[stops.length - 1];
+        if (s2v !== "") stops.push({ ...CAMPUS_ROUTE_STOPS.distribution[parseInt(s2v)], label: "Distribution" });
+        else {
+          const n = findNearest(last1.lat, last1.lng, CAMPUS_ROUTE_STOPS.distribution);
+          if (n) stops.push({ ...n, label: "Distribution" });
+        }
+
+        const last2 = stops[stops.length - 1];
+        if (s3v !== "") stops.push({ ...CAMPUS_ROUTE_STOPS.compost[parseInt(s3v)], label: "Compost" });
+        else {
+          const n = findNearest(last2.lat, last2.lng, CAMPUS_ROUTE_STOPS.compost);
+          if (n) stops.push({ ...n, label: "Compost" });
+        }
+
+        return stops;
+      }
+
+      // Optimize route
+      document.getElementById("rpOptimize").addEventListener("click", async () => {
+        const stops = getAllStops();
+        if (stops.length < 2) return;
+
+        const spinner = document.getElementById("rpSpinner");
+        const results = document.getElementById("rpResults");
+        spinner.classList.add("visible");
+        results.classList.remove("visible");
+        routeLayer.removeAll();
+
+        let totalDist = 0, totalTime = 0;
+        const legs = [];
+
+        // Lazy-load esri/config + API key on first use
+        if (!hasApiKey) {
+          try {
+            const cfg = await fetch("/api/config").then(r => r.json());
+            if (cfg.ARCGIS_API_KEY) {
+              const esriCfg = await new Promise(function(resolve) {
+                require(["esri/config"], function(c) { resolve(c); });
+              });
+              esriCfg.apiKey = cfg.ARCGIS_API_KEY;
+              hasApiKey = true;
+            }
+          } catch(e) {}
+        }
+        if (!routeModule) {
+          try {
+            const mods = await new Promise((resolve) => {
+              require(["esri/rest/route", "esri/rest/support/RouteParameters", "esri/rest/support/FeatureSet"],
+                function(r, rp, fs) { resolve({ route: r, RouteParameters: rp, FeatureSet: fs }); });
+            });
+            routeModule = mods.route; RouteParameters = mods.RouteParameters; FeatureSet = mods.FeatureSet;
+          } catch(e) { console.warn("Could not load routing modules"); }
+        }
+
+        const useFallback = !hasApiKey || !routeModule;
+
+        if (!useFallback) {
+          try {
+            const routeStops = stops.map(s => new Graphic({ geometry: { type: "point", longitude: s.lng, latitude: s.lat } }));
+            const params = new RouteParameters({
+              stops: new FeatureSet({ features: routeStops }),
+              startTime: new Date(),
+              returnDirections: true
+            });
+            const result = await routeModule.solve(ROUTE_URL, params);
+            const routeResult = result.routeResults[0].route;
+
+            routeLayer.add(new Graphic({
+              geometry: routeResult.geometry,
+              symbol: { type: "simple-line", color: [0, 191, 165, 0.3], width: 8 }
+            }));
+            routeLayer.add(new Graphic({
+              geometry: routeResult.geometry,
+              symbol: { type: "simple-line", color: "#b3a369", width: 4 }
+            }));
+
+            totalDist = routeResult.attributes.Total_Miles || 0;
+            totalTime = routeResult.attributes.Total_TravelTime || 0;
+
+            // Compute legs from directions
+            if (result.routeResults[0].directions) {
+              const features = result.routeResults[0].directions.features;
+              let legDist = 0;
+              features.forEach(f => { legDist += f.attributes.length || 0; });
+            }
+
+            view.goTo(routeResult.geometry.extent.expand(1.3));
+          } catch (err) {
+            console.warn("Route API failed, using fallback:", err);
+            drawFallbackRoute(stops);
+            return;
+          }
+        } else {
+          drawFallbackRoute(stops);
+          return;
+        }
+
+        // Draw stop markers
+        drawStopMarkers(stops);
+
+        // Display results
+        for (let i = 1; i < stops.length; i++) {
+          const d = haversine(stops[i-1].lat, stops[i-1].lng, stops[i].lat, stops[i].lng);
+          legs.push({ from: stops[i-1].name, to: stops[i].name, dist: d });
+        }
+
+        displayResults(totalDist, totalTime, legs, false);
+        spinner.classList.remove("visible");
+      });
+
+      function drawFallbackRoute(stops) {
+        routeLayer.removeAll();
+        let totalDist = 0;
+        const legs = [];
+
+        for (let i = 1; i < stops.length; i++) {
+          const d = haversine(stops[i-1].lat, stops[i-1].lng, stops[i].lat, stops[i].lng);
+          totalDist += d;
+          legs.push({ from: stops[i-1].name, to: stops[i].name, dist: d });
+
+          routeLayer.add(new Graphic({
+            geometry: {
+              type: "polyline",
+              paths: [[[stops[i-1].lng, stops[i-1].lat], [stops[i].lng, stops[i].lat]]]
+            },
+            symbol: { type: "simple-line", color: "#b3a369", width: 3, style: "dash" }
+          }));
+        }
+
+        drawStopMarkers(stops);
+        const totalTime = (totalDist / transportSpeed) * 60;
+        displayResults(totalDist, totalTime, legs, true);
+        document.getElementById("rpSpinner").classList.remove("visible");
+
+        if (stops.length > 1) {
+          view.goTo(stops.map(s => ({ type: "point", longitude: s.lng, latitude: s.lat })), { padding: { top: 80, left: 320, right: 360, bottom: 40 } });
+        }
+      }
+
+      function drawStopMarkers(stops) {
+        stops.forEach((s, i) => {
+          routeLayer.add(new Graphic({
+            geometry: { type: "point", longitude: s.lng, latitude: s.lat },
+            symbol: {
+              type: "simple-marker",
+              color: i === 0 ? "#66bb6a" : "#b3a369",
+              size: 14,
+              outline: { color: "#fff", width: 2 }
+            },
+            attributes: s,
+            popupTemplate: { title: `${i === 0 ? "Origin" : "Stop " + i}: ${s.name}` }
+          }));
+          // Label
+          routeLayer.add(new Graphic({
+            geometry: { type: "point", longitude: s.lng, latitude: s.lat },
+            symbol: {
+              type: "text",
+              text: i === 0 ? "O" : String(i),
+              color: "#fff",
+              font: { size: 9, weight: "bold" },
+              yoffset: 0
+            }
+          }));
+        });
+      }
+
+      function displayResults(dist, time, legs, isEstimate) {
+        const suffix = isEstimate ? " (est.)" : "";
+        document.getElementById("rpDistance").textContent = dist.toFixed(1) + " mi" + suffix;
+        document.getElementById("rpTime").textContent = Math.round(time) + " min" + suffix;
+        const totalVol = CAMPUS_SURPLUS.reduce((s, c) => s + c.quantity_lbs, 0);
+        document.getElementById("rpVolume").textContent = totalVol.toLocaleString() + " lbs";
+
+        const container = document.getElementById("rpLegsContainer");
+        container.innerHTML = "";
+        legs.forEach(l => {
+          const div = document.createElement("div");
+          div.className = "rp-leg";
+          div.innerHTML = `<span>${l.from} → ${l.to}</span> <span>${l.dist.toFixed(2)} mi</span>`;
+          container.appendChild(div);
+        });
+
+        document.getElementById("rpResults").classList.add("visible");
+      }
+
+      // Clear route
+      document.getElementById("rpClear").addEventListener("click", () => {
+        routeLayer.removeAll();
+        document.getElementById("rpResults").classList.remove("visible");
+      });
+
+      // Google Maps directions
+      document.getElementById("rpDirections").addEventListener("click", () => {
+        const stops = getAllStops();
+        if (stops.length < 2) return;
+        const origin = `${stops[0].lat},${stops[0].lng}`;
+        const dest = `${stops[stops.length-1].lat},${stops[stops.length-1].lng}`;
+        const waypoints = stops.slice(1, -1).map(s => `${s.lat},${s.lng}`).join("|");
+        const mode = transportSpeed <= 3 ? "walking" : "bicycling";
+        window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&waypoints=${waypoints}&travelmode=${mode}`, "_blank");
+      });
+
+      /* ═══════════════════════════════════════════════════════
+         ADMIN VIEW + ANALYTICS
+         ═══════════════════════════════════════════════════════ */
+      function loadChartJS() {
+        if (window.Chart) return Promise.resolve();
+        return new Promise(function(resolve, reject) {
+          const oldDefine = window.define;
+          window.define = undefined;
+          const s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js";
+          s.onload = function() { window.define = oldDefine; resolve(); };
+          s.onerror = function() { window.define = oldDefine; reject(new Error("Chart.js failed to load")); };
+          document.head.appendChild(s);
+        });
+      }
+
+      function loadD3() {
+        if (window.d3) return Promise.resolve();
+        return new Promise(function(resolve, reject) {
+          const oldDefine = window.define;
+          window.define = undefined;
+          const s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js";
+          s.onload = function() { window.define = oldDefine; resolve(); };
+          s.onerror = function() { window.define = oldDefine; reject(new Error("D3 failed to load")); };
+          document.head.appendChild(s);
+        });
+      }
+
+      function setAdminMode(next) {
+        adminMode = !!next;
+        appEl.classList.toggle("admin-mode", adminMode);
+        adminView.classList.toggle("open", adminMode);
+        if (adminMode) rpPanel.classList.remove("open");
+        view.padding = adminMode ? { top: 64, right: Math.max(280, adminView.offsetWidth + 8) } : { top: 64 };
+      }
+
+      function factMatchesFilter(fact, fs) {
+        if (fs.source_name && fact.source_name !== fs.source_name) return false;
+        if (fs.urgency && fact.urgency !== fs.urgency) return false;
+        if (fs.location_name && fact.location_name !== fs.location_name) return false;
+        if (fs.hour_bucket && fact.hour_bucket !== fs.hour_bucket) return false;
+        return true;
+      }
+
+      function updateAdminFilterPills() {
+        const pills = [];
+        if (adminFilterState.source_name) pills.push(`Source: ${adminFilterState.source_name}`);
+        if (adminFilterState.urgency) pills.push(`Urgency: ${adminFilterState.urgency} (${urgencyBadge(adminFilterState.urgency)})`);
+        if (adminFilterState.location_name) pills.push(`Location: ${adminFilterState.location_name}`);
+        if (adminFilterState.hour_bucket) pills.push(`Hour: ${adminFilterState.hour_bucket}`);
+        if (!pills.length) {
+          adminFilterStateEl.textContent = "No active admin filters";
+          return;
+        }
+        adminFilterStateEl.innerHTML = pills.map(p => `<span class="afs-pill">${p}</span>`).join("");
+      }
+
+      function clearAdminFilters() {
+        adminFilterState.source_name = null;
+        adminFilterState.urgency = null;
+        adminFilterState.location_name = null;
+        adminFilterState.hour_bucket = null;
+        adminSelection.origin = null;
+        adminSelection.key = null;
+        applyAdminFilters(adminFilterState);
+      }
+
+      function applyAdminFilters(fs) {
+        const hasActive = !!(fs.source_name || fs.urgency || fs.location_name || fs.hour_bucket);
+        const filteredFacts = hasActive ? adminFacts.filter(f => factMatchesFilter(f, fs)) : adminFacts;
+        const shouldShowEmpty = hasActive && filteredFacts.length === 0;
+        let visibleCount = 0;
+
+        surplusLayer.graphics.forEach(g => {
+          const baseVisible = typeof g._baseVisible === "boolean" ? g._baseVisible : true;
+          const pass = !hasActive || graphicPassesAdminFilters(g, fs);
+          g.visible = baseVisible;
+          const mode = hasActive ? (pass ? "active" : "muted") : "normal";
+          g.symbol = makeSurplusSymbol(g.attributes, mode);
+          if (baseVisible && pass) visibleCount += 1;
+        });
+
+        eventLayer.graphics.forEach(g => {
+          const baseVisible = typeof g._baseVisible === "boolean" ? g._baseVisible : true;
+          const pass = !hasActive || graphicPassesAdminFilters(g, fs);
+          g.visible = baseVisible;
+          const mode = hasActive ? (pass ? "active" : "muted") : "normal";
+          g.symbol = makeEventSymbol(g.attributes, mode);
+          if (baseVisible && pass) visibleCount += 1;
+        });
+
+        if (shouldShowEmpty && !adminFilterEmptyState) {
+          renderAdminEmpty(treemapHost, "No active records for current filters.");
+          renderAdminEmpty(matrixHost, "No active records for current filters.");
+          adminFilterEmptyState = true;
+        } else if (!shouldShowEmpty && adminFilterEmptyState) {
+          renderTreemap(adminFacts);
+          renderMatrix(adminFacts);
+          adminFilterEmptyState = false;
+        }
+
+        if (!adminFilterEmptyState) {
+          syncTreemapSelection();
+          syncMatrixSelection();
+        }
+        updateAdminFilterPills();
+
+        const warnings = localStorageWarnings.slice();
+        if (hasActive && visibleCount === 0) warnings.push("No active records for current filters.");
+        showAdminWarning(warnings);
+      }
+
+      const debouncedApplyAdminFilters = debounce(function() {
+        applyAdminFilters(adminFilterState);
+      }, 120);
+
+      function buildAdminFacts() {
+        /** @type {AdminFact[]} */
+        const facts = [];
+        const nowIso = new Date().toISOString();
+
+        CAMPUS_SURPLUS.forEach((s, idx) => {
+          const ts = s.created_at || s.expiration || nowIso;
+          facts.push({
+            fact_id: `d-${s.id || idx}`,
+            ts_iso: ts,
+            source_type: "dining",
+            source_name: s.name,
+            location_name: s.name,
+            hour_bucket: getHourBucket(ts),
+            weekday: getWeekdayShort(ts),
+            quantity_lbs: Number(s.quantity_lbs || 0),
+            urgency: s.urgency || "Stable",
+            transport: s.transport || "Unknown"
+          });
+        });
+
+        CAMPUS_EVENTS.forEach((e, idx) => {
+          const ts = e.created_at || e.expiration || nowIso;
+          facts.push({
+            fact_id: `e-${e.id || idx}`,
+            ts_iso: ts,
+            source_type: "event",
+            source_name: e.event_name,
+            location_name: e.building || e.event_name,
+            hour_bucket: getHourBucket(ts),
+            weekday: getWeekdayShort(ts),
+            quantity_lbs: Number(e.est_lbs || 0),
+            urgency: e.urgency || "Stable",
+            transport: "Walk-in"
+          });
+        });
+
+        return facts;
+      }
+
+      function buildTreemapHierarchy(facts) {
+        const byType = new Map();
+        facts.forEach(f => {
+          if (!byType.has(f.source_type)) byType.set(f.source_type, new Map());
+          const byName = byType.get(f.source_type);
+          if (!byName.has(f.source_name)) {
+            byName.set(f.source_name, { source_name: f.source_name, source_type: f.source_type, value: 0, urgency: "Stable", critical_count: 0, count: 0 });
+          }
+          const node = byName.get(f.source_name);
+          node.value += f.quantity_lbs;
+          node.count += 1;
+          if (urgencyRank(f.urgency) > urgencyRank(node.urgency)) node.urgency = f.urgency;
+          if (f.urgency === "Critical") node.critical_count += 1;
+        });
+
+        const children = [];
+        byType.forEach((byName, type) => {
+          children.push({
+            name: type,
+            children: Array.from(byName.values()).sort((a, b) => b.value - a.value)
+          });
+        });
+
+        return { name: "All Surplus", children };
+      }
+
+      function buildHourLocationMatrix(facts) {
+        const cols = [];
+        for (let h = 6; h <= 22; h += 2) {
+          cols.push(`${String(h).padStart(2, "0")}:00-${String(h + 1).padStart(2, "0")}:59`);
+        }
+        const rowMap = new Map();
+        const cells = [];
+
+        facts.forEach(f => {
+          if (!cols.includes(f.hour_bucket)) return;
+          if (!rowMap.has(f.location_name)) rowMap.set(f.location_name, { location_name: f.location_name, total: 0 });
+          rowMap.get(f.location_name).total += f.quantity_lbs;
+          cells.push({ location_name: f.location_name, hour_bucket: f.hour_bucket, quantity_lbs: f.quantity_lbs });
+        });
+
+        const rows = Array.from(rowMap.values()).sort((a, b) => b.total - a.total);
+        return { rows, cols, cells };
+      }
+
+      function renderAdminEmpty(host, message) {
+        host.innerHTML = `<div class="admin-empty">${message}</div>`;
+      }
+
+      function renderTreemap(facts) {
+        if (!d3Ready || !window.d3) {
+          renderAdminEmpty(treemapHost, "Treemap dependency failed to load.");
+          return;
+        }
+        if (!facts.length) {
+          renderAdminEmpty(treemapHost, "No active records for current filters.");
+          return;
+        }
+
+        const d3 = window.d3;
+        const hierarchyData = buildTreemapHierarchy(facts);
+        const total = facts.reduce((sum, f) => sum + f.quantity_lbs, 0) || 1;
+        treemapHost.innerHTML = '<div class="tree-tip" id="treeTip"></div>';
+        const localTip = treemapHost.querySelector("#treeTip");
+        const width = treemapHost.clientWidth;
+        const height = treemapHost.clientHeight;
+        const root = d3.hierarchy(hierarchyData).sum(d => d.value || 0).sort((a, b) => b.value - a.value);
+        d3.treemap().size([width, height]).paddingInner(2).paddingOuter(2)(root);
+
+        const svg = d3.select(treemapHost).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+        const leaves = root.leaves();
+        const g = svg.selectAll("g.node").data(leaves).enter().append("g").attr("class", "node");
+
+        g.append("rect")
+          .attr("x", d => d.x0)
+          .attr("y", d => d.y0)
+          .attr("width", d => Math.max(0, d.x1 - d.x0))
+          .attr("height", d => Math.max(0, d.y1 - d.y0))
+          .attr("fill", d => urgencyColor(d.data.urgency))
+          .attr("stroke", "#3A4E5E")
+          .attr("stroke-width", 1)
+          .attr("data-source-name", d => d.data.source_name)
+          .attr("data-urgency", d => d.data.urgency)
+          .attr("tabindex", 0)
+          .attr("role", "button")
+          .attr("aria-label", d => `${d.data.source_name} ${Math.round(d.value)} pounds urgency ${d.data.urgency}`)
+          .on("click", function(_, d) {
+            adminFilterState.source_name = d.data.source_name;
+            adminFilterState.urgency = d.data.urgency;
+            adminSelection.origin = "treemap";
+            adminSelection.key = d.data.source_name;
+            debouncedApplyAdminFilters();
+          })
+          .on("keydown", function(event, d) {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              adminFilterState.source_name = d.data.source_name;
+              adminFilterState.urgency = d.data.urgency;
+              adminSelection.origin = "treemap";
+              adminSelection.key = d.data.source_name;
+              debouncedApplyAdminFilters();
+            }
+          })
+          .on("mousemove", function(event, d) {
+            const pct = ((d.value / total) * 100).toFixed(1);
+            localTip.style.display = "block";
+            localTip.style.left = `${event.offsetX + 10}px`;
+            localTip.style.top = `${event.offsetY + 10}px`;
+            localTip.innerHTML = `<strong>${d.data.source_name}</strong><br>${Math.round(d.value)} lbs (${pct}%)<br>Urgency: ${d.data.urgency} (${urgencyBadge(d.data.urgency)})<br>Critical records: ${d.data.critical_count}`;
+          })
+          .on("mouseleave", function() {
+            localTip.style.display = "none";
+          });
+
+        g.append("text")
+          .attr("x", d => d.x0 + 6)
+          .attr("y", d => d.y0 + 16)
+          .attr("fill", "#ffffff")
+          .attr("font-size", 10)
+          .text(d => {
+            const maxChars = Math.max(4, Math.floor((d.x1 - d.x0) / 7));
+            const label = d.data.source_name || "";
+            return label.length > maxChars ? `${label.slice(0, Math.max(3, maxChars - 1))}...` : label;
+          });
+
+        g.append("text")
+          .attr("x", d => d.x0 + 6)
+          .attr("y", d => d.y0 + 30)
+          .attr("fill", "#f2f5fb")
+          .attr("font-size", 10)
+          .text(d => `${Math.round(d.value)} lbs [${urgencyBadge(d.data.urgency)}]`);
+
+        syncTreemapSelection();
+      }
+
+      function syncTreemapSelection() {
+        const rects = treemapHost.querySelectorAll("rect[data-source-name]");
+        rects.forEach(rect => {
+          const sourceName = rect.getAttribute("data-source-name");
+          const urgency = rect.getAttribute("data-urgency");
+          const selected = (!adminFilterState.source_name || adminFilterState.source_name === sourceName) &&
+            (!adminFilterState.urgency || adminFilterState.urgency === urgency);
+          rect.style.opacity = selected ? "1" : "0.38";
+          rect.style.stroke = selected ? "#E8EDF2" : "#3A4E5E";
+          rect.style.strokeWidth = selected ? "2" : "1";
+        });
+      }
+
+      function matrixHeatColor(value, maxCell) {
+        if (value <= 0) return "#1A2A3A";
+        const ratio = Math.min(1, Math.max(0, value / Math.max(1, maxCell)));
+        if (ratio < 0.34) return "rgba(126, 200, 160, 0.85)";
+        if (ratio < 0.67) return "rgba(242, 197, 114, 0.9)";
+        return "rgba(232, 93, 74, 0.92)";
+      }
+
+      function renderMatrix(facts) {
+        const matrix = buildHourLocationMatrix(facts);
+        matrixViewState.rows = matrix.rows;
+        matrixViewState.cols = matrix.cols;
+        matrixViewState.cells = matrix.cells;
+
+        if (!matrix.rows.length || !matrix.cells.length) {
+          renderAdminEmpty(matrixHost, "No active records for current filters.");
+          matrixMetaEl.textContent = "0 rows | 0 buckets";
+          return;
+        }
+
+        const activeRows = showAllMatrixRows ? matrix.rows : matrix.rows.slice(0, 10);
+        const matrixMap = new Map();
+        matrix.cells.forEach(cell => {
+          const key = `${cell.location_name}::${cell.hour_bucket}`;
+          matrixMap.set(key, (matrixMap.get(key) || 0) + cell.quantity_lbs);
+        });
+        const maxCell = Math.max(1, ...Array.from(matrixMap.values()));
+
+        const grid = document.createElement("div");
+        grid.className = "matrix-grid";
+        grid.innerHTML = `<div></div>${matrix.cols.map(c => `<div class="mx-head">${c.replace(":00-", "<br>")}</div>`).join("")}`;
+
+        activeRows.forEach(row => {
+          const label = document.createElement("div");
+          label.className = "mx-row-label";
+          label.textContent = row.location_name;
+          label.title = row.location_name;
+          grid.appendChild(label);
+
+          matrix.cols.forEach(col => {
+            const key = `${row.location_name}::${col}`;
+            const value = matrixMap.get(key) || 0;
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "mx-cell";
+            btn.dataset.locationName = row.location_name;
+            btn.dataset.hourBucket = col;
+            btn.dataset.value = String(value);
+            btn.style.background = matrixHeatColor(value, maxCell);
+            btn.textContent = value > 0 ? String(Math.round(value)) : "-";
+            btn.setAttribute("aria-label", `${row.location_name}, ${col}, ${Math.round(value)} pounds`);
+            btn.addEventListener("click", () => {
+              adminFilterState.location_name = row.location_name;
+              adminFilterState.hour_bucket = col;
+              adminSelection.origin = "matrix";
+              adminSelection.key = key;
+              debouncedApplyAdminFilters();
+            });
+            btn.addEventListener("keydown", event => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                adminFilterState.location_name = row.location_name;
+                adminFilterState.hour_bucket = col;
+                adminSelection.origin = "matrix";
+                adminSelection.key = key;
+                debouncedApplyAdminFilters();
+              }
+            });
+            grid.appendChild(btn);
+          });
+        });
+
+        matrixHost.innerHTML = "";
+        matrixHost.appendChild(grid);
+        matrixMetaEl.textContent = `${activeRows.length} rows | ${matrix.cols.length} hour buckets`;
+        matrixToggleBtn.textContent = showAllMatrixRows ? "Show Top 10 Rows" : "Show All Rows";
+        syncMatrixSelection();
+      }
+
+      function syncMatrixSelection() {
+        const cells = matrixHost.querySelectorAll(".mx-cell");
+        cells.forEach(cell => {
+          const locationName = cell.dataset.locationName;
+          const hourBucket = cell.dataset.hourBucket;
+          const selected = (!adminFilterState.location_name || adminFilterState.location_name === locationName) &&
+            (!adminFilterState.hour_bucket || adminFilterState.hour_bucket === hourBucket);
+          cell.classList.toggle("is-active", selected);
+          cell.style.opacity = selected ? "1" : "0.5";
+        });
+      }
+
+      function initAdminCharts() {
+        const chartDefaults = {
+          color: "#92A4B8",
+          borderColor: "#3A4E5E",
+          font: { family: "'Avenir Next', 'Segoe UI', sans-serif" }
+        };
+        Chart.defaults.color = chartDefaults.color;
+        Chart.defaults.borderColor = chartDefaults.borderColor;
+
+        if (chartWaste) chartWaste.destroy();
+        if (chartPantry) chartPantry.destroy();
+
+        chartWaste = new Chart(document.getElementById("chartWaste"), {
+          type: "bar",
+          data: {
+            labels: ADMIN_DATA.waste_labels,
+            datasets: [{ label: "Avg Waste (lbs)", data: ADMIN_DATA.waste_values, backgroundColor: "#E8A87C" }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { title: { display: true, text: "lbs" } } }
+          }
+        });
+
+        chartPantry = new Chart(document.getElementById("chartPantry"), {
+          type: "bar",
+          data: {
+            labels: ADMIN_DATA.pantry_labels,
+            datasets: [
+              { label: "Visits", data: ADMIN_DATA.pantry_visits, backgroundColor: "#E8A87C" },
+              { label: "Items Distributed", data: ADMIN_DATA.pantry_items, backgroundColor: "#D4775B" }
+            ]
+          },
+          options: { responsive: true, plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } } }
+        });
+      }
+
+      function refreshDynamicUrgency() {
+        function refreshOne(item) {
+          if (!item.expiration) item.expiration = new Date(Date.now() + (item.hours_left || 1) * H).toISOString();
+          const remainingHours = Math.max(0, (new Date(item.expiration) - Date.now()) / H);
+          item.hours_left = Number(remainingHours.toFixed(2));
+          item.urgency = remainingHours <= 2 ? "Critical" : remainingHours <= 6 ? "Soon" : "Stable";
+        }
+        CAMPUS_SURPLUS.forEach(refreshOne);
+        CAMPUS_EVENTS.forEach(refreshOne);
+      }
+
+      function refreshAdminAnalytics() {
+        adminFacts = buildAdminFacts();
+        adminFilterEmptyState = false;
+        renderTreemap(adminFacts);
+        renderMatrix(adminFacts);
+        refreshUpdatedTimestamp();
+        applyAdminFilters(adminFilterState);
+      }
+
+      function startAdminRefreshLoop() {
+        if (liveRefreshInterval) clearInterval(liveRefreshInterval);
+        if (dailyRefreshTimeout) clearTimeout(dailyRefreshTimeout);
+        if (dailyRefreshInterval) clearInterval(dailyRefreshInterval);
+
+        liveRefreshInterval = setInterval(() => {
+          refreshDynamicUrgency();
+          renderSurplusPins();
+          renderEventPins();
+          updateStats();
+          applyFilters();
+          if (adminMode || chartsInitialized) refreshAdminAnalytics();
+        }, 30000);
+
+        const now = new Date();
+        const nextMidnight = new Date(now);
+        nextMidnight.setHours(24, 0, 0, 0);
+        const msToMidnight = Math.max(1000, nextMidnight.getTime() - now.getTime());
+        dailyRefreshTimeout = setTimeout(() => {
+          if (chartsInitialized && window.Chart) {
+            initAdminCharts();
+            refreshAdminAnalytics();
+          }
+          dailyRefreshInterval = setInterval(() => {
+            if (chartsInitialized && window.Chart) {
+              initAdminCharts();
+              refreshAdminAnalytics();
+            }
+          }, 24 * 60 * 60 * 1000);
+        }, msToMidnight);
+      }
+
+      const adminToggleBtn = document.getElementById("adminToggle");
+      adminToggleBtn.addEventListener("click", async () => {
+        setAdminMode(true);
+        if (!chartsInitialized) {
+          await loadChartJS();
+          await loadD3();
+          d3Ready = !!window.d3;
+          initAdminCharts();
+          chartsInitialized = true;
+        }
+        refreshAdminAnalytics();
+      });
+
+      document.getElementById("adminBack").addEventListener("click", () => {
+        setAdminMode(false);
+        clearAdminFilters();
+        applyFilters();
+      });
+
+      document.getElementById("adminClearFilters").addEventListener("click", () => {
+        clearAdminFilters();
+      });
+
+      matrixToggleBtn.addEventListener("click", () => {
+        showAllMatrixRows = !showAllMatrixRows;
+        renderMatrix(adminFacts);
+      });
+
+      view.on("click", async (event) => {
+        if (!adminMode) return;
+        const hit = await view.hitTest(event);
+        const picked = hit.results.find(r => r.graphic && (r.graphic.layer === surplusLayer || r.graphic.layer === eventLayer));
+        if (!picked) return;
+        const fact = normalizeGraphicFacts(picked.graphic);
+        if (!fact) return;
+        adminFilterState.source_name = fact.source_name;
+        adminFilterState.urgency = fact.urgency;
+        adminFilterState.location_name = fact.location_name;
+        adminFilterState.hour_bucket = fact.hour_bucket;
+        adminSelection.origin = "map";
+        adminSelection.key = fact.source_name;
+        applyAdminFilters(adminFilterState);
+      });
+
+      window.addEventListener("resize", () => {
+        if (adminMode) {
+          view.padding = { top: 64, right: Math.max(280, adminView.offsetWidth + 8) };
+          refreshAdminAnalytics();
+        }
+      });
+
+      /* ═══════════════════════════════════════════════════════
+         LOAD SAVED DATA FROM LOCALSTORAGE
+         ═══════════════════════════════════════════════════════ */
+      (function loadSavedData() {
+        localStorageWarnings = [];
+        localStorageWarningSet.clear();
+        const savedSurplus = safeArrayFromStorage("ch_surplus");
+        savedSurplus.forEach(entry => {
+          if (!entry || typeof entry !== "object") return;
+          if (!isValidPoint(entry)) return;
+          if (!entry.expiration) entry.expiration = new Date(NOW + (entry.hours_left || 1) * H).toISOString();
+          entry.urgency = entry.hours_left <= 2 ? "Critical" : entry.hours_left <= 6 ? "Soon" : "Stable";
+          CAMPUS_SURPLUS.push(entry);
+        });
+
+        const savedEvents = safeArrayFromStorage("ch_events");
+        savedEvents.forEach(evt => {
+          if (!evt || typeof evt !== "object") return;
+          if (!isValidPoint(evt)) return;
+          if (!evt.expiration) evt.expiration = new Date(NOW + (evt.hours_left || 1) * H).toISOString();
+          evt.urgency = evt.hours_left <= 2 ? "Critical" : evt.hours_left <= 6 ? "Soon" : "Stable";
+          CAMPUS_EVENTS.push(evt);
+        });
+        refreshDynamicUrgency();
+        safeRender("Surplus", renderSurplusPins);
+        safeRender("Events", renderEventPins);
+
+        updateStats();
+        updateCounts();
+        showAdminWarning(localStorageWarnings);
+        applyFilters();
+        refreshAdminAnalytics();
+        startAdminRefreshLoop();
+      })();
+
+    }); // end require
+  </script>
+</body>
+</html>
