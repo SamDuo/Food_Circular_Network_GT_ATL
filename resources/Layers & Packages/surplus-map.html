@@ -19,12 +19,17 @@
       --muted: #9ca6b8;
       --gold: #b3a369;
 
-      /* Surplus & Route */
-      --surplus-critical: #ef5350;
-      --surplus-soon: #ffc107;
-      --surplus-stable: #66bb6a;
+      /* Surplus urgency (luminous) */
+      --surplus-critical: #ff4757;
+      --surplus-soon: #ffc048;
+      --surplus-stable: #2ed573;
       --route-teal: #b3a369;
       --route-panel-w: 360px;
+
+      /* Glassmorphism tokens */
+      --glass-bg: rgba(8, 12, 24, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(16px) saturate(1.2);
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -44,8 +49,11 @@
        ═══════════════════════════════════════════════════════ */
     #topbar {
       position: absolute; top: 0; left: 0; right: 0; z-index: 30;
-      height: var(--header-h); background: var(--bg-dark);
-      border-bottom: 1px solid #222a3b;
+      height: var(--header-h);
+      background: rgba(7, 9, 15, 0.85);
+      backdrop-filter: blur(12px) saturate(1.1);
+      -webkit-backdrop-filter: blur(12px) saturate(1.1);
+      border-bottom: 1px solid var(--glass-border);
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 12px;
     }
@@ -67,9 +75,9 @@
     .navLink {
       color: var(--route-teal); text-decoration: none; font-size: 12px; font-weight: 700;
       padding: 8px 14px; border: 1px solid rgba(179, 163, 105, 0.5); border-radius: 999px;
-      white-space: nowrap; transition: background 0.2s;
+      white-space: nowrap; transition: background 0.2s, box-shadow 0.2s;
     }
-    .navLink:hover { background: rgba(179, 163, 105, 0.12); }
+    .navLink:hover { background: rgba(179, 163, 105, 0.12); box-shadow: 0 0 10px rgba(179, 163, 105, 0.15); }
 
     /* ═══════════════════════════════════════════════════════
        MAP & STATS
@@ -81,8 +89,16 @@
       display: grid; gap: 6px; width: 220px;
     }
     .statCard {
-      background: rgba(10, 14, 22, 0.88); border: 1px solid #2b3446;
-      border-radius: 8px; padding: 7px 10px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px; padding: 7px 10px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .statCard:hover {
+      border-color: rgba(179, 163, 105, 0.25);
+      box-shadow: 0 0 12px rgba(179, 163, 105, 0.08);
     }
     .statLabel { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; }
     .statValue { margin-top: 3px; font-size: 17px; font-weight: 800; color: #ffffff; }
@@ -93,14 +109,21 @@
     #layersToggle {
       position: absolute; left: 12px; bottom: 88px; z-index: 26;
       width: 40px; height: 40px; border-radius: 50%;
-      border: 1px solid #2d3442; background: #05080d; color: #ffffff; cursor: pointer;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      color: #ffffff; cursor: pointer;
     }
 
     #layerPanel {
       position: absolute; top: 74px; left: 12px; z-index: 25;
       width: 300px; max-height: calc(100vh - 170px); overflow-y: auto;
-      background: rgba(5, 8, 13, 0.95); border: 1px solid #2d3442;
-      border-radius: 10px; padding: 10px; display: none;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 10px; display: none;
     }
     #layerPanel.open { display: block; }
 
@@ -126,8 +149,10 @@
        SURPLUS SUMMARY
        ═══════════════════════════════════════════════════════ */
     #surplusSummary {
-      margin-top: 8px; padding: 8px; background: #141924;
-      border-radius: 6px; font-size: 11px; color: var(--muted); line-height: 1.6;
+      margin-top: 8px; padding: 8px;
+      background: rgba(20, 25, 36, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px; font-size: 11px; color: var(--muted); line-height: 1.6;
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -136,11 +161,16 @@
     #routeToggle {
       position: absolute; right: 12px; bottom: 88px; z-index: 26;
       width: 40px; height: 40px; border-radius: 50%;
-      border: 1px solid #2d3442; background: #05080d; color: var(--route-teal);
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      color: var(--route-teal);
       cursor: pointer; font-size: 16px; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    #routeToggle:hover { background: #101a22; border-color: var(--route-teal); }
+    #routeToggle:hover { border-color: var(--route-teal); box-shadow: 0 0 10px rgba(179, 163, 105, 0.2); }
 
     /* ═══════════════════════════════════════════════════════
        ROUTE PANEL
@@ -149,7 +179,10 @@
       position: absolute; top: var(--header-h); right: 0;
       width: var(--route-panel-w); height: calc(100vh - var(--header-h));
       overflow-y: auto; z-index: 27;
-      background: rgba(5, 8, 13, 0.96); border-left: 1px solid #2d3442;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-left: 1px solid var(--glass-border);
       display: none; padding: 0;
     }
     #routePanel.open { display: block; }
@@ -195,25 +228,33 @@
       width: 22px; height: 22px; border-radius: 50%; display: flex;
       align-items: center; justify-content: center;
       color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0;
+      box-shadow: 0 0 8px rgba(179, 163, 105, 0.2);
     }
     .rp-chain-label { font-size: 11px; color: var(--muted); min-width: 90px; }
     .rp-chain-row .rp-select { margin-bottom: 0; flex: 1; }
 
     .rp-btn {
-      width: 100%; padding: 10px; border: 1px solid #3a4254; background: #101621;
+      width: 100%; padding: 10px;
+      border: 1px solid var(--glass-border);
+      background: rgba(16, 22, 33, 0.7);
       color: #d8dde6; font-size: 12px; font-weight: 700; border-radius: 8px;
       cursor: pointer; margin-bottom: 6px; text-align: center;
+      transition: background 0.2s, border-color 0.2s;
     }
-    .rp-btn:hover { background: #1a2433; }
+    .rp-btn:hover { background: rgba(26, 36, 51, 0.8); border-color: rgba(255, 255, 255, 0.12); }
     .rp-btn-primary {
-      background: var(--route-teal); color: #fff; border-color: var(--route-teal);
+      background: linear-gradient(135deg, rgba(179, 163, 105, 0.4), rgba(179, 163, 105, 0.25));
+      color: #fff; border-color: rgba(179, 163, 105, 0.5);
       font-size: 13px; letter-spacing: 0.5px;
     }
-    .rp-btn-primary:hover { background: #00a890; }
+    .rp-btn-primary:hover { background: linear-gradient(135deg, rgba(179, 163, 105, 0.55), rgba(179, 163, 105, 0.35)); }
 
     .rp-stats {
       display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-      margin: 14px 0; padding: 10px; background: #141924; border-radius: 8px;
+      margin: 14px 0; padding: 10px;
+      background: rgba(20, 25, 36, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
     }
     .rp-stat-cell { text-align: center; padding: 6px; }
     .rp-stat-value { font-size: 20px; font-weight: 800; color: #fff; }
@@ -258,8 +299,11 @@
     .fleet-panel { margin-bottom: 14px; }
 
     .fleet-section {
-      background: #141924; border: 1px solid #2d3442;
-      border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+      background: rgba(20, 25, 36, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
     }
     .fleet-section-title {
       font-size: 10px; color: var(--route-teal); text-transform: uppercase;
@@ -278,9 +322,9 @@
     .ai-highlight { font-size: 12px; font-weight: 700; color: var(--route-teal); }
     .ai-actions { display: flex; gap: 6px; }
 
-    .capacity-ok   { color: #66bb6a; }
-    .capacity-warn { color: #ffc107; }
-    .capacity-full { color: #ef5350; }
+    .capacity-ok   { color: #2ed573; }
+    .capacity-warn { color: #ffc048; }
+    .capacity-full { color: #ff4757; }
 
     /* ═══════════════════════════════════════════════════════
        MOBILE RESPONSIVE
@@ -297,7 +341,7 @@
       #routePanel {
         top: auto; bottom: 0; left: 0; right: 0;
         width: 100%; height: auto; max-height: 60vh;
-        border-left: none; border-top: 1px solid #2d3442;
+        border-left: none; border-top: 1px solid var(--glass-border);
         border-radius: 16px 16px 0 0;
       }
       .fleet-stats-grid { gap: 4px; }
@@ -689,7 +733,8 @@
       /* ═══════════════════════════════════════════════════════
          SURPLUS RENDERING
          ═══════════════════════════════════════════════════════ */
-      function urgencyColor(u) { return u === "Critical" ? "#ef5350" : u === "Soon" ? "#ffc107" : "#66bb6a"; }
+      function urgencyColor(u) { return u === "Critical" ? "#ff4757" : u === "Soon" ? "#ffc048" : "#2ed573"; }
+      function urgencyGlow(u) { return u === "Critical" ? "rgba(255,71,87,0.4)" : u === "Soon" ? "rgba(255,192,72,0.35)" : "rgba(46,213,115,0.35)"; }
       function pinSize(lbs) { return lbs < 50 ? 14 : lbs <= 200 ? 18 : 22; }
 
       function surplusPopupContent({ graphic }) {
@@ -706,7 +751,7 @@
         return `<div style="font-family:sans-serif;font-size:13px;line-height:1.7;min-width:220px">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="font-weight:700">${a.food_type}</span>
-            <span style="background:${urgColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${a.urgency}</span>
+            <span style="background:${urgColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;box-shadow:0 0 8px ${urgColor}">${a.urgency}</span>
           </div>
           <div style="margin:4px 0"><strong>${a.quantity_lbs} lbs</strong> <span style="color:#888">(~${meals} meals)</span></div>
           <div style="color:${urgColor};font-weight:600">Expires in ${timeStr}</div>
@@ -728,7 +773,7 @@
               type: "simple-marker", style: "circle",
               color: urgencyColor(s.urgency),
               size: pinSize(s.quantity_lbs),
-              outline: { color: "#ffffff", width: 1.5 }
+              outline: { color: urgencyGlow(s.urgency), width: pinSize(s.quantity_lbs) * 0.5 }
             },
             attributes: { ...s },
             popupTemplate: { title: "{name}", content: surplusPopupContent }
@@ -1054,8 +1099,9 @@
             const miles = attrs.Total_Miles || (attrs.Total_Kilometers ? attrs.Total_Kilometers * 0.621371 : 0);
             const minutes = attrs.Total_TravelTime || 0;
 
-            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: [0, 191, 165, 0.3], width: 8 } }));
-            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: "#b3a369", width: 4 } }));
+            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: [179, 163, 105, 0.15], width: 14, cap: "round", join: "round" } }));
+            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: [179, 163, 105, 0.4], width: 6, cap: "round", join: "round" } }));
+            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: "#b3a369", width: 3, cap: "round", join: "round" } }));
 
             drawStopMarkers(stops);
 
@@ -1077,10 +1123,9 @@
 
       function displayFallbackRoute(stops, baselineDist, totalVolume) {
         for (let i = 0; i < stops.length - 1; i++) {
-          routeLayer.add(new Graphic({
-            geometry: { type: "polyline", paths: [[[stops[i].lng, stops[i].lat], [stops[i + 1].lng, stops[i + 1].lat]]] },
-            symbol: { type: "simple-line", color: "#b3a369", width: 3, style: "dash" }
-          }));
+          const segGeom = { type: "polyline", paths: [[[stops[i].lng, stops[i].lat], [stops[i + 1].lng, stops[i + 1].lat]]] };
+          routeLayer.add(new Graphic({ geometry: segGeom, symbol: { type: "simple-line", color: [179, 163, 105, 0.12], width: 10, cap: "round" } }));
+          routeLayer.add(new Graphic({ geometry: segGeom, symbol: { type: "simple-line", color: "#b3a369", width: 2.5, style: "dash", cap: "round" } }));
         }
         drawStopMarkers(stops);
 
@@ -1104,7 +1149,7 @@
               type: "simple-marker", style: "circle",
               color: "#b3a369",
               size: i === 0 ? 16 : 14,
-              outline: { color: "#ffffff", width: 2 }
+              outline: { color: "rgba(179, 163, 105, 0.3)", width: i === 0 ? 8 : 6 }
             },
             attributes: { name: stop.name, order: i },
             popupTemplate: { title: i === 0 ? "Origin: {name}" : `Stop ${i}: {name}` }
@@ -1139,7 +1184,7 @@
           if (match) {
             const hrsLeft = Math.max(0, (new Date(match.expiration) - Date.now()) / 3600000);
             const urgLabel = hrsLeft <= 2 ? "CRITICAL" : hrsLeft <= 6 ? "SOON" : "STABLE";
-            const urgColor = hrsLeft <= 2 ? "#ef5350" : hrsLeft <= 6 ? "#ffc107" : "#66bb6a";
+            const urgColor = hrsLeft <= 2 ? "#ff4757" : hrsLeft <= 6 ? "#ffc048" : "#2ed573";
             const urgDiv = document.createElement("div");
             urgDiv.style.cssText = "margin-top:8px;padding:6px 8px;background:#141924;border-radius:6px;font-size:11px;";
             urgDiv.innerHTML = `<span style="color:${urgColor};font-weight:700">${urgLabel}</span> pickup: ${match.quantity_lbs} lbs ${match.food_type} — ${hrsLeft.toFixed(1)}h remaining<br><span style="color:var(--muted)">Transport: ${match.transport}</span>`;

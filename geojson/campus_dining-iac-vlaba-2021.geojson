@@ -1,0 +1,197 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.3918, 33.7716] },
+            "properties": {
+                "FID": 1,
+                "Latitude": 33.7716,
+                "Longitude": -84.3918,
+                "Restaurant": "North Ave Dining Hall",
+                "Type_of_Food": "Dining Hall / Buffet",
+                "hours": "Sun 9a-9p, Mon-Thu 7a-2a, Fri 7a-10p, Sat 9a-9p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "North Ave, Atlanta GA 30332",
+                "building": "North Avenue Apartments"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.4061, 33.7777] },
+            "properties": {
+                "FID": 2,
+                "Latitude": 33.7777,
+                "Longitude": -84.4061,
+                "Restaurant": "West Village Dining Commons",
+                "Type_of_Food": "Dining Hall / Buffet",
+                "hours": "Mon-Fri 9a-11p, Sat-Sun 9a-9p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "Hemphill Ave, Atlanta GA 30332",
+                "building": "West Village"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.3898, 33.7728] },
+            "properties": {
+                "FID": 3,
+                "Latitude": 33.7728,
+                "Longitude": -84.3898,
+                "Restaurant": "Brittain Dining Hall",
+                "Type_of_Food": "Dining Hall / Buffet",
+                "hours": "Mon-Fri 7a-9p, Sat-Sun 9a-9p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "Techwood Dr NW, Atlanta GA 30332",
+                "building": "Brittain Dining Hall"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.3987, 33.7745] },
+            "properties": {
+                "FID": 4,
+                "Latitude": 33.7745,
+                "Longitude": -84.3987,
+                "Restaurant": "John Lewis Student Center Food Court",
+                "Type_of_Food": "Multi-Concept Food Court",
+                "hours": "Mon-Fri varies by vendor, Sat-Sun limited",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "351 Ferst Dr NW, Atlanta GA 30332",
+                "building": "John Lewis Student Center"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.4004, 33.777] },
+            "properties": {
+                "FID": 5,
+                "Latitude": 33.777,
+                "Longitude": -84.4004,
+                "Restaurant": "Nave Dining Concepts",
+                "Type_of_Food": "Grab-and-Go / Cafe",
+                "hours": "Mon-Fri 8a-4p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "North Ave NW, Atlanta GA 30332",
+                "building": "Nave Building"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.3913, 33.7779] },
+            "properties": {
+                "FID": 6,
+                "Latitude": 33.7779,
+                "Longitude": -84.3913,
+                "Restaurant": "Tech Square Dining Hub",
+                "Type_of_Food": "Fast Casual",
+                "hours": "Mon-Fri 10:30a-10p, Sat-Sun 11a-9p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "Tech Square, Atlanta GA 30332",
+                "building": "Tech Square"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.3952, 33.7782] },
+            "properties": {
+                "FID": 7,
+                "Latitude": 33.7782,
+                "Longitude": -84.3952,
+                "Restaurant": "Clough Commons Cafe",
+                "Type_of_Food": "Coffee / Bakery",
+                "hours": "Mon-Fri 7a-10p, Sat 9a-5p, Sun 9a-9p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "Clough Commons, Atlanta GA 30332",
+                "building": "Clough Undergraduate Learning Commons"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.4037, 33.7763] },
+            "properties": {
+                "FID": 8,
+                "Latitude": 33.7763,
+                "Longitude": -84.4037,
+                "Restaurant": "Ferst District Cafe",
+                "Type_of_Food": "Cafe / Sandwiches",
+                "hours": "Mon-Fri 8a-3p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "Ferst Dr NW, Atlanta GA 30332",
+                "building": "Ferst Center for the Arts"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.4011, 33.7733] },
+            "properties": {
+                "FID": 9,
+                "Latitude": 33.7733,
+                "Longitude": -84.4011,
+                "Restaurant": "Klaus Bistro",
+                "Type_of_Food": "Quick Service",
+                "hours": "Mon-Fri 8a-3p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "Klaus Advanced Computing Bldg, Atlanta GA 30332",
+                "building": "Klaus Advanced Computing Building"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.3969, 33.7723] },
+            "properties": {
+                "FID": 10,
+                "Latitude": 33.7723,
+                "Longitude": -84.3969,
+                "Restaurant": "Exhibition Hall Express",
+                "Type_of_Food": "Fast Casual",
+                "hours": "Mon-Fri 10a-3p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "Exhibition Hall, Atlanta GA 30332",
+                "building": "Exhibition Hall"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.3928, 33.7754] },
+            "properties": {
+                "FID": 11,
+                "Latitude": 33.7754,
+                "Longitude": -84.3928,
+                "Restaurant": "Crosland Tower Coffee Bar",
+                "Type_of_Food": "Coffee / Snacks",
+                "hours": "Mon-Fri 8a-4p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "Crosland Tower, Atlanta GA 30332",
+                "building": "Crosland Tower"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [-84.3989, 33.772] },
+            "properties": {
+                "FID": 12,
+                "Latitude": 33.772,
+                "Longitude": -84.3989,
+                "Restaurant": "CRC Fuel Zone",
+                "Type_of_Food": "Health / Smoothies",
+                "hours": "Mon-Fri 7a-8p, Sat-Sun 10a-6p",
+                "phone": "404-894-2000",
+                "url": "https://dining.gatech.edu",
+                "address": "Campus Recreation Center, Atlanta GA 30332",
+                "building": "Campus Recreation Center"
+            }
+        }
+    ]
+}

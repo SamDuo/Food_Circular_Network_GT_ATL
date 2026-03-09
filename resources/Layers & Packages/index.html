@@ -19,19 +19,25 @@
       --muted: #9ca6b8;
       --gold: #b3a369;
 
-      --food-recovery: #e53935;
-      --redistribution: #1e88e5;
-      --beneficiary: #43a047;
-      --compost-network: #8d6e63;
-      --food-desert: #ff5722;
-      --food-insecurity: #ab47bc;
+      /* Luminous layer colors (bright cores) */
+      --food-recovery: #ff6b6b;
+      --redistribution: #00d2ff;
+      --beneficiary: #38ef7d;
+      --compost-network: #f2994a;
+      --food-desert: #ff6348;
+      --food-insecurity: #c56cf0;
 
       --gt-dining: #f4d35e;
-      --gt-compost: #4caf50;
-      --gt-vending: #f57c00;
-      --gt-recycling: #29b6f6;
+      --gt-compost: #66bb6a;
+      --gt-vending: #ffa502;
+      --gt-recycling: #45aaf2;
       --gt-buildings: #d4c9a8;
       --gt-sidewalks: #b3a369;
+
+      /* Glassmorphism tokens */
+      --glass-bg: rgba(8, 12, 24, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(16px) saturate(1.2);
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -51,8 +57,11 @@
        ═══════════════════════════════════════════════════════ */
     #topbar {
       position: absolute; top: 0; left: 0; right: 0; z-index: 30;
-      height: var(--header-h); background: var(--bg-dark);
-      border-bottom: 1px solid #222a3b;
+      height: var(--header-h);
+      background: rgba(7, 9, 15, 0.85);
+      backdrop-filter: blur(12px) saturate(1.1);
+      -webkit-backdrop-filter: blur(12px) saturate(1.1);
+      border-bottom: 1px solid var(--glass-border);
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 12px;
     }
@@ -76,16 +85,16 @@
     .navLink {
       color: #b3a369; text-decoration: none; font-size: 12px; font-weight: 700;
       padding: 8px 14px; border: 1px solid rgba(179, 163, 105, 0.5); border-radius: 999px;
-      white-space: nowrap; transition: background 0.2s;
+      white-space: nowrap; transition: background 0.2s, box-shadow 0.2s;
     }
-    .navLink:hover { background: rgba(179, 163, 105, 0.12); }
+    .navLink:hover { background: rgba(179, 163, 105, 0.12); box-shadow: 0 0 10px rgba(179, 163, 105, 0.15); }
 
     #modeToggle { display: inline-flex; border: 1px solid #3a4254; border-radius: 999px; overflow: hidden; }
     #modeToggle button {
       border: 0; background: #141924; color: #d8dde6;
       padding: 8px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
     }
-    #modeToggle button.active { background: var(--gold); color: #1d232c; }
+    #modeToggle button.active { background: linear-gradient(135deg, #b3a369, #d4c48a); color: #1d232c; box-shadow: 0 0 10px rgba(179, 163, 105, 0.3); }
 
     /* ═══════════════════════════════════════════════════════
        MAP & STATS
@@ -97,8 +106,16 @@
       display: grid; gap: 6px; width: 220px;
     }
     .statCard {
-      background: rgba(10, 14, 22, 0.88); border: 1px solid #2b3446;
-      border-radius: 8px; padding: 7px 10px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px; padding: 7px 10px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .statCard:hover {
+      border-color: rgba(179, 163, 105, 0.25);
+      box-shadow: 0 0 12px rgba(179, 163, 105, 0.08);
     }
     .statLabel { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; }
     .statValue { margin-top: 3px; font-size: 17px; font-weight: 800; color: #ffffff; }
@@ -109,14 +126,21 @@
     #layersToggle {
       position: absolute; left: 12px; bottom: 88px; z-index: 26;
       width: 40px; height: 40px; border-radius: 50%;
-      border: 1px solid #2d3442; background: #05080d; color: #ffffff; cursor: pointer;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      color: #ffffff; cursor: pointer;
     }
 
     #layerPanel {
       position: absolute; top: 74px; left: 12px; z-index: 25;
       width: 300px; max-height: calc(100vh - 170px); overflow-y: auto;
-      background: rgba(5, 8, 13, 0.95); border: 1px solid #2d3442;
-      border-radius: 10px; padding: 10px; display: none;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 10px; display: none;
     }
     #layerPanel.open { display: block; }
 
@@ -147,14 +171,21 @@
     #dock {
       position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 24;
       display: flex; gap: 6px; max-width: calc(100vw - 24px); overflow-x: auto;
-      padding: 6px; border-radius: 12px; background: rgba(6, 7, 8, 0.96); border: 1px solid #252d3d;
+      padding: 6px; border-radius: 14px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
     }
     #dock button {
       border: 0; background: transparent; color: #d2d9e5;
       padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
-      white-space: nowrap; cursor: pointer;
+      white-space: nowrap; cursor: pointer; transition: background 0.2s;
     }
-    #dock button.active { background: #4f6872; color: #ffffff; }
+    #dock button.active {
+      background: linear-gradient(135deg, rgba(179, 163, 105, 0.3), rgba(79, 104, 114, 0.4));
+      color: #ffffff; border: 1px solid rgba(179, 163, 105, 0.3);
+    }
 
     /* ═══════════════════════════════════════════════════════
        MOBILE RESPONSIVE
@@ -213,22 +244,22 @@
       </div>
 
       <div class="groupTitle">Atlanta Network</div>
-      <label class="layerRow"><input type="checkbox" data-layer="foodRecovery" checked /><span class="dot" style="background: var(--food-recovery)"></span><span>Food Recovery Sources</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="redistribution" checked /><span class="dot" style="background: var(--redistribution)"></span><span>Redistribution Nodes</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="beneficiary" /><span class="dot" style="background: var(--beneficiary)"></span><span>Beneficiary Access Points</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="circular" checked /><span class="dot" style="background: var(--compost-network)"></span><span>Circular/Compost Network</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="foodDeserts" /><span class="dot poly" style="background: var(--food-desert)"></span><span>Food Deserts</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="foodInsecurity" /><span class="dot poly" style="background: var(--food-insecurity)"></span><span>Food Insecurity (CDC)</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="foodRecovery" checked /><span class="dot" style="background: var(--food-recovery); box-shadow: 0 0 5px var(--food-recovery)"></span><span>Food Recovery Sources</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="redistribution" checked /><span class="dot" style="background: var(--redistribution); box-shadow: 0 0 5px var(--redistribution)"></span><span>Redistribution Nodes</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="beneficiary" /><span class="dot" style="background: var(--beneficiary); box-shadow: 0 0 5px var(--beneficiary)"></span><span>Beneficiary Access Points</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="circular" checked /><span class="dot" style="background: var(--compost-network); box-shadow: 0 0 5px var(--compost-network)"></span><span>Circular/Compost Network</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="foodDeserts" /><span class="dot poly" style="background: var(--food-desert); box-shadow: 0 0 5px var(--food-desert)"></span><span>Food Deserts</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="foodInsecurity" /><span class="dot poly" style="background: var(--food-insecurity); box-shadow: 0 0 5px var(--food-insecurity)"></span><span>Food Insecurity (CDC)</span></label>
 
       <div class="groupTitle">GT Campus Layers (I2CE)</div>
-      <label class="layerRow"><input type="checkbox" data-layer="gtDining" checked /><span class="dot" style="background: var(--gt-dining)"></span><span>Campus Dining</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="gtCompost" checked /><span class="dot" style="background: var(--gt-compost)"></span><span>Compost Locations</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="gtVending" checked /><span class="dot" style="background: var(--gt-vending)"></span><span>Vending Machines</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="gtRecycling" checked /><span class="dot" style="background: var(--gt-recycling)"></span><span>Recycling / Trash Cans</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="gtDining" checked /><span class="dot" style="background: var(--gt-dining); box-shadow: 0 0 5px var(--gt-dining)"></span><span>Campus Dining</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="gtCompost" checked /><span class="dot" style="background: var(--gt-compost); box-shadow: 0 0 5px var(--gt-compost)"></span><span>Compost Locations</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="gtVending" checked /><span class="dot" style="background: var(--gt-vending); box-shadow: 0 0 5px var(--gt-vending)"></span><span>Vending Machines</span></label>
+      <label class="layerRow"><input type="checkbox" data-layer="gtRecycling" checked /><span class="dot" style="background: var(--gt-recycling); box-shadow: 0 0 5px var(--gt-recycling)"></span><span>Recycling / Trash Cans</span></label>
 
       <div class="groupTitle">GT Base Map (Auto in GT Mode)</div>
-      <div class="layerStatic"><span class="dot poly" style="background: var(--gt-buildings)"></span><span>Buildings</span></div>
-      <div class="layerStatic"><span class="dot line" style="background: var(--gt-sidewalks)"></span><span>Sidewalks</span></div>
+      <div class="layerStatic"><span class="dot poly" style="background: var(--gt-buildings); box-shadow: 0 0 5px var(--gt-buildings)"></span><span>Buildings</span></div>
+      <div class="layerStatic"><span class="dot line" style="background: var(--gt-sidewalks); box-shadow: 0 0 5px var(--gt-sidewalks)"></span><span>Sidewalks</span></div>
     </aside>
 
     <!-- ═══ DOCK ═══ -->
@@ -276,8 +307,8 @@
       /* ═══════════════════════════════════════════════════════
          LAYER DEFINITIONS
          ═══════════════════════════════════════════════════════ */
-      function pointRenderer(color, outline, size) {
-        return { type: "simple", symbol: { type: "simple-marker", style: "circle", color, size, outline: { color: outline, width: 1.1 } } };
+      function pointRenderer(coreColor, glowColor, size) {
+        return { type: "simple", symbol: { type: "simple-marker", style: "circle", color: coreColor, size, outline: { color: glowColor, width: size * 0.6 } } };
       }
       function lineRenderer(color, width) {
         return { type: "simple", symbol: { type: "simple-line", color, width } };
@@ -288,30 +319,31 @@
       function clusterConfig() {
         return {
           type: "cluster", clusterRadius: "58px", clusterMinSize: "22px", clusterMaxSize: "44px",
+          symbol: { type: "simple-marker", style: "circle", color: [179, 163, 105, 0.7], outline: { color: [179, 163, 105, 0.25], width: 6 } },
           popupTemplate: { title: "{cluster_count} features", content: "Zoom in to see individual locations." },
-          labelingInfo: [{ labelExpressionInfo: { expression: "$feature.cluster_count" }, symbol: { type: "text", color: "#ffffff", font: { size: 11, weight: "bold" } }, labelPlacement: "center-center" }]
+          labelingInfo: [{ labelExpressionInfo: { expression: "$feature.cluster_count" }, symbol: { type: "text", color: "#ffffff", font: { size: 11, weight: "bold" }, haloColor: [0, 0, 0, 0.6], haloSize: 1.5 }, labelPlacement: "center-center" }]
         };
       }
 
       const layers = {
-        foodRecovery: new GeoJSONLayer({ id: "foodRecovery", title: "Food Recovery Sources", url: `${BASE_URL}/food_recovery_sources.geojson`, visible: true, renderer: pointRenderer("#e53935", "#9a1d1d", 8), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
-        redistribution: new GeoJSONLayer({ id: "redistribution", title: "Redistribution Nodes", url: `${BASE_URL}/redistribution_nodes.geojson`, visible: true, renderer: pointRenderer("#1e88e5", "#155da0", 9), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
-        beneficiary: new GeoJSONLayer({ id: "beneficiary", title: "Beneficiary Access Points", url: `${BASE_URL}/beneficiary_access_points.geojson`, visible: false, renderer: pointRenderer("#43a047", "#2e7032", 8), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
-        circular: new GeoJSONLayer({ id: "circular", title: "Circular/Compost Network", url: `${BASE_URL}/circular_economy.geojson`, visible: true, renderer: pointRenderer("#8d6e63", "#5f4b44", 9), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
+        foodRecovery: new GeoJSONLayer({ id: "foodRecovery", title: "Food Recovery Sources", url: `${BASE_URL}/food_recovery_sources.geojson`, visible: true, renderer: pointRenderer("#ff6b6b", "rgba(255,107,107,0.35)", 8), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
+        redistribution: new GeoJSONLayer({ id: "redistribution", title: "Redistribution Nodes", url: `${BASE_URL}/redistribution_nodes.geojson`, visible: true, renderer: pointRenderer("#00d2ff", "rgba(0,210,255,0.35)", 9), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
+        beneficiary: new GeoJSONLayer({ id: "beneficiary", title: "Beneficiary Access Points", url: `${BASE_URL}/beneficiary_access_points.geojson`, visible: false, renderer: pointRenderer("#38ef7d", "rgba(56,239,125,0.35)", 8), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
+        circular: new GeoJSONLayer({ id: "circular", title: "Circular/Compost Network", url: `${BASE_URL}/circular_economy.geojson`, visible: true, renderer: pointRenderer("#f2994a", "rgba(242,153,74,0.35)", 9), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
         foodDeserts: new GeoJSONLayer({
           id: "foodDeserts", title: "Food Deserts – Atlanta", url: `${BASE_URL}/food_deserts_atlanta.geojson`, visible: false,
-          renderer: { type: "unique-value", field: "is_food_desert", defaultSymbol: { type: "simple-fill", color: [200, 200, 200, 0.05], outline: { color: [150, 150, 150, 0.2], width: 0.5 } }, uniqueValueInfos: [{ value: "Yes", symbol: { type: "simple-fill", color: [255, 87, 34, 0.35], outline: { color: [255, 87, 34, 0.7], width: 1 } } }] },
+          renderer: { type: "unique-value", field: "is_food_desert", defaultSymbol: { type: "simple-fill", color: [200, 200, 200, 0.03], outline: { color: [150, 150, 150, 0.15], width: 0.5 } }, uniqueValueInfos: [{ value: "Yes", symbol: { type: "simple-fill", color: [255, 99, 72, 0.25], outline: { color: [255, 99, 72, 0.6], width: 1.5 } } }] },
           popupTemplate: { title: "Tract {tract_name}", content: [{ type: "fields" }] }
         }),
         foodInsecurity: new FeatureLayer({
           id: "foodInsecurity", title: "Food Insecurity (CDC PLACES)",
           url: "https://services3.arcgis.com/ZvidGQkLaDJxRSJ2/arcgis/rest/services/PLACES_LocalData_for_BetterHealth/FeatureServer/3",
           definitionExpression: "StateAbbr = 'GA' AND (CountyName = 'Fulton' OR CountyName = 'DeKalb')", visible: false,
-          renderer: { type: "class-breaks", field: "FOODINSECU_CrudePrev", defaultSymbol: { type: "simple-fill", color: [171, 71, 188, 0.1], outline: { color: [171, 71, 188, 0.2], width: 0.5 } },
+          renderer: { type: "class-breaks", field: "FOODINSECU_CrudePrev", defaultSymbol: { type: "simple-fill", color: [197, 108, 240, 0.08], outline: { color: [197, 108, 240, 0.15], width: 0.5 } },
             classBreakInfos: [
-              { minValue: 0, maxValue: 15, symbol: { type: "simple-fill", color: [171, 71, 188, 0.1], outline: { color: [171, 71, 188, 0.3], width: 0.5 } } },
-              { minValue: 15, maxValue: 25, symbol: { type: "simple-fill", color: [171, 71, 188, 0.35], outline: { color: [171, 71, 188, 0.5], width: 0.8 } } },
-              { minValue: 25, maxValue: 100, symbol: { type: "simple-fill", color: [171, 71, 188, 0.6], outline: { color: [171, 71, 188, 0.8], width: 1 } } }
+              { minValue: 0, maxValue: 15, symbol: { type: "simple-fill", color: [197, 108, 240, 0.08], outline: { color: [197, 108, 240, 0.2], width: 0.5 } } },
+              { minValue: 15, maxValue: 25, symbol: { type: "simple-fill", color: [197, 108, 240, 0.3], outline: { color: [197, 108, 240, 0.5], width: 1 } } },
+              { minValue: 25, maxValue: 100, symbol: { type: "simple-fill", color: [197, 108, 240, 0.5], outline: { color: [197, 108, 240, 0.8], width: 1.5 } } }
             ]
           },
           popupTemplate: { title: "Tract {TractFIPS}", content: [{ type: "fields", fieldInfos: [
@@ -321,18 +353,18 @@
             { fieldName: "TotalPopulation", label: "Population" }
           ] }] }
         }),
-        gtDining: new GeoJSONLayer({ id: "gtDining", title: "GT Campus Dining", url: `${BASE_URL}/campus_dining.geojson`, visible: false, renderer: pointRenderer("#f4d35e", "#bd9526", 10), popupTemplate: { title: "{Restaurant}", content: [{ type: "fields" }] } }),
-        gtCompost: new GeoJSONLayer({ id: "gtCompost", title: "GT Compost", url: `${BASE_URL}/compost_locations.geojson`, visible: false, renderer: pointRenderer("#4caf50", "#2e7d32", 9), popupTemplate: { title: "GT Compost", content: [{ type: "fields" }] } }),
-        gtVending: new GeoJSONLayer({ id: "gtVending", title: "GT Vending", url: `${BASE_URL}/vending_machines.geojson`, visible: false, renderer: pointRenderer("#f57c00", "#af5600", 8), popupTemplate: { title: "GT Vending", content: [{ type: "fields" }] } }),
-        gtRecycling: new GeoJSONLayer({ id: "gtRecycling", title: "GT Recycling", url: `${BASE_URL}/recycling_trash_cans.geojson`, visible: false, renderer: pointRenderer("#29b6f6", "#1c86b5", 8), popupTemplate: { title: "GT Recycling / Trash", content: [{ type: "fields" }] } }),
-        gtBuildings: new GeoJSONLayer({ id: "gtBuildings", title: "GT Buildings", url: `${BASE_URL}/buildings.geojson`, visible: false, renderer: polygonRenderer([212, 201, 168, 0.55], [142, 121, 79, 1], 0.5), popupTemplate: { title: "{Name}", content: [{ type: "fields" }] } }),
-        gtSidewalks: new GeoJSONLayer({ id: "gtSidewalks", title: "GT Sidewalks", url: `${BASE_URL}/sidewalks.geojson`, visible: false, renderer: lineRenderer("#b3a369", 1.1), popupTemplate: { title: "GT Sidewalk", content: [{ type: "fields" }] } })
+        gtDining: new GeoJSONLayer({ id: "gtDining", title: "GT Campus Dining", url: `${BASE_URL}/campus_dining.geojson`, visible: false, renderer: pointRenderer("#f4d35e", "rgba(244,211,94,0.35)", 10), popupTemplate: { title: "{Restaurant}", content: [{ type: "fields" }] } }),
+        gtCompost: new GeoJSONLayer({ id: "gtCompost", title: "GT Compost", url: `${BASE_URL}/compost_locations.geojson`, visible: false, renderer: pointRenderer("#66bb6a", "rgba(102,187,106,0.35)", 9), popupTemplate: { title: "GT Compost", content: [{ type: "fields" }] } }),
+        gtVending: new GeoJSONLayer({ id: "gtVending", title: "GT Vending", url: `${BASE_URL}/vending_machines.geojson`, visible: false, renderer: pointRenderer("#ffa502", "rgba(255,165,2,0.35)", 8), popupTemplate: { title: "GT Vending", content: [{ type: "fields" }] } }),
+        gtRecycling: new GeoJSONLayer({ id: "gtRecycling", title: "GT Recycling", url: `${BASE_URL}/recycling_trash_cans.geojson`, visible: false, renderer: pointRenderer("#45aaf2", "rgba(69,170,242,0.35)", 8), popupTemplate: { title: "GT Recycling / Trash", content: [{ type: "fields" }] } }),
+        gtBuildings: new GeoJSONLayer({ id: "gtBuildings", title: "GT Buildings", url: `${BASE_URL}/buildings.geojson`, visible: false, renderer: polygonRenderer([212, 201, 168, 0.35], [179, 163, 105, 0.4], 0.8), popupTemplate: { title: "{Name}", content: [{ type: "fields" }] } }),
+        gtSidewalks: new GeoJSONLayer({ id: "gtSidewalks", title: "GT Sidewalks", url: `${BASE_URL}/sidewalks.geojson`, visible: false, renderer: lineRenderer("rgba(179, 163, 105, 0.6)", 1.5), popupTemplate: { title: "GT Sidewalk", content: [{ type: "fields" }] } })
       };
 
       const atlantaBoundaryLayer = new FeatureLayer({
         url: "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Current/MapServer/28",
         definitionExpression: "GEOID = '1304000'",
-        renderer: polygonRenderer([255, 255, 255, 0.03], [179, 163, 105, 0.6], 2),
+        renderer: polygonRenderer([255, 255, 255, 0.02], [179, 163, 105, 0.45], 2.5),
         title: "City of Atlanta Boundary", visible: true
       });
 

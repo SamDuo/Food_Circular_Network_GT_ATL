@@ -141,54 +141,46 @@
   },
   "food_recovery_sources": {
     "file": "food_recovery_sources.geojson",
-    "count": 18,
+    "count": 11314,
     "fields": [
-      "location_name",
-      "category",
+      "display_name",
+      "sub_type",
       "address",
-      "est_lbs_week",
-      "status",
-      "contact",
-      "hours"
+      "source_pkg",
+      "category"
     ]
   },
   "redistribution_nodes": {
     "file": "redistribution_nodes.geojson",
-    "count": 15,
+    "count": 2629,
     "fields": [
-      "location_name",
-      "node_type",
+      "display_name",
+      "sub_type",
       "address",
-      "capacity_lbs",
-      "hours",
-      "contact",
-      "status"
+      "source_pkg",
+      "category"
     ]
   },
   "beneficiary_access_points": {
     "file": "beneficiary_access_points.geojson",
-    "count": 15,
+    "count": 12,
     "fields": [
-      "location_name",
-      "access_type",
+      "display_name",
+      "sub_type",
       "address",
-      "served_per_week",
-      "hours",
-      "contact",
-      "status"
+      "source_pkg",
+      "category"
     ]
   },
   "circular_economy": {
     "file": "circular_economy.geojson",
-    "count": 10,
+    "count": 127,
     "fields": [
-      "location_name",
-      "process_type",
+      "display_name",
+      "sub_type",
       "address",
-      "capacity_tons_month",
-      "contact",
-      "status",
-      "accepts_from"
+      "source_pkg",
+      "category"
     ]
   },
   "network_flows": {
