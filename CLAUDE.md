@@ -3,7 +3,7 @@
 ## Project Overview
 A citywide food system mapping platform for Atlanta, built with **ArcGIS Maps SDK for JavaScript v4.30** (AMD modules via CDN). The platform visualizes food recovery sources, redistribution nodes, beneficiary access points, and circular economy infrastructure across Atlanta and the Georgia Tech campus.
 
-The project has two main web dashboards plus supporting Python scripts and 30 GeoJSON data layers.
+The project has **six web dashboards**, supporting Python scripts, Netlify deployment config, and 35 GeoJSON data layers.
 
 ---
 
@@ -12,28 +12,58 @@ The project has two main web dashboards plus supporting Python scripts and 30 Ge
 ### Web Dashboards (all inline CSS/HTML/JS, no build step)
 | File | Purpose | Lines |
 |------|---------|-------|
-| `resources/Layers & Packages/index.html` | **AFCN Dashboard** — main citywide + campus map with all data layers, mode toggle (Atlanta / GT Campus), dock tabs, layer panel | ~500 |
-| `resources/Layers & Packages/surplus-map.html` | **Real-Time Food Surplus Map** — standalone surplus pins + urgency-aware route optimizer + fleet intelligence, no AFCN layers | ~1250 |
-| `resources/Layers & Packages/gt_fch_map.html` | GT Food Circular Hub map (earlier version) | ~700 |
+| `resources/Layers & Packages/index.html` | **AFCN Dashboard** — main citywide + campus map with all data layers, mode toggle (Atlanta / GT Campus), dock tabs, layer panel | ~535 |
+| `resources/Layers & Packages/surplus-map.html` | **Real-Time Food Surplus Map** — standalone surplus pins + urgency-aware route optimizer + fleet intelligence, no AFCN layers | ~1358 |
+| `resources/Layers & Packages/fleet-analytics.html` | **Fleet Analytics** — fleet vehicle tracking, driver table, pipeline visualization, route assignment dock | ~162 |
+| `resources/Layers & Packages/gt-campus-hub.html` | **GT Campus Food Circular Hub** — campus-focused map with admin dashboard, Chart.js analytics, light theme | ~2655 |
+| `resources/Layers & Packages/gt_fch_preview.html` | **GT-FCH Preview Map** — lightweight local preview of GT Food Circular Hub with dynamic host origin | ~377 |
+| `resources/Layers & Packages/gt_fch_map.html` | **GT-FCH ArcGIS Feature Map** — earlier GT campus map version | ~793 |
 
-Both dashboards link to each other via nav links in the header.
+Dashboards link to each other via nav links in the header.
+
+#### IAC-VLABA-2021 Variants
+| File | Purpose |
+|------|---------|
+| `resources/Layers & Packages/index-iac-vlaba-2021.html` | Variant of AFCN dashboard for IAC-VLABA-2021 dataset |
+| `geojson/*-iac-vlaba-2021.geojson` | Matching GeoJSON layers for the IAC-VLABA-2021 variant |
+| `geojson/manifest-iac-vlaba-2021.json` | Manifest for IAC-VLABA-2021 layers |
+| `Python Script/serve-iac-vlaba-2021.py` | Dev server variant for IAC-VLABA-2021 |
 
 ### Python Scripts
 | File | Purpose |
 |------|---------|
-| `Python Script/serve.py` | Local dev server (port 8080), serves project root with CORS, `/api/config` endpoint returns ArcGIS API key from `.env` |
+| `Python Script/serve.py` | Local dev server (port 8080), serves project root with CORS, `/api/config` endpoint returns ArcGIS API key from `.env`, auto-opens browser, lists all dashboards on startup |
+| `Python Script/publish_dashboards.py` | Builds a publish-ready static bundle in `publish/` — copies `geojson/` + `resources/`, writes `api/config` JSON, generates a landing page linking all discovered dashboards |
 | `Python Script/build_ppkx.py` | ArcGIS Pro packaging script — creates File GDB from GeoPackage, builds .ppkx |
 | `Python Script/export_geopackage.py` | Exports layers to GeoPackage format |
 | `Python Script/convert_shapefiles.py` | Shapefile conversion utility |
+| `Python Script/serve-iac-vlaba-2021.py` | Dev server variant for IAC-VLABA-2021 dataset |
+
+### Deployment (Netlify)
+| File | Purpose |
+|------|---------|
+| `netlify.toml` | Netlify build config — runs `publish_dashboards.py --out publish --clean`, publishes `publish/` dir, redirects `/api/config` to serverless function |
+| `netlify/functions/config.js` | Serverless function returning `ARCGIS_API_KEY` env var as JSON (set in Netlify dashboard) |
 
 ### Data
 | Path | Description |
 |------|-------------|
-| `geojson/` | 30 GeoJSON files — campus dining, food recovery sources, redistribution nodes, beneficiary access points, circular economy, buildings, sidewalks, network flows, and 15+ `pkg_*` package layers |
+| `geojson/` | 35 GeoJSON files — campus dining, food recovery sources, redistribution nodes, beneficiary access points, circular economy, buildings, sidewalks, network flows, campus boundary, compost locations, food deserts, street centerlines, vending machines, trash/recycling (indoor + outdoor), and 15+ `pkg_*` package layers |
 | `geojson/manifest.json` | Metadata manifest for all GeoJSON layers |
 | `fulton_permitted_compost_sites (2).csv` | 10 real Fulton County permitted compost facilities (used in route optimizer) |
 | `.env` | ArcGIS API key (`ARCGIS_API_KEY=AAPK...`) — **do not commit** |
 | `exports/` | Generated GeoPackage and File GDB outputs |
+
+### Documentation
+| File | Purpose |
+|------|---------|
+| `PUBLISH.md` | Publishing guide — build bundle, deploy to Cloudflare Pages or Netlify, dashboard URLs |
+| `PRESENTATION_SCRIPT.md` | Presentation script / demo walkthrough |
+| `AFCN_Phase1_Tracking.md` | Phase 1 project tracking |
+| `Real-time Surplus Map.md` | Surplus map design notes |
+| `fleet-analytics-implementation.md` | Fleet analytics implementation notes |
+| `Design Research Notes.md` | Design research documentation |
+| `GT Campus Circular Hub — Design Review.md` | GT campus hub design review |
 
 ---
 
@@ -80,9 +110,21 @@ Both dashboards link to each other via nav links in the header.
 - **Key constants**: `MOCK_FLEET`, `SCORING_WEIGHTS`, `TRANSPORT_HIERARCHY`
 - **Key functions**: `computePriorityScore()`, `smartSelectRecovery()`, `smartSelectCapacityNode()`, `computeCapacityScore()`, `isTransportCompatible()`, `populateFleetPanel()`, `generateAISuggestion()`, `acceptAISuggestion()`
 
+### Fleet Analytics (`fleet-analytics.html`)
+- **Dark theme** — ArcGIS dark theme, `#0c1118` background
+- **Left rail**: Fleet table with vehicle rows (name, status, utilization), 3-column mini stats grid
+- **Center**: ArcGIS MapView with vehicle position markers, map legend, mode control
+- **Bottom strip**: 4-step pipeline visualization (Food Recovery → Redistribution → Beneficiary → Compost) with cards, scoring badges, and route builder
+- **Right dock**: Assigned routes list with accept/dismiss actions
+
+### GT Campus Hub (`gt-campus-hub.html`)
+- **Light theme** — ArcGIS light theme with admin palette (glaucous base + warm accents)
+- **Largest dashboard** (~2655 lines) with Chart.js analytics loaded lazily to avoid AMD/UMD conflict with ArcGIS Dojo loader
+- **Admin dashboard** with charts and campus-specific circular economy data
+
 ### API Key Flow
-1. `.env` file at project root: `ARCGIS_API_KEY=AAPK...`
-2. `serve.py` reads `.env` and serves it at `GET /api/config`
+1. **Local dev**: `.env` file at project root → `serve.py` reads it → served at `GET /api/config`
+2. **Netlify production**: `ARCGIS_API_KEY` env var in Netlify dashboard → `netlify/functions/config.js` serverless function → redirected from `/api/config`
 3. Dashboard JS fetches `/api/config` on load, sets `esriConfig.apiKey`
 4. If no key: yellow notice bar shown, routing falls back to geodesic estimates
 
@@ -94,6 +136,17 @@ python serve.py 3000     # http://localhost:3000
 ```
 Dashboard URL: `http://localhost:8080/resources/Layers%20%26%20Packages/index.html`
 Surplus Map: `http://localhost:8080/resources/Layers%20%26%20Packages/surplus-map.html`
+
+### Publishing / Deployment
+```bash
+# Build static bundle locally
+python "Python Script/publish_dashboards.py"
+python "Python Script/publish_dashboards.py" --clean          # full clean rebuild
+python "Python Script/publish_dashboards.py" --api-key "KEY"  # override API key
+
+# Netlify auto-builds via netlify.toml on push
+```
+The `publish/` folder (gitignored) contains the deploy-ready bundle with a generated landing page.
 
 ---
 
@@ -107,9 +160,16 @@ Surplus Map: `http://localhost:8080/resources/Layers%20%26%20Packages/surplus-ma
 | `circular_economy.geojson` | 127 | Compost, recycling, gardens |
 | `network_flows.geojson` | 12 | Flow LineStrings with lbs_per_week |
 | `buildings.geojson` | — | GT campus buildings |
+| `campus_boundary.geojson` | — | GT campus boundary polygon |
+| `compost_locations.geojson` | — | Compost facility locations |
+| `food_deserts_atlanta.geojson` | — | Atlanta food desert areas |
 | `recycling_trash_cans.geojson` | — | Outdoor recycling/trash locations |
+| `trash_recycling_indoor.geojson` | — | Indoor recycling/trash locations |
 | `sidewalks.geojson` | — | GT campus sidewalks |
-| `pkg_*.geojson` (15 files) | — | Package layers: grocery stores, farmers markets, restaurants, fast food, hospitals, religious institutions, etc. |
+| `street_centerlines.geojson` | — | GT campus street centerlines |
+| `vending_machines.geojson` | — | GT vending machine locations |
+| `pkg_*.geojson` (15 files) | — | Package layers: grocery stores, farmers markets, restaurants, fast food, hospitals, religious institutions, community orgs, food processing, Kroger network, supermarkets, etc. |
+| `*-iac-vlaba-2021.geojson` (5 files) | — | IAC-VLABA-2021 dataset variants of core layers |
 
 ---
 
@@ -126,6 +186,10 @@ Surplus Map: `http://localhost:8080/resources/Layers%20%26%20Packages/surplus-ma
 9. **Transport hierarchy as numeric levels** — Refrigerated Van (4) > Dry Vehicle (3) > Bike Courier (2) > Walk-in (1); vehicle must meet or exceed the pickup's required level
 10. **Capacity penalties at destination** — nodes >90% full get score penalties rather than being excluded, so they're still available as last resort
 11. **Fleet Intelligence uses mock data** — `MOCK_FLEET` constant provides realistic fleet stats; designed to be replaceable with live API data later
+12. **Chart.js loaded lazily in gt-campus-hub** — avoids AMD/UMD conflict with ArcGIS Dojo loader
+13. **gt_fch_preview uses dynamic host origin** — no localhost lock-in, works in any deployment environment
+14. **Netlify serverless function for API key** — keeps key secret in production vs. static `api/config` JSON in local dev
+15. **publish/ folder is gitignored** — generated artifact, rebuilt on each deploy
 
 ---
 
@@ -137,6 +201,12 @@ Surplus Map: `http://localhost:8080/resources/Layers%20%26%20Packages/surplus-ma
 3. Add a checkbox in the appropriate group in `<aside id="layerPanel">`
 4. Wire visibility toggle in the mode/tab JS logic
 5. Add to `updateStatsRail()` if it should show feature counts
+
+### Adding a new dashboard page
+1. Create `.html` file in `resources/Layers & Packages/`
+2. Add nav links to/from existing dashboards in the header
+3. The file will be auto-discovered by `publish_dashboards.py` and `serve.py`
+4. Optionally add to `PRIORITY_DASHBOARDS` and `DISPLAY_NAMES` in `publish_dashboards.py` for ordering/naming on the landing page
 
 ### Modifying mock surplus data
 - Edit `MOCK_SURPLUS` array in `surplus-map.html` (inline JS)
@@ -153,3 +223,23 @@ Surplus Map: `http://localhost:8080/resources/Layers%20%26%20Packages/surplus-ma
 ### Updating compost sites
 - Reference: `fulton_permitted_compost_sites (2).csv`
 - Route stops defined in `ROUTE_STOPS.compost` array in `surplus-map.html`
+
+### Deploying to Netlify
+1. Push to the repo — Netlify auto-builds via `netlify.toml`
+2. Set `ARCGIS_API_KEY` in Netlify dashboard → Site settings → Environment variables
+3. The build runs `publish_dashboards.py --out publish --clean` and publishes the `publish/` folder
+4. `/api/config` is redirected to the serverless function in `netlify/functions/config.js`
+
+---
+
+## Conventions
+
+- **No build step** — all dashboards are self-contained HTML with inline CSS and JS
+- **ArcGIS Maps SDK v4.30** via CDN (AMD modules) — do not upgrade without testing all dashboards
+- **Dark theme** for AFCN dashboard, surplus map, and fleet analytics; **light theme** for GT campus hub
+- **GT branding**: Navy `#003057`, Tech Gold `#B3A369`
+- **Font**: "Avenir Next", "Segoe UI", Arial, sans-serif
+- **File naming**: kebab-case for new files (e.g., `fleet-analytics.html`), underscores acceptable for legacy (e.g., `gt_fch_map.html`)
+- **GeoJSON files**: lowercase with underscores, `pkg_` prefix for package/external layers
+- **No external JS frameworks** — vanilla JS only, Chart.js loaded lazily where needed
+- **Secrets**: Never commit `.env`; API keys go through `/api/config` endpoint (local server or Netlify function)
