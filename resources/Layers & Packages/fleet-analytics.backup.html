@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Fleet Analytics - Atlanta Food Circular Network</title>
-<link rel="stylesheet" href="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps.css">
-<script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps-web.min.js"></script>
+<link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/dark/main.css" />
+<script src="https://js.arcgis.com/4.30/"></script>
 <style>
 :root{--hh:56px;--bg:#0c1118;--bg2:#07090f;--line:#22314a;--txt:#e8eef9;--mut:#8fa2c0;--gold:#b3a369;--ok:#66bb6a;--warn:#ffc107;--bad:#ef5350;--flow-h:32%}
 *{box-sizing:border-box;margin:0;padding:0}html,body,#app{width:100%;height:100%;overflow:hidden;font-family:"Avenir Next","Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--txt)}#app{position:relative;display:flex;flex-direction:column}
@@ -24,7 +24,6 @@
 .btn,.btnP{border-radius:999px;border:1px solid #2e4261;background:#112139;color:#d9e7ff;font-size:10px;font-weight:700;padding:4px 10px;cursor:pointer}.btnP{border-color:rgba(179,163,105,.85);background:rgba(179,163,105,.25);color:#f3e7bf}
 .builder{border:1px solid #294163;border-radius:6px;background:#10233a;padding:7px;margin-bottom:6px}.bt{font-size:10px;text-transform:uppercase;letter-spacing:.3px;color:#8fa7c8;font-weight:700;margin-bottom:5px}.br{display:flex;justify-content:space-between;gap:6px;margin-bottom:4px;font-size:10px}.bk{color:#86a0c3}.bv{font-weight:700;text-align:right}.chk{display:flex;gap:5px;font-size:10px;margin-bottom:3px;color:#a4b7d4;line-height:1.3}.chk .mk{width:12px;text-align:center;font-weight:800;font-size:9px}.ok .mk{color:var(--ok)}.no .mk{color:var(--bad)}
 #dock{display:flex;flex-direction:column;background:#0a1324}.dHead{padding:8px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:6px}.dTitle{font-size:10px;text-transform:uppercase;color:#d7c17d;font-weight:700;letter-spacing:.3px}.dPill{border:1px solid #2f4360;border-radius:999px;background:#112038;color:#d9e7ff;font-size:10px;font-weight:700;padding:3px 8px}.dLife{padding:5px 10px;border-bottom:1px solid var(--line);font-size:9px;text-transform:uppercase;color:#7288a9}#assignedRoutesList{flex:1;min-height:0;overflow:auto;padding:6px 8px}.ac{border:1px solid #233a5a;border-radius:6px;background:#101f34;padding:6px;margin-bottom:6px}.ac.focus{border-color:rgba(179,163,105,.7)}.at{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-bottom:3px}.an{font-size:11px;font-weight:700;cursor:pointer}.am{font-size:10px;color:#91a8c8;line-height:1.3}.aa{margin-top:5px;display:flex;justify-content:space-between;gap:5px;align-items:center}
-.mapboxgl-popup-content{background:#0f1f35!important;color:#e8eef9;border:1px solid #243652;border-radius:6px;font-size:11px;padding:6px 8px}.mapboxgl-popup-tip{border-top-color:#0f1f35!important}.mapboxgl-popup-close-button{color:#8fa2c0;font-size:14px}
 @media(max-width:1180px){#main{grid-template-columns:1fr}#fleetRail{min-height:220px;max-height:260px}#flowStrip{grid-template-columns:1fr}}
 </style>
 </head>
@@ -40,7 +39,7 @@
     <div class="miniStats"><div class="miniStat"><div class="v">24m</div><div class="l">Avg Pickup</div></div><div class="miniStat"><div class="v">94%</div><div class="l">On-Time</div></div><div class="miniStat"><div class="v">12.4K</div><div class="l">LBS Today</div></div></div>
     <div class="fleetTableWrap"><table><thead><tr><th>Vehicle / Driver</th><th>Type</th><th>Status</th><th>Utilization</th></tr></thead><tbody id="driverTableBody"></tbody></table></div>
   </aside>
-  <main id="mapStage"><div id="viewDiv"></div><div class="mapLegend"><span class="legendItem"><span class="legendDot" style="background:#2f8fe5"></span>Vehicles</span><span class="legendItem"><span class="legendDot" style="background:#da4744"></span>Donors</span><span class="legendItem"><span class="legendDot" style="background:#d0b76d"></span>Recipients</span><span class="legendItem" style="color:#d4bf72">Logistics Fleet</span></div><div id="mapStatus">Initializing map...</div><div id="mapModeCtrl"><button id="modeTT" class="modeBtn active" type="button">TomTom</button><button id="modeMock" class="modeBtn" type="button">Mock</button><span style="width:1px;height:14px;background:#2e4261;margin:0 2px;display:inline-block"></span><button id="modeTraffic" class="modeBtn" type="button">Traffic</button><button id="mode3D" class="modeBtn" type="button">3D</button></div></main>
+  <main id="mapStage"><div id="viewDiv"></div><div class="mapLegend"><span class="legendItem"><span class="legendDot" style="background:#2f8fe5"></span>Vehicles</span><span class="legendItem"><span class="legendDot" style="background:#da4744"></span>Donors</span><span class="legendItem"><span class="legendDot" style="background:#d0b76d"></span>Recipients</span><span class="legendItem" style="color:#d4bf72">Logistics Fleet</span></div><div id="mapStatus">Initializing ArcGIS...</div><div id="mapModeCtrl"><button id="modeArc" class="modeBtn active" type="button">ArcGIS</button><button id="modeMock" class="modeBtn" type="button">Mock</button><span style="width:1px;height:14px;background:#2e4261;margin:0 2px;display:inline-block"></span><button id="modeTraffic" class="modeBtn" type="button">Traffic</button><button id="mode3D" class="modeBtn" type="button">3D</button></div></main>
 </section>
 <section id="flowStrip"><div id="pipe"><div id="pipeWrap">
   <div class="step active" data-step="0"><div class="sHead"><div class="sTitle"><div class="sCircle">1</div><div class="sLabel">LOGISTICS FLEET</div></div><div><div class="sVal" id="c1">0</div><div class="sSub">ACTIVE VEHICLES</div></div></div><div class="sBody" id="step1Body"><div class="empty">Select a driver from the left table to begin assignment.</div></div></div>
@@ -58,7 +57,8 @@
 <script>
 (()=>{
 const MAP_MODE_KEY='fleet.analytics.mapMode';
-const DEFAULT_MAP_MODE='tomtom';
+const DEFAULT_MAP_MODE='arcgis';
+const ROUTE_URL="https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
 const ATL={xmin:-84.68,xmax:-84.08,ymin:33.52,ymax:34.08};
 const VEH=[
 {id:"v1",veh:"Reefer Van #1",drv:"Marcus Johnson",type:"Refrigerated",status:"Active",u:88,cap:3200,lng:-84.393,lat:33.757},
@@ -87,13 +87,13 @@ const MOCK_RECS=[
 {id:"mr6",name:"North Fulton Access Hub",lng:-84.331,lat:33.912,source:"mock_recipients.json"}
 ];
 const S={step:0,selD:null,selDon:null,selRec:null,donors:[],recs:[],dc:[],rc:[],ai:null,preview:null,pending:[],assigned:[],focus:null,ds:"loading",rs:"loading"};
-const M={ready:false,mode:"none",view:null,tomtomKey:'',mock:null,trafficOn:false,is3D:false};
+const M={ready:false,mode:"none",hasKey:false,view:null,G:null,route:null,RP:null,FS:null,l:null,mock:null};
 const U={};
 let mapInitSeq=0;
 document.addEventListener("DOMContentLoaded",init);
 function init(){cache();bind();renderDrivers();renderStep1();renderDonors();renderRecs();renderPending();renderAssigned();updateBuilder();initMap();}
-function cache(){["driverTableBody","fleetCount","step1Body","donorOptions","recipientOptions","pendingList","assignedRoutesList","c1","c2","c3","c4","dockCount","bDriver","bDonor","bRec","bScore","bRoute","checklist","queueBtn","aiBtn","approveBtn","mapStatus","viewDiv","modeTT","modeMock","modeTraffic","mode3D"].forEach(id=>U[id]=document.getElementById(id));U.steps=[...document.querySelectorAll('.step')];}
-function bind(){U.steps.forEach(el=>el.onclick=()=>setStep(+el.dataset.step));U.queueBtn.onclick=queuePending;U.aiBtn.onclick=useAI;U.approveBtn.onclick=approveSelected;U.modeTT.onclick=()=>switchMapMode('tomtom');U.modeMock.onclick=()=>switchMapMode('mock');U.modeTraffic.onclick=toggleTraffic;U.mode3D.onclick=toggle3D;}
+function cache(){["driverTableBody","fleetCount","step1Body","donorOptions","recipientOptions","pendingList","assignedRoutesList","c1","c2","c3","c4","dockCount","bDriver","bDonor","bRec","bScore","bRoute","checklist","queueBtn","aiBtn","approveBtn","mapStatus","viewDiv","modeArc","modeMock","modeTraffic","mode3D"].forEach(id=>U[id]=document.getElementById(id));U.steps=[...document.querySelectorAll('.step')];}
+function bind(){U.steps.forEach(el=>el.onclick=()=>setStep(+el.dataset.step));U.queueBtn.onclick=queuePending;U.aiBtn.onclick=useAI;U.approveBtn.onclick=approveSelected;U.modeArc.onclick=()=>switchMapMode('arcgis');U.modeMock.onclick=()=>switchMapMode('mock');U.modeTraffic.onclick=toggleTraffic;U.mode3D.onclick=toggle3D;}
 function setStep(n){S.step=Math.max(0,Math.min(3,n));U.steps.forEach(el=>el.classList.toggle('active',+el.dataset.step===S.step));}
 function esc(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');}
 function icon(t){if(t==='Refrigerated')return '&#128666;'; if(t==='Dry')return '&#128230;'; if(t==='Standard')return '&#128663;'; return '&#128692;';}
@@ -113,9 +113,9 @@ function curScore(d,o,r){const a=rankDonors(d).find(x=>x.r.id===o.id)||{s:50},b=
 function buildAI(){const d=drv();if(!d||!S.donors.length||!S.recs.length){S.ai=null;return;}const od=rankDonors(d)[0];if(!od){S.ai=null;return;}const rr=rankRecs(d,od.r)[0];if(!rr){S.ai=null;return;}const score=Math.max(1,Math.min(99,Math.round(od.s*.6+rr.s*.4)));S.ai={donorId:od.r.id,recId:rr.r.id,score};}
 function useAI(){if(!S.ai)return;S.selDon=S.ai.donorId;S.selRec=S.ai.recId;renderDonors();renderRecs();updateBuilder();previewRoute();setStep(3);}
 async function previewRoute(){const d=drv(),o=don(),r=rec();if(!d||!o||!r){S.preview=null;updateBuilder();updateMap();return;}U.bRoute.textContent='Calculating route...';S.preview=await solve([d,o,r]);updateBuilder();updateMap();}
-function checks(d,o,r){const ok=d&&o&&r?canRun(d,o,r):false;return[{t:'Active driver selected',ok:!!d&&d.status==='Active'},{t:'Food donor selected from live layer',ok:!!o},{t:'Redistribution destination selected',ok:!!r},{t:'Vehicle and route compatibility check',ok},{t:M.tomtomKey?'TomTom route validated':'Fallback route available (API key missing)',ok:!!S.preview&&(S.preview.arc||!M.tomtomKey)}];}
+function checks(d,o,r){const ok=d&&o&&r?canRun(d,o,r):false;return[{t:'Active driver selected',ok:!!d&&d.status==='Active'},{t:'Food donor selected from live layer',ok:!!o},{t:'Redistribution destination selected',ok:!!r},{t:'Vehicle and route compatibility check',ok},{t:M.hasKey?'ArcGIS route solve validated':'Fallback route available (API key missing)',ok:!!S.preview&&(S.preview.arc||!M.hasKey)}];}
 function canRun(d,o,r){const m=hv(d.lat,d.lng,o.lat,o.lng)+hv(o.lat,o.lng,r.lat,r.lng);if(d.status!=='Active')return false;if(d.type==='Bike'&&m>4.5)return false;if(d.type==='Standard'&&m>10)return false;return compat(d.type,m)>=45;}
-function updateBuilder(){const d=drv(),o=don(),r=rec();U.bDriver.textContent=d?`${d.drv} (${d.veh})`:'-';U.bDonor.textContent=o?o.name:'-';U.bRec.textContent=r?r.name:'-';U.bScore.textContent=d&&o&&r?`${curScore(d,o,r)} / 100`:'-';if(S.preview)U.bRoute.textContent=`${S.preview.miles.toFixed(1)} mi, ${S.preview.mins} min (${S.preview.arc?'TomTom route':'Fallback estimate'})`;else if(d&&o&&r)U.bRoute.textContent='Calculating route...';else U.bRoute.textContent='-';U.checklist.innerHTML=checks(d,o,r).map(x=>`<div class="chk ${x.ok?'ok':'no'}"><span class="mk">${x.ok?'[OK]':'[!]'}</span><span>${esc(x.t)}</span></div>`).join('');}
+function updateBuilder(){const d=drv(),o=don(),r=rec();U.bDriver.textContent=d?`${d.drv} (${d.veh})`:'-';U.bDonor.textContent=o?o.name:'-';U.bRec.textContent=r?r.name:'-';U.bScore.textContent=d&&o&&r?`${curScore(d,o,r)} / 100`:'-';if(S.preview)U.bRoute.textContent=`${S.preview.miles.toFixed(1)} mi, ${S.preview.mins} min (${S.preview.arc?'ArcGIS route':'Fallback estimate'})`;else if(d&&o&&r)U.bRoute.textContent='Calculating route...';else U.bRoute.textContent='-';U.checklist.innerHTML=checks(d,o,r).map(x=>`<div class="chk ${x.ok?'ok':'no'}"><span class="mk">${x.ok?'[OK]':'[!]'}</span><span>${esc(x.t)}</span></div>`).join('');}
 async function queuePending(){const d=drv(),o=don(),r=rec();if(!d||!o||!r){status('Select driver, donor, and destination first.');return;}if(!S.preview)await previewRoute();if(!S.preview)return;const score=S.ai?S.ai.score:curScore(d,o,r);const recd={id:`rt-${Date.now()}-${Math.floor(Math.random()*1000)}`,driver:`${d.drv} (${d.veh})`,donor:o.name,rec:r.name,status:'Pending',score,miles:S.preview.miles,mins:S.preview.mins,geom:JSON.parse(JSON.stringify(S.preview.geom)),arc:S.preview.arc};S.pending.unshift(recd);S.focus=recd.id;renderPending();renderAssigned();updateCounts();updateMap();setStep(3);}
 function renderPending(){if(!S.pending.length){U.pendingList.innerHTML='<div class="empty">No routes pending approval.</div>';updateCounts();return;}U.pendingList.innerHTML=S.pending.map(r=>`<div class="card"><div class="ct"><span>${esc(r.donor)} -> ${esc(r.rec)}</span><span class="badge pending">Pending</span></div><div class="cm">${esc(r.driver)} | ${r.miles.toFixed(1)} mi | ${r.mins} min | AI ${r.score}</div><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:7px"><label style="font-size:11px;color:#a9bbd7"><input type="checkbox" class="pcheck" data-id="${r.id}" checked> Approve</label><button class="btn" data-focus="${r.id}" type="button">View on Map</button></div></div>`).join('');[...U.pendingList.querySelectorAll('[data-focus]')].forEach(b=>b.onclick=()=>{S.focus=b.dataset.focus;updateMap();setStep(3)});updateCounts();}
 function approveSelected(){const ids=new Set([...U.pendingList.querySelectorAll('.pcheck:checked')].map(c=>c.dataset.id));if(!ids.size)return;const keep=[],add=[];S.pending.forEach(r=>ids.has(r.id)?add.push(r):keep.push(r));add.forEach(r=>S.assigned.unshift({...r,status:'Approved'}));S.pending=keep;if(add.length)S.focus=add[0].id;renderPending();renderAssigned();updateCounts();updateMap();}
@@ -125,159 +125,30 @@ function renderAssigned(){if(!S.assigned.length){U.assignedRoutesList.innerHTML=
 function advance(id){const r=S.assigned.find(x=>x.id===id);if(!r)return;if(r.status==='Approved')r.status='In-Progress';else if(r.status==='In-Progress')r.status='Completed';S.focus=id;renderAssigned();updateMap();}
 function updateCounts(){U.c1.textContent=VEH.filter(v=>v.status==='Active').length;U.c2.textContent=S.dc.length;U.c3.textContent=S.rc.length;U.c4.textContent=S.pending.length;}
 function focused(){if(!S.focus)return null;return S.pending.find(r=>r.id===S.focus)||S.assigned.find(r=>r.id===S.focus)||null;}
-/* ── Mock SVG helpers (unchanged) ── */
 function clearNode(n){while(n&&n.firstChild)n.removeChild(n.firstChild);}
 function svgEl(tag,attrs){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);if(attrs)Object.keys(attrs).forEach(k=>e.setAttribute(k,String(attrs[k])));return e;}
 function toXY(lng,lat){const w=1000,h=600,p=30,x=p+((lng-ATL.xmin)/(ATL.xmax-ATL.xmin))*(w-p*2),y=p+(1-((lat-ATL.ymin)/(ATL.ymax-ATL.ymin)))*(h-p*2);return[Math.max(p,Math.min(w-p,x)),Math.max(p,Math.min(h-p,y))];}
 function drawMockPoint(layer,type,lng,lat,emph,active){const pt=toXY(lng,lat),x=pt[0],y=pt[1],stroke=emph?'#fff':'#d9deea',sw=emph?2.6:1.2,a=active==='inactive'?0.45:0.92;if(type==='veh'){const s=emph?12:9;layer.appendChild(svgEl('rect',{x:x-s/2,y:y-s/2,width:s,height:s,fill:`rgba(47,143,229,${a})`,stroke,'stroke-width':sw,rx:2,ry:2}));return;}if(type==='don'){const s=emph?12:9,p=`${x},${y-s/2} ${x+s/2},${y} ${x},${y+s/2} ${x-s/2},${y}`;layer.appendChild(svgEl('polygon',{points:p,fill:`rgba(218,71,68,${a})`,stroke,'stroke-width':sw}));return;}const r=emph?6.5:5;layer.appendChild(svgEl('circle',{cx:x,cy:y,r,fill:`rgba(208,183,109,${a})`,stroke,'stroke-width':sw}));}
 function ensureMockMap(){clearNode(U.viewDiv);U.viewDiv.style.background='radial-gradient(circle at 50% 45%, #1f2f45 0%, #121c2e 35%, #0d1422 65%, #0a111c 100%)';const s=svgEl('svg',{viewBox:'0 0 1000 600',preserveAspectRatio:'none',width:'100%',height:'100%'});s.style.position='absolute';s.style.inset='0';s.style.zIndex='1';const g=svgEl('g',{opacity:'0.42'});for(let x=60;x<1000;x+=60)g.appendChild(svgEl('line',{x1:x,y1:0,x2:x,y2:600,stroke:'#24384f','stroke-width':1}));for(let y=60;y<600;y+=60)g.appendChild(svgEl('line',{x1:0,y1:y,x2:1000,y2:y,stroke:'#24384f','stroke-width':1}));const roads=svgEl('g',{opacity:'0.3'});roads.appendChild(svgEl('path',{d:'M30 460 C220 370,390 320,560 280 C720 245,860 205,970 155',fill:'none',stroke:'#3a4b62','stroke-width':3}));roads.appendChild(svgEl('path',{d:'M110 90 C240 160,320 250,420 340 C520 430,690 530,900 580',fill:'none',stroke:'#3a4b62','stroke-width':3}));roads.appendChild(svgEl('path',{d:'M500 20 C495 160,505 290,510 575',fill:'none',stroke:'#4a5f7a','stroke-width':2.5}));const base=svgEl('g',{}),route=svgEl('g',{}),ctx=svgEl('g',{}),t=svgEl('text',{x:500,y:40,fill:'#9fb0c8','text-anchor':'middle','font-size':20,'font-weight':700});t.textContent='Atlanta Mock Route Canvas';s.appendChild(g);s.appendChild(roads);s.appendChild(base);s.appendChild(route);s.appendChild(ctx);s.appendChild(t);U.viewDiv.appendChild(s);M.mock={svg:s,base,route,ctx};M.mode='mock';M.ready=true;}
-/* ── TomTom Map Engine ── */
-function emptyFC(){return{type:'FeatureCollection',features:[]};}
-function drawBase(){
-if(M.mode==='mock'&&M.mock){clearNode(M.mock.base);VEH.forEach(v=>drawMockPoint(M.mock.base,'veh',v.lng,v.lat,false,v.status==='Active'?'active':'inactive'));S.donors.slice(0,140).forEach(d=>drawMockPoint(M.mock.base,'don',d.lng,d.lat,false,'active'));S.recs.slice(0,120).forEach(r=>drawMockPoint(M.mock.base,'rec',r.lng,r.lat,false,'active'));return;}
-if(M.mode!=='tomtom'||!M.view)return;
-const map=M.view;
-try{
-map.getSource('vehicles').setData({type:'FeatureCollection',features:VEH.map(v=>({type:'Feature',geometry:{type:'Point',coordinates:[v.lng,v.lat]},properties:{name:v.drv+' - '+v.veh,status:v.status}}))});
-map.getSource('donors').setData({type:'FeatureCollection',features:S.donors.slice(0,140).map(d=>({type:'Feature',geometry:{type:'Point',coordinates:[d.lng,d.lat]},properties:{name:d.name}}))});
-map.getSource('recipients').setData({type:'FeatureCollection',features:S.recs.slice(0,120).map(r=>({type:'Feature',geometry:{type:'Point',coordinates:[r.lng,r.lat]},properties:{name:r.name}}))});
-}catch(e){console.warn('drawBase error',e);}
-}
-function drawRoute(g){
-if(!g)return;
-if(M.mode==='mock'&&M.mock){
-const coords=g.coordinates||(g.paths?g.paths.flat():[]);
-if(!coords.length)return;
-const d=coords.map((c,i)=>{const xy=toXY(c[0],c[1]);return`${i===0?'M':'L'}${xy[0]},${xy[1]}`;}).join(' ');
-M.mock.route.appendChild(svgEl('path',{d,fill:'none',stroke:'rgba(0,191,165,0.28)','stroke-width':10,'stroke-linecap':'round','stroke-linejoin':'round'}));
-M.mock.route.appendChild(svgEl('path',{d,fill:'none',stroke:'#b3a369','stroke-width':4,'stroke-linecap':'round','stroke-linejoin':'round'}));
-return;}
-if(M.mode!=='tomtom'||!M.view)return;
-try{M.view.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:g,properties:{}}]});}catch(e){console.warn('drawRoute error',e);}
-}
-function zoomRoute(g){
-if(M.mode!=='tomtom'||!M.view||!g||!g.coordinates||!g.coordinates.length)return;
-const coords=g.coordinates,lngs=coords.map(c=>c[0]),lats=coords.map(c=>c[1]);
-M.view.fitBounds([[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]],{padding:40,duration:500});
-}
-function updateMap(){
-if(!M.ready)return;drawBase();
-const d=drv(),o=don(),r=rec(),fr=focused(),rt=fr?{geom:fr.geom}:S.preview;
-if(M.mode==='mock'&&M.mock){clearNode(M.mock.ctx);clearNode(M.mock.route);if(d)drawMockPoint(M.mock.ctx,'veh',d.lng,d.lat,true,'active');if(o)drawMockPoint(M.mock.ctx,'don',o.lng,o.lat,true,'active');if(r)drawMockPoint(M.mock.ctx,'rec',r.lng,r.lat,true,'active');if(rt&&rt.geom)drawRoute(rt.geom);return;}
-if(M.mode!=='tomtom'||!M.view)return;
-const map=M.view;
-try{
-const ctxF=[];
-if(d)ctxF.push({type:'Feature',geometry:{type:'Point',coordinates:[d.lng,d.lat]},properties:{color:'rgba(30,136,229,0.98)',name:d.drv}});
-if(o)ctxF.push({type:'Feature',geometry:{type:'Point',coordinates:[o.lng,o.lat]},properties:{color:'rgba(239,83,80,0.95)',name:o.name}});
-if(r)ctxF.push({type:'Feature',geometry:{type:'Point',coordinates:[r.lng,r.lat]},properties:{color:'rgba(179,163,105,0.95)',name:r.name}});
-map.getSource('context').setData({type:'FeatureCollection',features:ctxF});
-if(rt&&rt.geom){drawRoute(rt.geom);zoomRoute(rt.geom);}else{map.getSource('route').setData(emptyFC());}
-}catch(e){console.warn('updateMap error',e);}
-}
-async function solve(stops){
-if(M.tomtomKey&&stops.length>=2){
-try{
-const locs=stops.map(s=>`${s.lat},${s.lng}`).join(':');
-const url=`https://api.tomtom.com/routing/1/calculateRoute/${locs}/json?key=${M.tomtomKey}&traffic=true&travelMode=car&routeType=fastest`;
-const res=await fetch(url);
-if(res.ok){const data=await res.json();
-if(data.routes&&data.routes.length){const rt=data.routes[0],pts=rt.legs.flatMap(l=>l.points),coords=pts.map(p=>[p.longitude,p.latitude]);
-const mi=(rt.summary.lengthInMeters||0)*0.000621371,mn=Math.round((rt.summary.travelTimeInSeconds||0)/60);
-return{geom:{type:'LineString',coordinates:coords},miles:mi,mins:mn,arc:true};}}
-}catch(e){console.warn('TomTom route fallback',e);}}
-const mi=chain(stops);
-return{geom:{type:'LineString',coordinates:stops.map(s=>[s.lng,s.lat])},miles:mi,mins:Math.round(mi/22*60),arc:false};
-}
+function drawBase(){if(M.mode==='mock'&&M.mock){clearNode(M.mock.base);VEH.forEach(v=>drawMockPoint(M.mock.base,'veh',v.lng,v.lat,false,v.status==='Active'?'active':'inactive'));S.donors.slice(0,140).forEach(d=>drawMockPoint(M.mock.base,'don',d.lng,d.lat,false,'active'));S.recs.slice(0,120).forEach(r=>drawMockPoint(M.mock.base,'rec',r.lng,r.lat,false,'active'));return;}if(!M.l||!M.G)return;const G=M.G;M.l.v.removeAll();M.l.d.removeAll();M.l.r.removeAll();VEH.forEach(v=>M.l.v.add(new G({geometry:{type:'point',longitude:v.lng,latitude:v.lat},symbol:{type:'simple-marker',style:'square',color:v.status==='Active'?[30,136,229,.95]:[92,115,145,.9],size:10,outline:{color:[255,255,255,.9],width:1.4}},popupTemplate:{title:v.drv+' - '+v.veh}})));S.donors.slice(0,140).forEach(d=>M.l.d.add(new G({geometry:{type:'point',longitude:d.lng,latitude:d.lat},symbol:{type:'simple-marker',style:'diamond',color:[239,83,80,.85],size:8,outline:{color:[255,255,255,.8],width:1}},popupTemplate:{title:d.name}})));S.recs.slice(0,120).forEach(r=>M.l.r.add(new G({geometry:{type:'point',longitude:r.lng,latitude:r.lat},symbol:{type:'simple-marker',style:'circle',color:[179,163,105,.88],size:8,outline:{color:[255,255,255,.85],width:1}},popupTemplate:{title:r.name}})));}
+function drawRoute(g){if(!g)return;if(M.mode==='mock'&&M.mock){if(!Array.isArray(g.paths)||!g.paths.length)return;const d=g.paths.map(path=>path.map((pt,i)=>{const xy=toXY(pt[0],pt[1]);return`${i===0?'M':'L'}${xy[0]},${xy[1]}`;}).join(' ')).join(' ');M.mock.route.appendChild(svgEl('path',{d,fill:'none',stroke:'rgba(0,191,165,0.28)','stroke-width':10,'stroke-linecap':'round','stroke-linejoin':'round'}));M.mock.route.appendChild(svgEl('path',{d,fill:'none',stroke:'#b3a369','stroke-width':4,'stroke-linecap':'round','stroke-linejoin':'round'}));return;}if(!M.G||!M.l)return;const G=M.G;M.l.route.add(new G({geometry:g,symbol:{type:'simple-line',color:[0,191,165,.25],width:8}}));M.l.route.add(new G({geometry:g,symbol:{type:'simple-line',color:'#b3a369',width:4}}));}
+function zoom(g){if(M.mode!=='arcgis'||!M.view||!g||!g.paths)return;const p=g.paths.flat();if(!p.length)return;const xs=p.map(x=>x[0]),ys=p.map(y=>y[1]);M.view.goTo({type:'extent',xmin:Math.min(...xs)-.02,ymin:Math.min(...ys)-.02,xmax:Math.max(...xs)+.02,ymax:Math.max(...ys)+.02,spatialReference:{wkid:4326}},{duration:500}).catch(()=>{});}
+function updateMap(){if(!M.ready)return;drawBase();const d=drv(),o=don(),r=rec(),fr=focused(),rt=fr?{geom:fr.geom}:S.preview;if(M.mode==='mock'&&M.mock){clearNode(M.mock.ctx);clearNode(M.mock.route);if(d)drawMockPoint(M.mock.ctx,'veh',d.lng,d.lat,true,'active');if(o)drawMockPoint(M.mock.ctx,'don',o.lng,o.lat,true,'active');if(r)drawMockPoint(M.mock.ctx,'rec',r.lng,r.lat,true,'active');if(rt&&rt.geom)drawRoute(rt.geom);return;}if(!M.l||!M.G)return;M.l.ctx.removeAll();M.l.route.removeAll();const G=M.G;if(d)M.l.ctx.add(new G({geometry:{type:'point',longitude:d.lng,latitude:d.lat},symbol:{type:'simple-marker',style:'square',size:14,color:[30,136,229,.98],outline:{color:[255,255,255,1],width:2.4}}}));if(o)M.l.ctx.add(new G({geometry:{type:'point',longitude:o.lng,latitude:o.lat},symbol:{type:'simple-marker',style:'diamond',size:14,color:[239,83,80,.95],outline:{color:[255,255,255,1],width:2}}}));if(r)M.l.ctx.add(new G({geometry:{type:'point',longitude:r.lng,latitude:r.lat},symbol:{type:'simple-marker',style:'circle',size:14,color:[179,163,105,.95],outline:{color:[255,255,255,1],width:2}}}));if(rt&&rt.geom){drawRoute(rt.geom);zoom(rt.geom);}}
+async function solve(stops){if(M.mode==='arcgis'&&M.hasKey&&M.route&&M.RP&&M.FS&&M.G){try{const fs=stops.map(p=>new M.G({geometry:{type:'point',longitude:p.lng,latitude:p.lat}}));const params=new M.RP({stops:new M.FS({features:fs}),returnDirections:true,outSpatialReference:{wkid:4326},startTime:new Date()});const res=await M.route.solve(ROUTE_URL,params);if(res&&res.routeResults&&res.routeResults.length){const rr=res.routeResults[0],a=rr.route.attributes||{},mi=a.Total_Miles||(a.Total_Kilometers?a.Total_Kilometers*.621371:chain(stops)),mn=Math.round(a.Total_TravelTime||mi/24*60),g=rr.route.geometry;return{geom:g&&g.toJSON?g.toJSON():g,miles:mi,mins:mn,arc:true}}}catch(e){console.warn('route fallback',e)}}const mi=chain(stops);return{geom:{type:'polyline',paths:[stops.map(s=>[s.lng,s.lat])],spatialReference:{wkid:4326}},miles:mi,mins:Math.round(mi/22*60),arc:false};}
 function chain(st){let t=0;for(let i=0;i<st.length-1;i++)t+=hv(st[i].lat,st[i].lng,st[i+1].lat,st[i+1].lng);return t;}
 function hv(a,b,c,d){const r=Math.PI/180,dl=(c-a)*r,dn=(d-b)*r,x=Math.sin(dl/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dn/2)**2;return 3958.8*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
-function toggleTraffic(){
-if(M.mode!=='tomtom'||!M.view){status('Traffic requires TomTom map mode');return;}
-M.trafficOn=!M.trafficOn;
-U.modeTraffic.classList.toggle('traffic-on',M.trafficOn);
-try{M.view.setLayoutProperty('tt-traffic','visibility',M.trafficOn?'visible':'none');}catch(e){console.warn('traffic toggle error',e);}
-}
-function toggle3D(){
-if(M.mode!=='tomtom'||!M.view){status('3D requires TomTom map mode');return;}
-M.is3D=!M.is3D;
-U.mode3D.classList.toggle('view3d',M.is3D);
-M.view.easeTo({pitch:M.is3D?60:0,bearing:M.is3D?-20:0,duration:800});
-status(M.is3D?'3D tilted view active':'2D flat view active');
-}
-function updateOverlayBtns(){const mock=M.mode==='mock';if(U.modeTraffic){U.modeTraffic.disabled=mock;U.modeTraffic.style.opacity=mock?'0.4':'1';if(mock){U.modeTraffic.classList.remove('traffic-on');M.trafficOn=false;}}if(U.mode3D){U.mode3D.disabled=mock;U.mode3D.style.opacity=mock?'0.4':'1';if(mock){U.mode3D.classList.remove('view3d');M.is3D=false;}}}
+let trafficTimer=null;
+function toggleTraffic(){if(!M.trafficLayer){status('Traffic unavailable (no TomTom API key)');return;}const on=!M.trafficLayer.visible;M.trafficLayer.visible=on;U.modeTraffic.classList.toggle('traffic-on',on);if(on){trafficTimer=setInterval(()=>{if(M.trafficLayer)M.trafficLayer.refresh();},300000);}else{clearInterval(trafficTimer);trafficTimer=null;}}
+function updateOverlayBtns(){const mock=M.mode==='mock';if(U.modeTraffic){U.modeTraffic.disabled=mock||!M.trafficLayer;U.modeTraffic.style.opacity=(mock||!M.trafficLayer)?'0.4':'1';if(mock||!M.trafficLayer){U.modeTraffic.classList.remove('traffic-on');if(M.trafficLayer)M.trafficLayer.visible=false;clearInterval(trafficTimer);trafficTimer=null;}}if(U.mode3D){U.mode3D.disabled=mock;U.mode3D.style.opacity=mock?'0.4':'1';if(mock){U.mode3D.classList.remove('view3d');M.is3D=false;}}}
+async function toggle3D(){if(M.mode!=='arcgis'||!M.view){status('3D requires ArcGIS map mode');return;}const center=M.view.center,zoom=M.view.zoom;M.view.destroy();M.is3D=!M.is3D;U.mode3D.classList.toggle('view3d',M.is3D);if(M.is3D){M.mapObj.ground='world-elevation';M.view=new M.SceneView({map:M.mapObj,container:'viewDiv',center,zoom,camera:{position:{x:center.longitude,y:center.latitude,z:2500},tilt:60,heading:0},environment:{lighting:{directShadowsEnabled:true,date:new Date()},atmosphere:{quality:'high'}},qualityProfile:'medium',ui:{components:['zoom','attribution']}});}else{M.mapObj.ground={surfaceColor:[0,0,0]};M.view=new M.MapView({map:M.mapObj,container:'viewDiv',center,zoom,constraints:{minZoom:9,maxZoom:17},ui:{components:['zoom','attribution']}});}try{await M.view.when();M.view.ui.add(new M.HomeWidget({view:M.view}),'top-left');updateMap();status(M.is3D?'3D Scene View active':'2D Map View active');}catch(e){console.warn('View toggle error',e);status('View toggle failed: '+(e&&e.message||'unknown'));}}
 function status(msg){U.mapStatus.textContent=`${msg} | Donors: ${S.ds} | Recipients: ${S.rs}`;}
 function statusError(msg){U.mapStatus.textContent=`Map init failed: ${msg}`;}
-function modePref(){try{const v=localStorage.getItem(MAP_MODE_KEY);return v==='mock'?'mock':'tomtom';}catch(e){return DEFAULT_MAP_MODE;}}
+function modePref(){try{const v=localStorage.getItem(MAP_MODE_KEY);return v==='mock'?'mock':'arcgis';}catch(e){return DEFAULT_MAP_MODE;}}
 function saveModePref(mode){try{localStorage.setItem(MAP_MODE_KEY,mode);}catch(e){}}
-function syncModeUI(mode){if(U.modeTT)U.modeTT.classList.toggle('active',mode==='tomtom');if(U.modeMock)U.modeMock.classList.toggle('active',mode==='mock');}
-function resetMapRuntime(){if(M.view&&typeof M.view.remove==='function'){try{M.view.remove();}catch(e){}}M.ready=false;M.mode='none';M.view=null;M.mock=null;M.trafficOn=false;M.is3D=false;if(U.viewDiv){clearNode(U.viewDiv);U.viewDiv.style.background='';}}
-async function switchMapMode(mode){if(mode!=='tomtom'&&mode!=='mock')return;if(M.ready&&M.mode===mode){syncModeUI(mode);return;}saveModePref(mode);syncModeUI(mode);await initMap(mode);}
-function initTomTomMap(cfg){
-return new Promise((resolve,reject)=>{
-const apiKey=cfg.tomtomApiKey;
-M.tomtomKey=apiKey;
-status('Creating TomTom map...');
-let map;
-try{
-map=tt.map({key:apiKey,container:'viewDiv',center:[-84.388,33.749],zoom:10.8,
-style:`https://api.tomtom.com/style/1/style/*?map=basic_night&key=${apiKey}`});
-}catch(e){reject(e);return;}
-const timeout=setTimeout(()=>reject(new Error('TomTom map load timed out (20s)')),20000);
-map.on('error',e=>{clearTimeout(timeout);console.warn('TomTom map error',e);});
-map.on('load',async()=>{
-clearTimeout(timeout);
-try{
-map.addControl(new tt.NavigationControl(),'top-left');
-/* Traffic flow raster tiles (initially hidden) */
-map.addSource('tt-traffic',{type:'raster',tiles:[`https://api.tomtom.com/traffic/map/4/tile/flow/relative/{z}/{x}/{y}.png?key=${apiKey}&thickness=10`],tileSize:256});
-map.addLayer({id:'tt-traffic',type:'raster',source:'tt-traffic',layout:{visibility:'none'},paint:{'raster-opacity':0.7}});
-/* Route layers */
-map.addSource('route',{type:'geojson',data:emptyFC()});
-map.addLayer({id:'route-glow',type:'line',source:'route',paint:{'line-color':'rgba(0,191,165,0.25)','line-width':8}});
-map.addLayer({id:'route-line',type:'line',source:'route',paint:{'line-color':'#b3a369','line-width':4}});
-/* Data layers */
-map.addSource('donors',{type:'geojson',data:emptyFC()});
-map.addLayer({id:'donors-layer',type:'circle',source:'donors',paint:{'circle-radius':4,'circle-color':'rgba(239,83,80,0.85)','circle-stroke-color':'rgba(255,255,255,0.8)','circle-stroke-width':1}});
-map.addSource('recipients',{type:'geojson',data:emptyFC()});
-map.addLayer({id:'recipients-layer',type:'circle',source:'recipients',paint:{'circle-radius':4,'circle-color':'rgba(179,163,105,0.88)','circle-stroke-color':'rgba(255,255,255,0.85)','circle-stroke-width':1}});
-map.addSource('vehicles',{type:'geojson',data:emptyFC()});
-map.addLayer({id:'vehicles-layer',type:'circle',source:'vehicles',paint:{'circle-radius':5,'circle-color':['case',['==',['get','status'],'Active'],'rgba(30,136,229,0.95)','rgba(92,115,145,0.9)'],'circle-stroke-color':'rgba(255,255,255,0.9)','circle-stroke-width':1.4}});
-map.addSource('context',{type:'geojson',data:emptyFC()});
-map.addLayer({id:'context-layer',type:'circle',source:'context',paint:{'circle-radius':7,'circle-color':['get','color'],'circle-stroke-color':'#ffffff','circle-stroke-width':2.4}});
-/* Popups on click */
-['vehicles-layer','donors-layer','recipients-layer','context-layer'].forEach(lid=>{
-map.on('click',lid,e=>{if(e.features&&e.features.length){const p=e.features[0].properties;new tt.Popup({offset:10}).setLngLat(e.lngLat).setHTML(`<b>${p.name||''}</b>`).addTo(map);}});
-map.on('mouseenter',lid,()=>{map.getCanvas().style.cursor='pointer';});
-map.on('mouseleave',lid,()=>{map.getCanvas().style.cursor='';});
-});
-M.view=map;M.mode='tomtom';
-syncModeUI('tomtom');updateOverlayBtns();
-status('Map ready, loading data...');
-await loadDomainData(false);
-M.ready=true;
-finalizeDataReady('TomTom map connected'+(M.tomtomKey?' with traffic + routing':''));
-resolve();
-}catch(e){reject(e);}
-});
-});
-}
-async function initMockMode(reason){M.view=null;M.tomtomKey='';M.trafficOn=false;M.is3D=false;await loadDomainData(true);ensureMockMap();syncModeUI('mock');updateOverlayBtns();finalizeDataReady(`Mock map connected (${reason})`);}
-async function initMap(requestedMode){
-const seq=++mapInitSeq;
-const mode=(requestedMode==='tomtom'||requestedMode==='mock')?requestedMode:modePref();
-syncModeUI(mode);resetMapRuntime();
-if(mode==='mock'){await initMockMode('manual mode');return;}
-status('Initializing TomTom map...');
-let cfg={};
-try{const r=await fetch('/api/config',{cache:'no-store'});cfg=r.ok?await r.json():{}}catch(e){console.warn('config fetch failed',e)}
-if(seq!==mapInitSeq)return;
-M.tomtomKey=cfg.tomtomApiKey||'';
-if(!M.tomtomKey){console.warn('No TomTom API key found');await initMockMode('no TomTom API key \u2014 set TOMTOM_API_KEY in .env');return;}
-if(typeof tt==='undefined'){await initMockMode('TomTom SDK not loaded (CDN blocked?)');return;}
-try{await withTimeout(initTomTomMap(cfg),30000,'TomTom initialization timed out (30s)');}
-catch(e){if(seq!==mapInitSeq)return;console.error('TomTom init failed',e);statusError(e&&e.message?e.message:'TomTom initialization failed');await initMockMode('TomTom unavailable \u2014 '+((e&&e.message)||'unknown error'));}
-}
-/* ── Data loading (unchanged) ── */
+function syncModeUI(mode){if(U.modeArc)U.modeArc.classList.toggle('active',mode==='arcgis');if(U.modeMock)U.modeMock.classList.toggle('active',mode==='mock');}
+function resetMapRuntime(){if(M.view&&typeof M.view.destroy==='function'){try{M.view.destroy();}catch(e){}}clearInterval(trafficTimer);trafficTimer=null;M.ready=false;M.mode='none';M.hasKey=false;M.view=null;M.G=null;M.route=null;M.RP=null;M.FS=null;M.l=null;M.mock=null;M.trafficLayer=null;M.mapObj=null;M.MapView=null;M.SceneView=null;M.HomeWidget=null;M.is3D=false;if(U.viewDiv){clearNode(U.viewDiv);U.viewDiv.style.background='';}}
+async function switchMapMode(mode){if(mode!=='arcgis'&&mode!=='mock')return;if(M.ready&&M.mode===mode){syncModeUI(mode);return;}saveModePref(mode);syncModeUI(mode);await initMap(mode);}
+async function ensureArcGISLoader(){if(typeof window.require==='function')return;const src='https://js.arcgis.com/4.30/';let s=[...document.scripts].find(x=>x.src&&x.src.indexOf(src)===0);if(s&&((s.readyState==='complete')||(s.readyState==='loaded'))&&typeof window.require!=='function')throw new Error('ArcGIS SDK loaded but AMD loader is unavailable');if(!s){s=document.createElement('script');s.src=src;s.async=true;document.head.appendChild(s);}await new Promise((res,rej)=>{const to=setTimeout(()=>rej(new Error('ArcGIS SDK request timed out')),15000);const ok=()=>{clearTimeout(to);res();};const bad=()=>{clearTimeout(to);rej(new Error('ArcGIS SDK request failed (blocked or offline)'));};s.addEventListener('load',ok,{once:true});s.addEventListener('error',bad,{once:true});});if(typeof window.require!=='function')throw new Error('ArcGIS SDK loaded without AMD loader');}
 function inATL(lng,lat){return lng>=ATL.xmin&&lng<=ATL.xmax&&lat>=ATL.ymin&&lat<=ATL.ymax;}
 function srcName(sp){if(!sp)return '';const c=sp.replace('.geojson','').replace(/pkg_/g,'').replace(/_/g,' ').trim();return c?c.charAt(0).toUpperCase()+c.slice(1):'';}
 function parse(features,prefix,fb){const out=[];features.forEach((f,i)=>{const g=f&&f.geometry,p=f&&f.properties?f.properties:{};if(!g||g.type!=='Point'||!Array.isArray(g.coordinates)||g.coordinates.length<2)return;const lng=+g.coordinates[0],lat=+g.coordinates[1];if(!Number.isFinite(lng)||!Number.isFinite(lat))return;const n=(p.display_name||'').trim()||srcName((p.source_pkg||'').trim())||`${fb} ${i+1}`;out.push({id:`${prefix}-${i}`,name:n,lng,lat,source:(p.source_pkg||'').trim()||fb});});return out;}
@@ -286,6 +157,9 @@ async function load(path){try{const res=await fetch(path,{cache:'no-store'});if(
 async function loadDomainData(useMockOnly){if(useMockOnly){S.donors=MOCK_DONORS.map(x=>({...x}));S.recs=MOCK_RECS.map(x=>({...x}));S.ds='mock ('+MOCK_DONORS.length+')';S.rs='mock ('+MOCK_RECS.length+')';return;}let donors=[],recs=[],ds='mock_donors.json',rs='mock_recipients.json';try{status('Loading donors...');const df=parse(await load('/geojson/food_recovery_sources.geojson'),'d','Food Donor');const inCity=df.filter(x=>inATL(x.lng,x.lat));donors=dedupe((inCity.length?inCity:df)).slice(0,320);if(donors.length)ds='food_recovery ('+donors.length+')';}catch(e){console.warn('donor load failed',e);}try{status('Loading recipients...');const rf=parse(await load('/geojson/redistribution_nodes.geojson'),'r','Redistribution Node');const ra=dedupe(rf.filter(x=>inATL(x.lng,x.lat)));if(ra.length>=6){recs=ra.slice(0,220);rs='redistribution ('+recs.length+')';}else{const fb=parse(await load('/geojson/beneficiary_access_points.geojson'),'r','Beneficiary Node').filter(x=>inATL(x.lng,x.lat));if(fb.length){recs=dedupe(fb).slice(0,220);rs='beneficiary ('+recs.length+')';}}}catch(e){console.warn('recipient load failed',e);}if(!donors.length){donors=MOCK_DONORS.map(x=>({...x}));ds='mock ('+donors.length+')';}if(!recs.length){recs=MOCK_RECS.map(x=>({...x}));rs='mock ('+recs.length+')';}S.donors=donors;S.recs=recs;S.ds=ds;S.rs=rs;}
 function finalizeDataReady(msg){buildAI();renderStep1();renderDonors();renderRecs();updateBuilder();drawBase();if(!S.selD&&VEH.length)selectDriver(VEH[0].id);else updateMap();status(msg);}
 function withTimeout(promise,ms,msg){return Promise.race([promise,new Promise((_,rej)=>setTimeout(()=>rej(new Error(msg)),ms))]);}
+function initArcGISMap(cfg){return new Promise((resolve,reject)=>{window.require(['esri/Map','esri/views/MapView','esri/views/SceneView','esri/layers/GraphicsLayer','esri/layers/WebTileLayer','esri/Graphic','esri/widgets/Home','esri/widgets/ScaleBar','esri/rest/route','esri/rest/support/RouteParameters','esri/rest/support/FeatureSet','esri/config'],async(Map,MapView,SceneView,GraphicsLayer,WebTileLayer,Graphic,Home,ScaleBar,route,RP,FS,esriConfig)=>{try{if(cfg.arcgisApiKey){esriConfig.apiKey=cfg.arcgisApiKey;M.hasKey=true}M.route=route;M.RP=RP;M.FS=FS;M.G=Graphic;M.MapView=MapView;M.SceneView=SceneView;M.HomeWidget=Home;M.is3D=false;status('Creating ArcGIS map...');const map=new Map({basemap:'dark-gray-vector'});M.mapObj=map;M.tomtomKey=cfg.tomtomApiKey||'';if(M.tomtomKey){const trafficLayer=new WebTileLayer({urlTemplate:'https://api.tomtom.com/traffic/map/4/tile/flow/relative/{z}/{x}/{y}.png?key='+M.tomtomKey+'&thickness=10',title:'Traffic Flow',visible:false,opacity:0.7,copyright:'TomTom'});map.add(trafficLayer,0);M.trafficLayer=trafficLayer;}const view=new MapView({map,container:'viewDiv',center:[-84.388,33.749],zoom:10.8,constraints:{minZoom:9,maxZoom:17},ui:{components:['zoom','attribution']}});view.ui.add(new Home({view}),'top-left');view.ui.add(new ScaleBar({view,unit:'dual'}),'bottom-left');const lv=new GraphicsLayer(),ld=new GraphicsLayer(),lr=new GraphicsLayer(),lctx=new GraphicsLayer(),lroute=new GraphicsLayer();map.addMany([ld,lr,lv,lroute,lctx]);M.l={v:lv,d:ld,r:lr,ctx:lctx,route:lroute};M.view=view;M.mode='arcgis';syncModeUI('arcgis');updateOverlayBtns();status('Waiting for map view...');await withTimeout(view.when(),20000,'Map view timed out (20s) - basemap may require a valid API key');status('Map ready, loading data...');await loadDomainData(false);M.ready=true;finalizeDataReady(M.hasKey?'ArcGIS routing connected':'ArcGIS map connected - routing fallback (no API key)');resolve();}catch(e){reject(e);}},err=>reject(err));});}
+async function initMockMode(reason){M.hasKey=false;M.route=null;M.RP=null;M.FS=null;M.G=null;M.l=null;M.view=null;M.trafficLayer=null;M.is3D=false;await loadDomainData(true);ensureMockMap();syncModeUI('mock');updateOverlayBtns();finalizeDataReady(`Mock map connected (${reason})`);}
+async function initMap(requestedMode){const seq=++mapInitSeq;const mode=(requestedMode==='arcgis'||requestedMode==='mock')?requestedMode:modePref();syncModeUI(mode);resetMapRuntime();if(mode==='mock'){await initMockMode('manual mode');return;}status('Initializing ArcGIS map...');let cfg={};try{const r=await fetch('/api/config',{cache:'no-store'});cfg=r.ok?await r.json():{}}catch(e){console.warn('config fetch failed',e)}if(seq!==mapInitSeq)return;M.tomtomKey=cfg.tomtomApiKey||'';if(!cfg.arcgisApiKey){console.warn('No API key found, falling back to mock');await initMockMode('no API key — set ARCGIS_API_KEY in .env or Netlify env vars');return;}try{await ensureArcGISLoader();if(seq!==mapInitSeq)return;await withTimeout(initArcGISMap(cfg),45000,'ArcGIS initialization timed out (45s)');}catch(e){if(seq!==mapInitSeq)return;console.error('ArcGIS init failed',e);statusError(e&&e.message?e.message:'ArcGIS initialization failed');await initMockMode('ArcGIS unavailable — '+((e&&e.message)||'unknown error'));}}
 })();
 </script>
 </div>
