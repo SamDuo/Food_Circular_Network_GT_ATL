@@ -5,51 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Atlanta Food Circular Network</title>
 
-  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
-  <script src="https://js.arcgis.com/4.30/"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Mapbox Geocoder plugin -->
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
 
   <style>
     /* ═══════════════════════════════════════════════════════
-       CORE VARIABLES
+       DESIGN TOKENS
        ═══════════════════════════════════════════════════════ */
     :root {
       --header-h: 64px;
-      --bg-dark: #07090f;
-      --text: #e6ecf5;
-      --muted: #9ca6b8;
-      --gold: #b3a369;
+      --bg-dark:  #07090f;
+      --text:     #e6ecf5;
+      --muted:    #9ca6b8;
+      --gold:     #b3a369;
 
-      /* Luminous layer colors (bright cores) */
-      --food-recovery: #ff6b6b;
+      /* Layer colours */
+      --food-recovery:  #ff6b6b;
       --redistribution: #00d2ff;
-      --beneficiary: #38ef7d;
-      --compost-network: #f2994a;
-      --food-desert: #ff6348;
-      --food-insecurity: #c56cf0;
+      --beneficiary:    #38ef7d;
+      --compost:        #f2994a;
+      --food-desert:    #ff6348;
+      --food-insecurity:#c56cf0;
+      --gt-dining:      #f4d35e;
+      --gt-compost:     #66bb6a;
+      --gt-vending:     #ffa502;
+      --gt-recycling:   #45aaf2;
+      --gt-buildings:   #d4c9a8;
+      --gt-sidewalks:   #b3a369;
 
-      --gt-dining: #f4d35e;
-      --gt-compost: #66bb6a;
-      --gt-vending: #ffa502;
-      --gt-recycling: #45aaf2;
-      --gt-buildings: #d4c9a8;
-      --gt-sidewalks: #b3a369;
-
-      /* Glassmorphism tokens */
-      --glass-bg: rgba(8, 12, 24, 0.72);
+      /* Glassmorphism */
+      --glass-bg:     rgba(8, 12, 24, 0.78);
       --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-blur: blur(16px) saturate(1.2);
+      --glass-blur:   blur(16px) saturate(1.2);
+
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --radius: 12px;
     }
 
-    /* ═══════════════════════════════════════════════════════
-       RESET & BASE
-       ═══════════════════════════════════════════════════════ */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body, #app {
-      width: 100%; height: 100%; overflow: hidden;
-      font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
-    }
-
+    html, body, #app { width: 100%; height: 100%; overflow: hidden; font-family: var(--font); }
     #app { position: relative; background: #0c1118; color: var(--text); }
 
     /* ═══════════════════════════════════════════════════════
@@ -58,52 +59,78 @@
     #topbar {
       position: absolute; top: 0; left: 0; right: 0; z-index: 30;
       height: var(--header-h);
-      background: rgba(7, 9, 15, 0.85);
+      background: rgba(7, 9, 15, 0.88);
       backdrop-filter: blur(12px) saturate(1.1);
       -webkit-backdrop-filter: blur(12px) saturate(1.1);
       border-bottom: 1px solid var(--glass-border);
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 12px;
+      padding: 0 16px;
     }
 
     #brandWrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
-
     #logoWrap {
-      width: 150px; height: 42px; border: none; border-radius: 8px;
+      width: 150px; height: 42px; border-radius: 8px;
       background: transparent; overflow: hidden; flex-shrink: 0;
     }
-    #logoWrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    #logoWrap img { width: 100%; height: 100%; object-fit: contain; }
 
-    #titleWrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
-    #titleWrap h1 { font-size: 27px; line-height: 1; font-weight: 700; color: #ffffff; }
-
-    #i2ceLink { color: #d6c890; text-decoration: none; font-weight: 700; font-size: 13px; }
+    #titleWrap { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    #titleWrap h1 { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+    #i2ceLink  { color: var(--gold); text-decoration: none; font-weight: 700; font-size: 12px; }
     #i2ceLink:hover { color: #f2e7bd; text-decoration: underline; }
 
     #topbarRight { display: flex; align-items: center; gap: 10px; }
 
     .navLink {
-      color: #b3a369; text-decoration: none; font-size: 12px; font-weight: 700;
-      padding: 8px 14px; border: 1px solid rgba(179, 163, 105, 0.5); border-radius: 999px;
+      color: var(--gold); text-decoration: none; font-size: 12px; font-weight: 700;
+      padding: 7px 14px; border: 1px solid rgba(179,163,105,0.45); border-radius: 999px;
       white-space: nowrap; transition: background 0.2s, box-shadow 0.2s;
     }
-    .navLink:hover { background: rgba(179, 163, 105, 0.12); box-shadow: 0 0 10px rgba(179, 163, 105, 0.15); }
+    .navLink:hover { background: rgba(179,163,105,0.1); box-shadow: 0 0 10px rgba(179,163,105,0.15); }
 
     #modeToggle { display: inline-flex; border: 1px solid #3a4254; border-radius: 999px; overflow: hidden; }
     #modeToggle button {
       border: 0; background: #141924; color: #d8dde6;
-      padding: 8px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+      padding: 8px 14px; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: var(--font); transition: background 0.2s;
     }
-    #modeToggle button.active { background: linear-gradient(135deg, #b3a369, #d4c48a); color: #1d232c; box-shadow: 0 0 10px rgba(179, 163, 105, 0.3); }
+    #modeToggle button.active {
+      background: linear-gradient(135deg, var(--gold), #d4c48a);
+      color: #1d232c; box-shadow: 0 0 10px rgba(179,163,105,0.3);
+    }
 
     /* ═══════════════════════════════════════════════════════
-       MAP & STATS
+       MAP
        ═══════════════════════════════════════════════════════ */
-    #viewDiv { position: absolute; inset: 0; }
+    #map { position: absolute; inset: 0; }
 
+    /* Mapbox popup style override */
+    .mapboxgl-popup-content {
+      background: rgba(8,12,24,0.95) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: 10px !important;
+      padding: 14px !important;
+      font-family: var(--font) !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6) !important;
+      max-width: 300px !important;
+    }
+    .mapboxgl-popup-tip { border-top-color: rgba(8,12,24,0.95) !important; }
+    .mapboxgl-popup-close-button { color: var(--muted) !important; font-size: 18px !important; right: 8px !important; top: 8px !important; }
+    .popup-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .popup-body  { font-size: 12px; color: #9ca6b8; line-height: 1.55; }
+
+    /* Mapbox controls nudge below topbar */
+    .mapboxgl-ctrl-top-right { top: calc(var(--header-h) + 10px) !important; }
+    .mapboxgl-ctrl-top-left  { top: calc(var(--header-h) + 10px) !important; left: 320px !important; }
+    .mapboxgl-ctrl-bottom-left { bottom: 72px !important; }
+
+    /* ═══════════════════════════════════════════════════════
+       STATS RAIL
+       ═══════════════════════════════════════════════════════ */
     #statsRail {
-      position: absolute; top: 72px; right: 10px; z-index: 24;
-      display: grid; gap: 6px; width: 220px;
+      position: absolute; top: calc(var(--header-h) + 10px); right: 10px; z-index: 24;
+      display: grid; gap: 6px; width: 210px;
     }
     .statCard {
       background: var(--glass-bg);
@@ -114,11 +141,11 @@
       transition: border-color 0.3s, box-shadow 0.3s;
     }
     .statCard:hover {
-      border-color: rgba(179, 163, 105, 0.25);
-      box-shadow: 0 0 12px rgba(179, 163, 105, 0.08);
+      border-color: rgba(179,163,105,0.25);
+      box-shadow: 0 0 12px rgba(179,163,105,0.08);
     }
     .statLabel { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; }
-    .statValue { margin-top: 3px; font-size: 17px; font-weight: 800; color: #ffffff; }
+    .statValue { margin-top: 3px; font-size: 17px; font-weight: 800; color: #fff; }
 
     /* ═══════════════════════════════════════════════════════
        LAYER PANEL
@@ -130,43 +157,47 @@
       background: var(--glass-bg);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
-      color: #ffffff; cursor: pointer;
+      color: #fff; cursor: pointer; font-size: 13px; font-weight: 700;
     }
 
     #layerPanel {
-      position: absolute; top: 74px; left: 12px; z-index: 25;
-      width: 300px; max-height: calc(100vh - 170px); overflow-y: auto;
+      position: absolute; top: calc(var(--header-h) + 10px); left: 12px; z-index: 25;
+      width: 296px; max-height: calc(100vh - 170px); overflow-y: auto;
       background: var(--glass-bg);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
-      border-radius: 12px; padding: 10px; display: none;
+      border-radius: var(--radius); padding: 10px;
+      display: none; scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
     }
     #layerPanel.open { display: block; }
+    #layerPanel::-webkit-scrollbar { width: 4px; }
+    #layerPanel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
     .panelHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .panelHeader h3 { font-size: 12px; color: #aab4c6; text-transform: uppercase; letter-spacing: 0.5px; }
-
+    .panelBtns { display: flex; gap: 4px; }
     .panelBtn {
       border: 1px solid #3a4254; background: #101621; color: #d8dde6;
-      font-size: 10px; font-weight: 700; border-radius: 6px; padding: 4px 6px; cursor: pointer;
+      font-size: 10px; font-weight: 700; border-radius: 6px; padding: 4px 8px;
+      cursor: pointer; font-family: var(--font);
     }
-
     .groupTitle {
-      margin: 9px 0 6px; font-size: 11px; color: #8e98aa;
-      text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px;
+      margin: 10px 0 6px; font-size: 10px; color: #8e98aa;
+      text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;
     }
-
-    .layerRow, .layerStatic { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 12px; }
+    .layerRow, .layerStatic {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 12px;
+    }
     .layerRow input { width: 14px; height: 14px; accent-color: var(--gold); cursor: pointer; }
-    .layerStatic { color: #c7d0df; opacity: 0.9; }
-
+    .layerStatic { color: #c7d0df; opacity: 0.85; }
     .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
     .dot.line { width: 14px; height: 4px; border-radius: 4px; }
     .dot.poly { border-radius: 2px; border: 1px solid #757d8f; }
 
     /* ═══════════════════════════════════════════════════════
-       DOCK (BOTTOM TABS)
+       DOCK
        ═══════════════════════════════════════════════════════ */
     #dock {
       position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 24;
@@ -177,359 +208,769 @@
       -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
     }
+    #dock::-webkit-scrollbar { display: none; }
     #dock button {
       border: 0; background: transparent; color: #d2d9e5;
-      padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
-      white-space: nowrap; cursor: pointer; transition: background 0.2s;
+      padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      white-space: nowrap; cursor: pointer; transition: background 0.2s; font-family: var(--font);
     }
     #dock button.active {
-      background: linear-gradient(135deg, rgba(179, 163, 105, 0.3), rgba(79, 104, 114, 0.4));
-      color: #ffffff; border: 1px solid rgba(179, 163, 105, 0.3);
+      background: linear-gradient(135deg, rgba(179,163,105,0.3), rgba(79,104,114,0.4));
+      color: #fff; border: 1px solid rgba(179,163,105,0.3);
     }
 
     /* ═══════════════════════════════════════════════════════
-       MOBILE RESPONSIVE
+       API KEY NOTICE
+       ═══════════════════════════════════════════════════════ */
+    #keyNotice {
+      position: absolute; top: calc(var(--header-h) + 10px); left: 50%; transform: translateX(-50%);
+      z-index: 25; background: rgba(255,193,7,0.15); border: 1px solid rgba(255,193,7,0.4);
+      border-radius: 8px; padding: 8px 16px; font-size: 11px; color: #ffc107;
+      display: none; white-space: nowrap;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE
        ═══════════════════════════════════════════════════════ */
     @media (max-width: 760px) {
-      #topbar {
-        height: 82px; flex-direction: column; align-items: flex-start;
-        justify-content: center; gap: 4px;
-      }
+      #topbar { height: 82px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; }
       #logoWrap { width: 120px; height: 34px; }
-      #titleWrap h1 { font-size: 20px; }
-      #statsRail { top: 90px; right: 8px; width: 160px; }
+      #titleWrap h1 { font-size: 18px; }
+      #statsRail { top: 90px; right: 8px; width: 150px; }
     }
+
+    /* Geocoder overrides */
+    .mapboxgl-ctrl-geocoder {
+      background: var(--glass-bg) !important;
+      backdrop-filter: var(--glass-blur) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: 999px !important;
+      box-shadow: none !important;
+      font-family: var(--font) !important;
+      min-width: 280px !important;
+      max-width: 320px !important;
+    }
+    .mapboxgl-ctrl-geocoder input {
+      color: var(--text) !important;
+      font-family: var(--font) !important;
+      font-size: 13px !important;
+      padding: 0 36px 0 40px !important;
+      height: 40px !important;
+    }
+    .mapboxgl-ctrl-geocoder input::placeholder { color: var(--muted) !important; }
+    .mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon { fill: var(--muted) !important; }
+    .mapboxgl-ctrl-geocoder .suggestions {
+      background: var(--surface) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: var(--radius-sm) !important;
+      font-family: var(--font) !important;
+    }
+    .mapboxgl-ctrl-geocoder .suggestions li a { color: var(--text) !important; font-size: 12px !important; }
+    .mapboxgl-ctrl-geocoder .suggestions .active > a,
+    .mapboxgl-ctrl-geocoder .suggestions li a:hover { background: rgba(179,163,105,0.12) !important; }
+
+    /* Cycling layer toggle button */
+    #cyclingToggle {
+      position: absolute; left: 60px; bottom: 88px; z-index: 26;
+      padding: 7px 14px; border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      color: var(--muted); cursor: pointer; font-size: 11px; font-weight: 700;
+      font-family: var(--font); display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    #cyclingToggle.active { color: #66bb6a; border-color: rgba(102,187,106,0.4); background: rgba(102,187,106,0.08); }
+    #cyclingToggle .cy-dot { width: 8px; height: 8px; border-radius: 50%; background: #66bb6a; }
   </style>
 </head>
 
 <body>
-  <div id="app">
-    <!-- ═══ TOPBAR ═══ -->
-    <header id="topbar">
-      <div id="brandWrap">
-        <div id="logoWrap">
-          <img src="/resources/GT%20logo/Primary%20Logos/Georgia%20Tech%20One%20Line/GTOneLine_White.svg" alt="GT logo" />
-        </div>
-        <div id="titleWrap">
-          <h1>Atlanta Food Circular Network</h1>
-          <a id="i2ceLink" href="https://sites.gatech.edu/i2ce/" target="_blank" rel="noopener">
-            Georgia Tech Circular Economy Lab [I2CE]
-          </a>
-        </div>
+<div id="app">
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header id="topbar">
+    <div id="brandWrap">
+      <div id="logoWrap">
+        <img src="/resources/GT%20logo/Primary%20Logos/Georgia%20Tech%20One%20Line/GTOneLine_White.svg" alt="GT" />
       </div>
-      <div id="topbarRight">
-        <a href="surplus-map.html" class="navLink">Surplus Map</a>
-        <a href="fleet-analytics.html" class="navLink">Fleet Analytics</a>
-        <a href="gt-campus-hub.html" class="navLink">Campus Hub</a>
-        <div id="modeToggle">
-          <button id="btnCity" class="active" type="button">Atlanta</button>
-          <button id="btnCampus" type="button">GT Campus</button>
-        </div>
+      <div id="titleWrap">
+        <h1>Atlanta Food Circular Network</h1>
+        <a id="i2ceLink" href="https://sites.gatech.edu/i2ce/" target="_blank" rel="noopener">
+          Georgia Tech Circular Economy Lab [I2CE]
+        </a>
       </div>
-    </header>
-
-    <!-- ═══ MAP ═══ -->
-    <div id="viewDiv"></div>
-    <section id="statsRail"></section>
-    <button id="layersToggle" type="button">L</button>
-
-    <!-- ═══ LAYER PANEL ═══ -->
-    <aside id="layerPanel">
-      <div class="panelHeader">
-        <h3>Layers</h3>
-        <div>
-          <button class="panelBtn" id="showAll" type="button">Show All</button>
-          <button class="panelBtn" id="hideAll" type="button">Hide All</button>
-        </div>
+    </div>
+    <div id="topbarRight">
+      <a href="surplus-map.html"    class="navLink">Surplus Map</a>
+      <a href="fleet-analytics.html" class="navLink">Fleet</a>
+      <a href="gt-campus-hub.html"  class="navLink">Campus Hub</a>
+      <div id="modeToggle">
+        <button id="btnCity"   class="active" type="button">Atlanta</button>
+        <button id="btnCampus" type="button">GT Campus</button>
       </div>
+    </div>
+  </header>
 
-      <div class="groupTitle">Atlanta Network</div>
-      <label class="layerRow"><input type="checkbox" data-layer="foodRecovery" checked /><span class="dot" style="background: var(--food-recovery); box-shadow: 0 0 5px var(--food-recovery)"></span><span>Food Recovery Sources</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="redistribution" checked /><span class="dot" style="background: var(--redistribution); box-shadow: 0 0 5px var(--redistribution)"></span><span>Redistribution Nodes</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="beneficiary" /><span class="dot" style="background: var(--beneficiary); box-shadow: 0 0 5px var(--beneficiary)"></span><span>Beneficiary Access Points</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="circular" checked /><span class="dot" style="background: var(--compost-network); box-shadow: 0 0 5px var(--compost-network)"></span><span>Circular/Compost Network</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="foodDeserts" /><span class="dot poly" style="background: var(--food-desert); box-shadow: 0 0 5px var(--food-desert)"></span><span>Food Deserts</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="foodInsecurity" /><span class="dot poly" style="background: var(--food-insecurity); box-shadow: 0 0 5px var(--food-insecurity)"></span><span>Food Insecurity (CDC)</span></label>
+  <!-- ═══ MAP ═══ -->
+  <div id="map"></div>
 
-      <div class="groupTitle">GT Campus Layers (I2CE)</div>
-      <label class="layerRow"><input type="checkbox" data-layer="gtDining" checked /><span class="dot" style="background: var(--gt-dining); box-shadow: 0 0 5px var(--gt-dining)"></span><span>Campus Dining</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="gtCompost" checked /><span class="dot" style="background: var(--gt-compost); box-shadow: 0 0 5px var(--gt-compost)"></span><span>Compost Locations</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="gtVending" checked /><span class="dot" style="background: var(--gt-vending); box-shadow: 0 0 5px var(--gt-vending)"></span><span>Vending Machines</span></label>
-      <label class="layerRow"><input type="checkbox" data-layer="gtRecycling" checked /><span class="dot" style="background: var(--gt-recycling); box-shadow: 0 0 5px var(--gt-recycling)"></span><span>Recycling / Trash Cans</span></label>
+  <!-- API key notice (shown when no key loaded) -->
+  <div id="keyNotice">⚠ Mapbox key not found — map running in demo mode</div>
 
-      <div class="groupTitle">GT Base Map (Auto in GT Mode)</div>
-      <div class="layerStatic"><span class="dot poly" style="background: var(--gt-buildings); box-shadow: 0 0 5px var(--gt-buildings)"></span><span>Buildings</span></div>
-      <div class="layerStatic"><span class="dot line" style="background: var(--gt-sidewalks); box-shadow: 0 0 5px var(--gt-sidewalks)"></span><span>Sidewalks</span></div>
-    </aside>
+  <!-- ═══ STATS RAIL ═══ -->
+  <section id="statsRail"></section>
 
-    <!-- ═══ DOCK ═══ -->
-    <nav id="dock"></nav>
-  </div>
+  <!-- ═══ LAYER TOGGLE BUTTON ═══ -->
+  <button id="layersToggle" type="button" title="Toggle layer panel">L</button>
 
-  <script>
-    /* ═══════════════════════════════════════════════════════
-       CONSTANTS
-       ═══════════════════════════════════════════════════════ */
-    const BASE_URL = `${window.location.origin}/geojson`;
-    const CITY_VIEW = { center: [-84.388, 33.749], zoom: 11 };
-    const CAMPUS_VIEW = { center: [-84.3963, 33.7756], zoom: 15 };
+  <!-- ═══ LAYER PANEL ═══ -->
+  <aside id="layerPanel">
+    <div class="panelHeader">
+      <h3>Layers</h3>
+      <div class="panelBtns">
+        <button class="panelBtn" id="showAll"  type="button">Show All</button>
+        <button class="panelBtn" id="hideAll"  type="button">Hide All</button>
+      </div>
+    </div>
 
-    const STATS = [
-      { label: "Food Diverted (lbs/wk)", value: 42500 },
-      { label: "Active Sources", value: 18 },
-      { label: "Redistribution Nodes", value: 15 },
-      { label: "People Served", value: 3200 },
-      { label: "CO2 Saved (kg/wk)", value: 8900 }
-    ];
+    <!-- Atlanta layers -->
+    <div class="groupTitle" id="grpAtlanta">Atlanta Network</div>
+    <label class="layerRow" id="row-foodRecovery">
+      <input type="checkbox" data-layer="foodRecovery" checked />
+      <span class="dot" style="background:var(--food-recovery);box-shadow:0 0 5px var(--food-recovery)"></span>
+      <span>Food Recovery Sources</span>
+    </label>
+    <label class="layerRow" id="row-redistribution">
+      <input type="checkbox" data-layer="redistribution" checked />
+      <span class="dot" style="background:var(--redistribution);box-shadow:0 0 5px var(--redistribution)"></span>
+      <span>Redistribution Nodes</span>
+    </label>
+    <label class="layerRow" id="row-beneficiary">
+      <input type="checkbox" data-layer="beneficiary" />
+      <span class="dot" style="background:var(--beneficiary);box-shadow:0 0 5px var(--beneficiary)"></span>
+      <span>Beneficiary Access Points</span>
+    </label>
+    <label class="layerRow" id="row-circular">
+      <input type="checkbox" data-layer="circular" checked />
+      <span class="dot" style="background:var(--compost);box-shadow:0 0 5px var(--compost)"></span>
+      <span>Circular/Compost Network</span>
+    </label>
+    <label class="layerRow" id="row-foodDeserts">
+      <input type="checkbox" data-layer="foodDeserts" />
+      <span class="dot poly" style="background:var(--food-desert);box-shadow:0 0 5px var(--food-desert)"></span>
+      <span>Food Deserts</span>
+    </label>
+    <label class="layerRow" id="row-foodInsecurity">
+      <input type="checkbox" data-layer="foodInsecurity" />
+      <span class="dot poly" style="background:var(--food-insecurity);box-shadow:0 0 5px var(--food-insecurity)"></span>
+      <span>Food Insecurity (CDC)</span>
+    </label>
 
-    const statsRail = document.getElementById("statsRail");
-    STATS.forEach((s) => {
-      const card = document.createElement("article");
-      card.className = "statCard";
-      card.innerHTML = `<div class="statLabel">${s.label}</div><div class="statValue">${Number(s.value).toLocaleString("en-US")}</div>`;
-      statsRail.appendChild(card);
+    <!-- GT Campus layers -->
+    <div class="groupTitle" id="grpCampus">GT Campus Layers (I2CE)</div>
+    <label class="layerRow" id="row-gtDining">
+      <input type="checkbox" data-layer="gtDining" checked />
+      <span class="dot" style="background:var(--gt-dining);box-shadow:0 0 5px var(--gt-dining)"></span>
+      <span>Campus Dining</span>
+    </label>
+    <label class="layerRow" id="row-gtCompost">
+      <input type="checkbox" data-layer="gtCompost" checked />
+      <span class="dot" style="background:var(--gt-compost);box-shadow:0 0 5px var(--gt-compost)"></span>
+      <span>Compost Locations</span>
+    </label>
+    <label class="layerRow" id="row-gtVending">
+      <input type="checkbox" data-layer="gtVending" checked />
+      <span class="dot" style="background:var(--gt-vending);box-shadow:0 0 5px var(--gt-vending)"></span>
+      <span>Vending Machines</span>
+    </label>
+    <label class="layerRow" id="row-gtRecycling">
+      <input type="checkbox" data-layer="gtRecycling" checked />
+      <span class="dot" style="background:var(--gt-recycling);box-shadow:0 0 5px var(--gt-recycling)"></span>
+      <span>Recycling / Trash Cans</span>
+    </label>
+
+    <!-- GT Base (auto) -->
+    <div class="groupTitle">GT Base Map (auto in GT mode)</div>
+    <div class="layerStatic">
+      <span class="dot poly" style="background:var(--gt-buildings);box-shadow:0 0 5px var(--gt-buildings)"></span>
+      <span>Buildings</span>
+    </div>
+    <div class="layerStatic">
+      <span class="dot line" style="background:var(--gt-sidewalks);box-shadow:0 0 5px var(--gt-sidewalks)"></span>
+      <span>Sidewalks</span>
+    </div>
+  </aside>
+
+  <!-- ═══ DOCK ═══ -->
+  <nav id="dock"></nav>
+
+  <!-- Cycling layer toggle -->
+  <button id="cyclingToggle" type="button" title="Toggle cycling infrastructure layer">
+    <span class="cy-dot"></span> Cycling
+  </button>
+
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   CONSTANTS
+   ════════════════════════════════════════════════════════════ */
+const GEOJSON_BASE = `${window.location.origin}/geojson`;
+
+const CITY_VIEW   = { center: [-84.388, 33.749], zoom: 11, pitch: 45, bearing: 0 };
+const CAMPUS_VIEW = { center: [-84.3963, 33.7756], zoom: 15.2, pitch: 30, bearing: -12 };
+
+const STATS = [
+  { label: "Food Diverted (lbs/wk)", value: 42500 },
+  { label: "Active Sources",          value: 18 },
+  { label: "Redistribution Nodes",    value: 15 },
+  { label: "People Served",           value: 3200 },
+  { label: "CO₂ Saved (kg/wk)",       value: 8900 },
+];
+
+/* Fallback public key — overridden by /api/config when dev server is running */
+const MAPBOX_PUBLIC_FALLBACK = ''  /* set MAPBOX_PUBLIC_KEY in .env — loaded via /api/config */;
+
+/* ════════════════════════════════════════════════════════════
+   LAYER CONFIG
+   Each entry describes one logical layer and all its Mapbox layer IDs.
+   ════════════════════════════════════════════════════════════ */
+const LAYER_CFG = {
+  /* ── Atlanta Network ── */
+  foodRecovery: {
+    file: 'food_recovery_sources.geojson', color: '#ff6b6b',
+    type: 'circle', size: 6, cluster: true,
+    mode: 'city', defaultVisible: true,
+    popupField: 'display_name',
+  },
+  redistribution: {
+    file: 'redistribution_nodes.geojson',  color: '#00d2ff',
+    type: 'circle', size: 7, cluster: true,
+    mode: 'city', defaultVisible: true,
+    popupField: 'display_name',
+  },
+  beneficiary: {
+    file: 'beneficiary_access_points.geojson', color: '#38ef7d',
+    type: 'circle', size: 8, cluster: false,
+    mode: 'city', defaultVisible: false,
+    popupField: 'display_name',
+  },
+  circular: {
+    file: 'circular_economy.geojson',  color: '#f2994a',
+    type: 'circle', size: 7, cluster: true,
+    mode: 'city', defaultVisible: true,
+    popupField: 'display_name',
+  },
+  foodDeserts: {
+    file: 'food_deserts_atlanta.geojson',
+    type: 'fill',
+    fillColor: ['case', ['==', ['get', 'is_food_desert'], 'Yes'], 'rgba(255,99,72,0.22)', 'rgba(200,200,200,0.03)'],
+    outlineColor: ['case', ['==', ['get', 'is_food_desert'], 'Yes'], 'rgba(255,99,72,0.6)', 'rgba(150,150,150,0.12)'],
+    outlineWidth: 1.5,
+    mode: 'city', defaultVisible: false,
+    popupField: 'tract_name',
+  },
+  foodInsecurity: {
+    /* Fetched live from ArcGIS REST as GeoJSON (public service, no key needed) */
+    url: 'https://services3.arcgis.com/ZvidGQkLaDJxRSJ2/arcgis/rest/services/PLACES_LocalData_for_BetterHealth/FeatureServer/3/query?where=StateAbbr+%3D+%27GA%27+AND+(CountyName+%3D+%27Fulton%27+OR+CountyName+%3D+%27DeKalb%27)&f=geojson&outFields=FOODINSECU_CrudePrev,CountyName,TotalPopulation,TractFIPS&resultRecordCount=3000',
+    type: 'fill',
+    fillColor: [
+      'interpolate', ['linear'], ['coalesce', ['get', 'FOODINSECU_CrudePrev'], 0],
+      0,  'rgba(197,108,240,0.05)',
+      15, 'rgba(197,108,240,0.25)',
+      25, 'rgba(197,108,240,0.50)',
+    ],
+    outlineColor: 'rgba(197,108,240,0.45)',
+    outlineWidth: 0.8,
+    mode: 'city', defaultVisible: false,
+    popupField: 'TractFIPS',
+  },
+
+  /* ── GT Campus ── */
+  gtDining: {
+    file: 'campus_dining.geojson', color: '#f4d35e',
+    type: 'circle', size: 9, cluster: false,
+    mode: 'campus', defaultVisible: true,
+    popupField: 'Restaurant',
+  },
+  gtCompost: {
+    file: 'compost_locations.geojson', color: '#66bb6a',
+    type: 'circle', size: 8, cluster: false,
+    mode: 'campus', defaultVisible: true,
+    popupField: 'Name',
+  },
+  gtVending: {
+    file: 'vending_machines.geojson', color: '#ffa502',
+    type: 'circle', size: 8, cluster: false,
+    mode: 'campus', defaultVisible: true,
+    popupField: 'Name',
+  },
+  gtRecycling: {
+    file: 'recycling_trash_cans.geojson', color: '#45aaf2',
+    type: 'circle', size: 8, cluster: false,
+    mode: 'campus', defaultVisible: true,
+    popupField: 'Name',
+  },
+
+  /* ── GT Base (auto-toggled with mode, not in tab system) ── */
+  gtBuildings: {
+    file: 'buildings.geojson',
+    type: 'fill',
+    fillColor: 'rgba(212,201,168,0.28)',
+    outlineColor: 'rgba(179,163,105,0.35)',
+    outlineWidth: 0.8,
+    mode: 'campus', alwaysOn: true, defaultVisible: false,
+    popupField: 'Name',
+  },
+  gtSidewalks: {
+    file: 'sidewalks.geojson',
+    type: 'line', color: 'rgba(179,163,105,0.55)', lineWidth: 1.2,
+    mode: 'campus', alwaysOn: true, defaultVisible: false,
+  },
+};
+
+/* Tab definitions */
+const CITY_TABS = [
+  { id: 'cityFoodRecovery',    label: 'Food Recovery Sources',    layers: ['foodRecovery'] },
+  { id: 'cityRedistribution',  label: 'Redistribution Nodes',     layers: ['redistribution'] },
+  { id: 'cityBeneficiary',     label: 'Beneficiary Access',        layers: ['beneficiary','foodDeserts','foodInsecurity'] },
+  { id: 'cityCircular',        label: 'Circular/Compost Network', layers: ['circular'] },
+];
+const CAMPUS_TABS = [
+  { id: 'campusDining',    label: 'Campus Dining',  layers: ['gtDining'] },
+  { id: 'campusCompost',   label: 'Compost',        layers: ['gtCompost'] },
+  { id: 'campusVending',   label: 'Vending',        layers: ['gtVending'] },
+  { id: 'campusTrash',     label: 'Trash Cans',     layers: ['gtRecycling'] },
+  { id: 'campusAll',       label: 'Campus All',     layers: ['gtDining','gtCompost','gtVending','gtRecycling'] },
+];
+
+/* ════════════════════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════════════════════ */
+let map;
+let mapReady = false;
+let mode = 'city';
+let activeCityTab   = 'cityFoodRecovery';
+let activeCampusTab = 'campusDining';
+
+/* ════════════════════════════════════════════════════════════
+   STATS RAIL
+   ════════════════════════════════════════════════════════════ */
+(function buildStats() {
+  const rail = document.getElementById('statsRail');
+  STATS.forEach(s => {
+    const card = document.createElement('article');
+    card.className = 'statCard';
+    card.innerHTML = `<div class="statLabel">${s.label}</div><div class="statValue">${Number(s.value).toLocaleString()}</div>`;
+    rail.appendChild(card);
+  });
+})();
+
+/* ════════════════════════════════════════════════════════════
+   API KEY FETCH
+   ════════════════════════════════════════════════════════════ */
+async function getMapboxToken() {
+  try {
+    const res = await fetch('/api/config');
+    if (res.ok) {
+      const cfg = await res.json();
+      if (cfg.mapboxPublicKey) return cfg.mapboxPublicKey;
+    }
+  } catch (_) {}
+  // Public key fallback is valid — no warning needed
+  return MAPBOX_PUBLIC_FALLBACK;
+}
+
+/* ════════════════════════════════════════════════════════════
+   MAPBOX INIT
+   ════════════════════════════════════════════════════════════ */
+function initMap(token) {
+  mapboxgl.accessToken = token;
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/dark-v11',
+    center: CITY_VIEW.center,
+    zoom:   CITY_VIEW.zoom,
+    pitch:  CITY_VIEW.pitch,
+    bearing: CITY_VIEW.bearing,
+    antialias: true,
+  });
+
+  map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
+  map.addControl(new mapboxgl.ScaleControl({ unit: 'imperial' }), 'bottom-left');
+
+  map.on('style.load', () => {
+    add3DBuildings();
+
+    // CyclOSM cycling infrastructure raster overlay
+    map.addSource('cycling-overlay', {
+      type: 'raster',
+      tiles: [
+        'https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+        'https://b.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+        'https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+      ],
+      tileSize: 256,
+      attribution: '<a href="https://github.com/cyclosm/cyclosm-cartocss-style" target="_blank">CyclOSM</a>',
+    });
+    map.addLayer({
+      id: 'cycling-overlay',
+      type: 'raster',
+      source: 'cycling-overlay',
+      layout: { visibility: 'none' },
+      paint: { 'raster-opacity': 0.75 },
     });
 
-    /* ═══════════════════════════════════════════════════════
-       ArcGIS AMD MODULES
-       ═══════════════════════════════════════════════════════ */
-    require([
-      "esri/Map",
-      "esri/views/MapView",
-      "esri/layers/GeoJSONLayer",
-      "esri/widgets/Home",
-      "esri/widgets/Compass",
-      "esri/widgets/ScaleBar",
-      "esri/widgets/Search",
-      "esri/layers/FeatureLayer"
-    ], function (Map, MapView, GeoJSONLayer, Home, Compass, ScaleBar, Search, FeatureLayer) {
+    addAllLayers();
+    bindPopups();
 
-      /* ═══════════════════════════════════════════════════════
-         LAYER DEFINITIONS
-         ═══════════════════════════════════════════════════════ */
-      function pointRenderer(coreColor, glowColor, size) {
-        return { type: "simple", symbol: { type: "simple-marker", style: "circle", color: coreColor, size, outline: { color: glowColor, width: size * 0.6 } } };
-      }
-      function lineRenderer(color, width) {
-        return { type: "simple", symbol: { type: "simple-line", color, width } };
-      }
-      function polygonRenderer(fill, outline, width) {
-        return { type: "simple", symbol: { type: "simple-fill", color: fill, outline: { color: outline, width } } };
-      }
-      function clusterConfig() {
-        return {
-          type: "cluster", clusterRadius: "58px", clusterMinSize: "22px", clusterMaxSize: "44px",
-          symbol: { type: "simple-marker", style: "circle", color: [179, 163, 105, 0.7], outline: { color: [179, 163, 105, 0.25], width: 6 } },
-          popupTemplate: { title: "{cluster_count} features", content: "Zoom in to see individual locations." },
-          labelingInfo: [{ labelExpressionInfo: { expression: "$feature.cluster_count" }, symbol: { type: "text", color: "#ffffff", font: { size: 11, weight: "bold" }, haloColor: [0, 0, 0, 0.6], haloSize: 1.5 }, labelPlacement: "center-center" }]
-        };
-      }
+    // Subtle fog
+    map.setFog({
+      color: '#07090f', 'high-color': '#0a1525',
+      'horizon-blend': 0.06, 'space-color': '#07090f', 'star-intensity': 0.1,
+    });
 
-      const layers = {
-        foodRecovery: new GeoJSONLayer({ id: "foodRecovery", title: "Food Recovery Sources", url: `${BASE_URL}/food_recovery_sources.geojson`, visible: true, renderer: pointRenderer("#ff6b6b", "rgba(255,107,107,0.35)", 8), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
-        redistribution: new GeoJSONLayer({ id: "redistribution", title: "Redistribution Nodes", url: `${BASE_URL}/redistribution_nodes.geojson`, visible: true, renderer: pointRenderer("#00d2ff", "rgba(0,210,255,0.35)", 9), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
-        beneficiary: new GeoJSONLayer({ id: "beneficiary", title: "Beneficiary Access Points", url: `${BASE_URL}/beneficiary_access_points.geojson`, visible: false, renderer: pointRenderer("#38ef7d", "rgba(56,239,125,0.35)", 8), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
-        circular: new GeoJSONLayer({ id: "circular", title: "Circular/Compost Network", url: `${BASE_URL}/circular_economy.geojson`, visible: true, renderer: pointRenderer("#f2994a", "rgba(242,153,74,0.35)", 9), popupTemplate: { title: "{display_name}", content: [{ type: "fields" }] } }),
-        foodDeserts: new GeoJSONLayer({
-          id: "foodDeserts", title: "Food Deserts – Atlanta", url: `${BASE_URL}/food_deserts_atlanta.geojson`, visible: false,
-          renderer: { type: "unique-value", field: "is_food_desert", defaultSymbol: { type: "simple-fill", color: [200, 200, 200, 0.03], outline: { color: [150, 150, 150, 0.15], width: 0.5 } }, uniqueValueInfos: [{ value: "Yes", symbol: { type: "simple-fill", color: [255, 99, 72, 0.25], outline: { color: [255, 99, 72, 0.6], width: 1.5 } } }] },
-          popupTemplate: { title: "Tract {tract_name}", content: [{ type: "fields" }] }
-        }),
-        foodInsecurity: new FeatureLayer({
-          id: "foodInsecurity", title: "Food Insecurity (CDC PLACES)",
-          url: "https://services3.arcgis.com/ZvidGQkLaDJxRSJ2/arcgis/rest/services/PLACES_LocalData_for_BetterHealth/FeatureServer/3",
-          definitionExpression: "StateAbbr = 'GA' AND (CountyName = 'Fulton' OR CountyName = 'DeKalb')", visible: false,
-          renderer: { type: "class-breaks", field: "FOODINSECU_CrudePrev", defaultSymbol: { type: "simple-fill", color: [197, 108, 240, 0.08], outline: { color: [197, 108, 240, 0.15], width: 0.5 } },
-            classBreakInfos: [
-              { minValue: 0, maxValue: 15, symbol: { type: "simple-fill", color: [197, 108, 240, 0.08], outline: { color: [197, 108, 240, 0.2], width: 0.5 } } },
-              { minValue: 15, maxValue: 25, symbol: { type: "simple-fill", color: [197, 108, 240, 0.3], outline: { color: [197, 108, 240, 0.5], width: 1 } } },
-              { minValue: 25, maxValue: 100, symbol: { type: "simple-fill", color: [197, 108, 240, 0.5], outline: { color: [197, 108, 240, 0.8], width: 1.5 } } }
-            ]
+    mapReady = true;
+
+    // Geocoder — search Atlanta
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl: mapboxgl,
+      bbox: [-84.55, 33.65, -84.25, 33.90],
+      placeholder: 'Search Atlanta…',
+      marker: { color: '#b3a369' },
+    });
+    map.addControl(geocoder, 'top-left');
+
+    applyActiveTabSelection();
+    applyVisibility();
+    renderDock();
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   3D BUILDINGS (ATL mode)
+   ════════════════════════════════════════════════════════════ */
+function add3DBuildings() {
+  const layers = map.getStyle().layers;
+  const labelLayerId = layers.find(l => l.type === 'symbol' && l.layout?.['text-field'])?.id;
+
+  map.addLayer({
+    id: '3d-buildings',
+    source: 'composite',
+    'source-layer': 'building',
+    filter: ['==', 'extrude', 'true'],
+    type: 'fill-extrusion',
+    minzoom: 12,
+    layout: { visibility: 'visible' },
+    paint: {
+      'fill-extrusion-color': [
+        'interpolate', ['linear'], ['get', 'height'],
+        0, '#0d1520', 20, '#15202f', 50, '#1b2c42',
+      ],
+      'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 15, ['get', 'height']],
+      'fill-extrusion-base':   ['interpolate', ['linear'], ['zoom'], 14, 0, 15, ['get', 'min_height']],
+      'fill-extrusion-opacity': 0.85,
+    },
+  }, labelLayerId);
+}
+
+/* ════════════════════════════════════════════════════════════
+   ADD ALL GEOJSON LAYERS
+   ════════════════════════════════════════════════════════════ */
+function addAllLayers() {
+  for (const [logicalId, cfg] of Object.entries(LAYER_CFG)) {
+    const dataUrl  = cfg.url || `${GEOJSON_BASE}/${cfg.file}`;
+    const initVis  = cfg.defaultVisible ? 'visible' : 'none';
+
+    // Source
+    const srcConfig = { type: 'geojson', data: dataUrl };
+    if (cfg.cluster) {
+      srcConfig.cluster = true;
+      srcConfig.clusterMaxZoom = 13;
+      srcConfig.clusterRadius  = 52;
+    }
+    map.addSource(logicalId, srcConfig);
+
+    // Layers
+    if (cfg.type === 'circle') {
+      if (cfg.cluster) {
+        // Cluster circles
+        map.addLayer({
+          id: `${logicalId}-clusters`,
+          type: 'circle',
+          source: logicalId,
+          filter: ['has', 'point_count'],
+          layout: { visibility: initVis },
+          paint: {
+            'circle-color': cfg.color,
+            'circle-opacity': 0.82,
+            'circle-radius': ['step', ['get', 'point_count'], 16, 10, 22, 100, 30],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': cfg.color,
+            'circle-stroke-opacity': 0.25,
           },
-          popupTemplate: { title: "Tract {TractFIPS}", content: [{ type: "fields", fieldInfos: [
-            { fieldName: "FOODINSECU_CrudePrev", label: "Food Insecurity %" },
-            { fieldName: "FOODSTAMP_CrudePrev", label: "Food Stamps %" },
-            { fieldName: "CountyName", label: "County" },
-            { fieldName: "TotalPopulation", label: "Population" }
-          ] }] }
-        }),
-        gtDining: new GeoJSONLayer({ id: "gtDining", title: "GT Campus Dining", url: `${BASE_URL}/campus_dining.geojson`, visible: false, renderer: pointRenderer("#f4d35e", "rgba(244,211,94,0.35)", 10), popupTemplate: { title: "{Restaurant}", content: [{ type: "fields" }] } }),
-        gtCompost: new GeoJSONLayer({ id: "gtCompost", title: "GT Compost", url: `${BASE_URL}/compost_locations.geojson`, visible: false, renderer: pointRenderer("#66bb6a", "rgba(102,187,106,0.35)", 9), popupTemplate: { title: "GT Compost", content: [{ type: "fields" }] } }),
-        gtVending: new GeoJSONLayer({ id: "gtVending", title: "GT Vending", url: `${BASE_URL}/vending_machines.geojson`, visible: false, renderer: pointRenderer("#ffa502", "rgba(255,165,2,0.35)", 8), popupTemplate: { title: "GT Vending", content: [{ type: "fields" }] } }),
-        gtRecycling: new GeoJSONLayer({ id: "gtRecycling", title: "GT Recycling", url: `${BASE_URL}/recycling_trash_cans.geojson`, visible: false, renderer: pointRenderer("#45aaf2", "rgba(69,170,242,0.35)", 8), popupTemplate: { title: "GT Recycling / Trash", content: [{ type: "fields" }] } }),
-        gtBuildings: new GeoJSONLayer({ id: "gtBuildings", title: "GT Buildings", url: `${BASE_URL}/buildings.geojson`, visible: false, renderer: polygonRenderer([212, 201, 168, 0.35], [179, 163, 105, 0.4], 0.8), popupTemplate: { title: "{Name}", content: [{ type: "fields" }] } }),
-        gtSidewalks: new GeoJSONLayer({ id: "gtSidewalks", title: "GT Sidewalks", url: `${BASE_URL}/sidewalks.geojson`, visible: false, renderer: lineRenderer("rgba(179, 163, 105, 0.6)", 1.5), popupTemplate: { title: "GT Sidewalk", content: [{ type: "fields" }] } })
-      };
-
-      const atlantaBoundaryLayer = new FeatureLayer({
-        url: "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Current/MapServer/28",
-        definitionExpression: "GEOID = '1304000'",
-        renderer: polygonRenderer([255, 255, 255, 0.02], [179, 163, 105, 0.45], 2.5),
-        title: "City of Atlanta Boundary", visible: true
-      });
-
-      /* ═══════════════════════════════════════════════════════
-         MAP & VIEW
-         ═══════════════════════════════════════════════════════ */
-      const atlantaLayers = [layers.foodRecovery, layers.redistribution, layers.beneficiary, layers.circular, layers.foodDeserts, layers.foodInsecurity];
-      const gtLayers = [layers.gtDining, layers.gtCompost, layers.gtVending, layers.gtRecycling];
-      const gtBaseLayers = [layers.gtBuildings, layers.gtSidewalks];
-
-      const map = new Map({
-        basemap: "dark-gray-vector",
-        layers: [
-          atlantaBoundaryLayer,
-          layers.foodDeserts, layers.foodInsecurity,
-          layers.gtSidewalks, layers.gtBuildings,
-          layers.foodRecovery, layers.redistribution, layers.beneficiary, layers.circular,
-          layers.gtRecycling, layers.gtDining, layers.gtVending, layers.gtCompost
-        ]
-      });
-
-      const view = new MapView({
-        container: "viewDiv", map,
-        center: CITY_VIEW.center, zoom: CITY_VIEW.zoom,
-        ui: { components: ["zoom", "attribution"] },
-        popup: { dockEnabled: false }
-      });
-
-      view.padding = { top: 74 };
-      view.ui.add(new Home({ view }), "top-left");
-      view.ui.add(new Compass({ view }), "top-left");
-      view.ui.add(new ScaleBar({ view, unit: "dual" }), "bottom-left");
-      view.ui.add(new Search({ view, locationEnabled: false, allPlaceholder: "Search locations" }), { position: "top-left", index: 2 });
-
-      /* ═══════════════════════════════════════════════════════
-         MODE / TAB / VISIBILITY
-         ═══════════════════════════════════════════════════════ */
-      let mode = "city";
-      let activeCityTab = "cityFoodRecoverySources";
-      let activeCampusTab = "campusDining";
-
-      const modeLayerIds = {
-        city: ["foodRecovery", "redistribution", "beneficiary", "circular", "foodDeserts", "foodInsecurity"],
-        campus: ["gtDining", "gtCompost", "gtVending", "gtRecycling"]
-      };
-
-      const cityTabDefs = [
-        { id: "cityFoodRecoverySources", label: "Food Recovery Sources", layers: ["foodRecovery"] },
-        { id: "cityRedistributionNodes", label: "Redistribution Nodes", layers: ["redistribution"] },
-        { id: "cityBeneficiaryAccessPoints", label: "Beneficiary Access Points", layers: ["beneficiary", "foodDeserts", "foodInsecurity"] },
-        { id: "cityCircularCompostNetwork", label: "Circular/Compost Network", layers: ["circular"] }
-      ];
-
-      const campusTabDefs = [
-        { id: "campusDining", label: "Campus Dining", layers: ["gtDining"] },
-        { id: "campusCompost", label: "Compost", layers: ["gtCompost"] },
-        { id: "campusVending", label: "Vending", layers: ["gtVending"] },
-        { id: "campusTrash", label: "Trash Cans", layers: ["gtRecycling"] },
-        { id: "campusAll", label: "Campus All", layers: ["gtDining", "gtCompost", "gtVending", "gtRecycling"] }
-      ];
-
-      function getCheckbox(layerId) { return document.querySelector(`input[data-layer="${layerId}"]`); }
-      function checkboxState(layerId) { const b = getCheckbox(layerId); return b ? b.checked : false; }
-      function setCheckbox(layerId, state) { const b = getCheckbox(layerId); if (b) b.checked = state; }
-      function tabDefsForMode() { return mode === "city" ? cityTabDefs : campusTabDefs; }
-      function activeTabId() { return mode === "city" ? activeCityTab : activeCampusTab; }
-      function setActiveTab(id) { if (mode === "city") activeCityTab = id; else activeCampusTab = id; }
-
-      function setModeLayerSelection(layerIds) {
-        const selected = new Set(layerIds);
-        modeLayerIds[mode].forEach(id => setCheckbox(id, selected.has(id)));
-      }
-
-      function renderDock() {
-        const dock = document.getElementById("dock");
-        dock.innerHTML = "";
-        const defs = tabDefsForMode();
-        const active = activeTabId();
-        defs.forEach(def => {
-          const btn = document.createElement("button");
-          btn.type = "button"; btn.textContent = def.label;
-          btn.className = def.id === active ? "active" : "";
-          btn.addEventListener("click", () => { setActiveTab(def.id); setModeLayerSelection(def.layers); applyVisibility(); renderDock(); });
-          dock.appendChild(btn);
+        });
+        // Cluster count labels
+        map.addLayer({
+          id: `${logicalId}-cluster-count`,
+          type: 'symbol',
+          source: logicalId,
+          filter: ['has', 'point_count'],
+          layout: {
+            visibility: initVis,
+            'text-field': '{point_count_abbreviated}',
+            'text-size': 11,
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          },
+          paint: { 'text-color': '#ffffff' },
         });
       }
-
-      function applyVisibility() {
-        atlantaLayers.forEach(l => { l.visible = mode === "city" && checkboxState(l.id); });
-        gtLayers.forEach(l => { l.visible = mode === "campus" && checkboxState(l.id); });
-        gtBaseLayers.forEach(l => { l.visible = mode === "campus"; });
-        atlantaBoundaryLayer.visible = mode === "city";
-      }
-
-      function applyActiveTabSelection() {
-        const defs = tabDefsForMode();
-        const target = defs.find(d => d.id === activeTabId()) || defs[0];
-        setActiveTab(target.id);
-        setModeLayerSelection(target.layers);
-      }
-
-      function setModeButtons() {
-        document.getElementById("btnCity").classList.toggle("active", mode === "city");
-        document.getElementById("btnCampus").classList.toggle("active", mode === "campus");
-      }
-
-      function switchToCity() { mode = "city"; setModeButtons(); applyActiveTabSelection(); applyVisibility(); renderDock(); view.goTo(CITY_VIEW).catch(() => {}); }
-      function switchToCampus() { mode = "campus"; setModeButtons(); applyActiveTabSelection(); applyVisibility(); renderDock(); view.goTo(CAMPUS_VIEW).catch(() => {}); }
-
-      document.getElementById("btnCity").addEventListener("click", switchToCity);
-      document.getElementById("btnCampus").addEventListener("click", switchToCampus);
-
-      document.querySelectorAll("input[data-layer]").forEach(box => {
-        box.addEventListener("change", () => { setActiveTab(""); applyVisibility(); renderDock(); });
+      // Individual points
+      map.addLayer({
+        id: `${logicalId}-points`,
+        type: 'circle',
+        source: logicalId,
+        filter: cfg.cluster ? ['!', ['has', 'point_count']] : ['==', '$type', 'Point'],
+        layout: { visibility: initVis },
+        paint: {
+          'circle-radius': cfg.size,
+          'circle-color': cfg.color,
+          'circle-opacity': 0.9,
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': cfg.color,
+          'circle-stroke-opacity': 0.4,
+        },
       });
 
-      document.getElementById("showAll").addEventListener("click", () => { modeLayerIds[mode].forEach(id => setCheckbox(id, true)); setActiveTab(""); applyVisibility(); renderDock(); });
-      document.getElementById("hideAll").addEventListener("click", () => { modeLayerIds[mode].forEach(id => setCheckbox(id, false)); setActiveTab(""); applyVisibility(); renderDock(); });
-      document.getElementById("layersToggle").addEventListener("click", () => { document.getElementById("layerPanel").classList.toggle("open"); });
-
-      // Clustering
-      const clusterRules = [
-        { layer: layers.foodRecovery, threshold: 12 }, { layer: layers.redistribution, threshold: 12 },
-        { layer: layers.beneficiary, threshold: 12 }, { layer: layers.circular, threshold: 12 },
-        { layer: layers.gtDining, threshold: 15 }, { layer: layers.gtCompost, threshold: 15 },
-        { layer: layers.gtVending, threshold: 15 }, { layer: layers.gtRecycling, threshold: 15 }
-      ];
-      function updateClusters(zoom) {
-        clusterRules.forEach(({ layer, threshold }) => {
-          if (zoom < threshold && !layer.featureReduction) layer.featureReduction = clusterConfig();
-          if (zoom >= threshold && layer.featureReduction) layer.featureReduction = null;
-        });
-      }
-
-      /* ═══════════════════════════════════════════════════════
-         INITIALIZATION
-         ═══════════════════════════════════════════════════════ */
-      view.when(() => {
-        applyActiveTabSelection();
-        applyVisibility();
-        renderDock();
-        updateClusters(view.zoom || CITY_VIEW.zoom);
+    } else if (cfg.type === 'fill') {
+      map.addLayer({
+        id: `${logicalId}-fill`,
+        type: 'fill',
+        source: logicalId,
+        filter: ['==', '$type', 'Polygon'],
+        layout: { visibility: initVis },
+        paint: { 'fill-color': cfg.fillColor, 'fill-opacity': 1 },
+      });
+      map.addLayer({
+        id: `${logicalId}-outline`,
+        type: 'line',
+        source: logicalId,
+        filter: ['==', '$type', 'Polygon'],
+        layout: { visibility: initVis },
+        paint: { 'line-color': cfg.outlineColor, 'line-width': cfg.outlineWidth || 1.5 },
       });
 
-      view.watch("zoom", z => updateClusters(z));
-
-      // Atlanta boundary spatial filter
-      atlantaBoundaryLayer.when(() => {
-        const query = atlantaBoundaryLayer.createQuery();
-        query.returnGeometry = true;
-        return atlantaBoundaryLayer.queryFeatures(query);
-      }).then(result => {
-        if (result.features.length > 0) {
-          const atlantaGeom = result.features[0].geometry;
-          atlantaLayers.forEach(layer => {
-            view.whenLayerView(layer).then(lv => {
-              lv.filter = { geometry: atlantaGeom, spatialRelationship: "intersects" };
-            });
-          });
-        }
-      }).catch(err => {
-        console.warn("Atlanta boundary filter unavailable:", err.message);
+    } else if (cfg.type === 'line') {
+      map.addLayer({
+        id: `${logicalId}-line`,
+        type: 'line',
+        source: logicalId,
+        layout: { visibility: initVis },
+        paint: { 'line-color': cfg.color, 'line-width': cfg.lineWidth || 1.5 },
       });
+    }
+  }
+}
 
+/* ════════════════════════════════════════════════════════════
+   POPUPS
+   ════════════════════════════════════════════════════════════ */
+function bindPopups() {
+  const popup = new mapboxgl.Popup({ closeButton: true, closeOnClick: false, offset: 12, maxWidth: '300px' });
+
+  for (const [logicalId, cfg] of Object.entries(LAYER_CFG)) {
+    const clickLayerId = cfg.type === 'circle' ? `${logicalId}-points`
+                       : cfg.type === 'fill'   ? `${logicalId}-fill`
+                       : null;
+    if (!clickLayerId) continue;
+
+    map.on('mouseenter', clickLayerId, () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', clickLayerId, () => { map.getCanvas().style.cursor = ''; });
+
+    map.on('click', clickLayerId, e => {
+      const props = e.features[0].properties;
+      const title = props[cfg.popupField] || props.name || props.Name || logicalId;
+      const rows  = Object.entries(props)
+        .filter(([k]) => !['id','objectid','OBJECTID'].includes(k))
+        .slice(0, 6)
+        .map(([k, v]) => `<tr><td style="color:var(--muted);padding-right:8px">${k}</td><td>${v}</td></tr>`)
+        .join('');
+      popup.setLngLat(e.lngLat)
+        .setHTML(`<div class="popup-title">${title}</div><div class="popup-body"><table>${rows}</table></div>`)
+        .addTo(map);
     });
-  </script>
+
+    // Cluster expand on click
+    if (cfg.cluster) {
+      map.on('click', `${logicalId}-clusters`, e => {
+        const features = map.queryRenderedFeatures(e.point, { layers: [`${logicalId}-clusters`] });
+        const clusterId = features[0].properties.cluster_id;
+        map.getSource(logicalId).getClusterExpansionZoom(clusterId, (err, zoom) => {
+          if (!err) map.easeTo({ center: features[0].geometry.coordinates, zoom });
+        });
+      });
+      map.on('mouseenter', `${logicalId}-clusters`, () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', `${logicalId}-clusters`, () => { map.getCanvas().style.cursor = ''; });
+    }
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   LAYER VISIBILITY
+   ════════════════════════════════════════════════════════════ */
+function getMapboxIds(logicalId) {
+  const cfg = LAYER_CFG[logicalId];
+  const ids = [];
+  if (cfg.type === 'circle') {
+    if (cfg.cluster) ids.push(`${logicalId}-clusters`, `${logicalId}-cluster-count`);
+    ids.push(`${logicalId}-points`);
+  } else if (cfg.type === 'fill') {
+    ids.push(`${logicalId}-fill`, `${logicalId}-outline`);
+  } else if (cfg.type === 'line') {
+    ids.push(`${logicalId}-line`);
+  }
+  return ids;
+}
+
+function setLayerVis(logicalId, visible) {
+  if (!mapReady) return;
+  const v = visible ? 'visible' : 'none';
+  getMapboxIds(logicalId).forEach(id => {
+    if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', v);
+  });
+}
+
+function getCheckbox(layerId) { return document.querySelector(`input[data-layer="${layerId}"]`); }
+function isChecked(layerId)   { const b = getCheckbox(layerId); return b ? b.checked : false; }
+function setChecked(layerId, state) { const b = getCheckbox(layerId); if (b) b.checked = state; }
+
+/* ════════════════════════════════════════════════════════════
+   MODE / TAB / VISIBILITY LOGIC
+   ════════════════════════════════════════════════════════════ */
+const cityLayerIds   = ['foodRecovery','redistribution','beneficiary','circular','foodDeserts','foodInsecurity'];
+const campusLayerIds = ['gtDining','gtCompost','gtVending','gtRecycling'];
+const campusBaseIds  = ['gtBuildings','gtSidewalks'];
+const allLogicalIds  = [...cityLayerIds, ...campusLayerIds, ...campusBaseIds];
+
+function tabDefsForMode()  { return mode === 'city' ? CITY_TABS : CAMPUS_TABS; }
+function activeTabId()     { return mode === 'city' ? activeCityTab : activeCampusTab; }
+function setActiveTabId(id){ if (mode === 'city') activeCityTab = id; else activeCampusTab = id; }
+
+function setModeLayerSelection(layerIds) {
+  const selected = new Set(layerIds);
+  const modeIds  = mode === 'city' ? cityLayerIds : campusLayerIds;
+  modeIds.forEach(id => setChecked(id, selected.has(id)));
+}
+
+function applyVisibility() {
+  if (!mapReady) return;
+
+  cityLayerIds.forEach(id => {
+    setLayerVis(id, mode === 'city' && isChecked(id));
+  });
+  campusLayerIds.forEach(id => {
+    setLayerVis(id, mode === 'campus' && isChecked(id));
+  });
+  campusBaseIds.forEach(id => {
+    setLayerVis(id, mode === 'campus');
+  });
+
+  // 3D buildings: ON in Atlanta mode, OFF in campus mode
+  if (map.getLayer('3d-buildings')) {
+    map.setLayoutProperty('3d-buildings', 'visibility', mode === 'city' ? 'visible' : 'none');
+  }
+}
+
+function applyActiveTabSelection() {
+  const defs   = tabDefsForMode();
+  const target = defs.find(d => d.id === activeTabId()) || defs[0];
+  setActiveTabId(target.id);
+  setModeLayerSelection(target.layers);
+}
+
+function renderDock() {
+  const dock   = document.getElementById('dock');
+  const defs   = tabDefsForMode();
+  const active = activeTabId();
+  dock.innerHTML = '';
+  defs.forEach(def => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.textContent = def.label;
+    btn.className = def.id === active ? 'active' : '';
+    btn.addEventListener('click', () => {
+      setActiveTabId(def.id);
+      setModeLayerSelection(def.layers);
+      applyVisibility();
+      renderDock();
+    });
+    dock.appendChild(btn);
+  });
+}
+
+function setModeButtons() {
+  document.getElementById('btnCity').classList.toggle('active',   mode === 'city');
+  document.getElementById('btnCampus').classList.toggle('active', mode === 'campus');
+}
+
+function switchToCity() {
+  mode = 'city';
+  setModeButtons();
+  applyActiveTabSelection();
+  applyVisibility();
+  renderDock();
+  map.flyTo({ ...CITY_VIEW, duration: 1200 });
+}
+
+function switchToCampus() {
+  mode = 'campus';
+  setModeButtons();
+  applyActiveTabSelection();
+  applyVisibility();
+  renderDock();
+  map.flyTo({ ...CAMPUS_VIEW, duration: 1200 });
+}
+
+/* ════════════════════════════════════════════════════════════
+   EVENT WIRING
+   ════════════════════════════════════════════════════════════ */
+document.getElementById('btnCity').addEventListener('click',   switchToCity);
+document.getElementById('btnCampus').addEventListener('click', switchToCampus);
+
+document.querySelectorAll('input[data-layer]').forEach(box => {
+  box.addEventListener('change', () => { setActiveTabId(''); applyVisibility(); renderDock(); });
+});
+
+document.getElementById('showAll').addEventListener('click', () => {
+  (mode === 'city' ? cityLayerIds : campusLayerIds).forEach(id => setChecked(id, true));
+  setActiveTabId(''); applyVisibility(); renderDock();
+});
+document.getElementById('hideAll').addEventListener('click', () => {
+  (mode === 'city' ? cityLayerIds : campusLayerIds).forEach(id => setChecked(id, false));
+  setActiveTabId(''); applyVisibility(); renderDock();
+});
+
+document.getElementById('layersToggle').addEventListener('click', () => {
+  document.getElementById('layerPanel').classList.toggle('open');
+});
+
+document.getElementById('cyclingToggle').addEventListener('click', () => {
+  const btn = document.getElementById('cyclingToggle');
+  const isActive = btn.classList.toggle('active');
+  if (mapReady && map.getLayer('cycling-overlay')) {
+    map.setLayoutProperty('cycling-overlay', 'visibility', isActive ? 'visible' : 'none');
+  }
+});
+
+/* ════════════════════════════════════════════════════════════
+   BOOTSTRAP
+   ════════════════════════════════════════════════════════════ */
+(async function init() {
+  const token = await getMapboxToken();
+  initMap(token);
+})();
+</script>
 </body>
 </html>

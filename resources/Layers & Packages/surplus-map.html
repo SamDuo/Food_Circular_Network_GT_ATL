@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Real-Time Food Surplus Map</title>
 
-  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
-  <script src="https://js.arcgis.com/4.30/"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 
   <style>
     /* ═══════════════════════════════════════════════════════
@@ -27,7 +27,7 @@
       --route-panel-w: 360px;
 
       /* Glassmorphism tokens */
-      --glass-bg: rgba(8, 12, 24, 0.72);
+      --glass-bg: rgba(8, 12, 24, 0.82);
       --glass-border: rgba(255, 255, 255, 0.08);
       --glass-blur: blur(16px) saturate(1.2);
     }
@@ -80,10 +80,31 @@
     .navLink:hover { background: rgba(179, 163, 105, 0.12); box-shadow: 0 0 10px rgba(179, 163, 105, 0.15); }
 
     /* ═══════════════════════════════════════════════════════
-       MAP & STATS
+       MAP
        ═══════════════════════════════════════════════════════ */
-    #viewDiv { position: absolute; inset: 0; }
+    #map { position: absolute; inset: 0; }
 
+    /* Mapbox controls nudged below topbar */
+    .mapboxgl-ctrl-top-right { top: calc(var(--header-h) + 10px) !important; right: 10px !important; }
+    .mapboxgl-ctrl-bottom-left { bottom: 36px !important; left: 10px !important; }
+    .mapboxgl-ctrl-attrib { font-size: 10px !important; }
+
+    /* Popup styling */
+    .mapboxgl-popup-content {
+      background: rgba(8, 12, 24, 0.96) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: 10px !important;
+      padding: 14px !important;
+      font-family: "Avenir Next", "Segoe UI", Arial, sans-serif !important;
+      min-width: 220px;
+    }
+    .mapboxgl-popup-tip { display: none !important; }
+    .mapboxgl-popup-close-button { color: var(--muted) !important; font-size: 18px !important; top: 6px !important; right: 8px !important; }
+
+    /* ═══════════════════════════════════════════════════════
+       STATS RAIL
+       ═══════════════════════════════════════════════════════ */
     #statsRail {
       position: absolute; top: 72px; right: 10px; z-index: 24;
       display: grid; gap: 6px; width: 220px;
@@ -268,16 +289,6 @@
     }
     .rp-leg span { color: var(--route-teal); font-weight: 700; }
 
-    .rp-apiNotice {
-      margin-bottom: 12px; padding: 10px; background: #2a2210;
-      border: 1px solid #5c4a0a; border-radius: 8px; font-size: 11px; color: #ffc107;
-    }
-    .rp-apiNotice input {
-      width: 100%; margin: 6px 0; padding: 6px 8px; background: #1a1a1a;
-      border: 1px solid #3a4254; border-radius: 4px; color: var(--text); font-size: 11px;
-    }
-    .rp-apiNotice button { margin-top: 4px; }
-
     .rp-results { display: none; }
     .rp-results.visible { display: block; }
 
@@ -309,9 +320,7 @@
       font-size: 10px; color: var(--route-teal); text-transform: uppercase;
       font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;
     }
-    .fleet-stats-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-    }
+    .fleet-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .fleet-stat { text-align: center; padding: 4px; }
     .fleet-stat-value { display: block; font-size: 16px; font-weight: 800; color: #ffffff; }
     .fleet-stat-label { display: block; font-size: 9px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
@@ -322,9 +331,11 @@
     .ai-highlight { font-size: 12px; font-weight: 700; color: var(--route-teal); }
     .ai-actions { display: flex; gap: 6px; }
 
-    .capacity-ok   { color: #2ed573; }
-    .capacity-warn { color: #ffc048; }
-    .capacity-full { color: #ff4757; }
+    /* Surplus pin pulse animation */
+    @keyframes surplusPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.8; }
+    }
 
     /* ═══════════════════════════════════════════════════════
        MOBILE RESPONSIVE
@@ -373,7 +384,7 @@
     </header>
 
     <!-- ═══ MAP ═══ -->
-    <div id="viewDiv"></div>
+    <div id="map"></div>
     <section id="statsRail"></section>
     <button id="layersToggle" type="button">L</button>
 
@@ -429,13 +440,6 @@
               <button class="rp-btn" id="aiDismiss" type="button" style="flex:1">Dismiss</button>
             </div>
           </div>
-        </div>
-
-        <!-- API Key Notice -->
-        <div id="rpApiNotice" class="rp-apiNotice" style="display:none">
-          <div>ArcGIS API key required for real-time routing</div>
-          <input id="rpApiKeyInput" type="text" placeholder="Paste your AAPK key here..." />
-          <button class="rp-btn" id="rpApiKeySave" type="button">Save Key</button>
         </div>
 
         <!-- Origin -->
@@ -506,11 +510,14 @@
     /* ═══════════════════════════════════════════════════════
        CONSTANTS
        ═══════════════════════════════════════════════════════ */
+    const MAPBOX_FALLBACK = ''  /* set MAPBOX_PUBLIC_KEY in .env — loaded via /api/config */;
     const CITY_VIEW = { center: [-84.388, 33.749], zoom: 11 };
-    const ROUTE_URL = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
     const H = 3600000;
     const NOW = Date.now();
 
+    /* ═══════════════════════════════════════════════════════
+       STATS RAIL
+       ═══════════════════════════════════════════════════════ */
     const STATS = [
       { label: "Food Diverted (lbs/wk)", value: 42500 },
       { label: "Active Sources", value: 18 },
@@ -518,7 +525,6 @@
       { label: "People Served", value: 3200 },
       { label: "CO2 Saved (kg/wk)", value: 8900 }
     ];
-
     const statsRail = document.getElementById("statsRail");
     STATS.forEach((s) => {
       const card = document.createElement("article");
@@ -528,31 +534,27 @@
     });
 
     /* ═══════════════════════════════════════════════════════
-       MOCK SURPLUS DATA (30 entries, real coordinates)
+       MOCK SURPLUS DATA
        ═══════════════════════════════════════════════════════ */
     const MOCK_SURPLUS = [
-      // GT Campus entries moved to gt-campus-hub.html
-      // Restaurants (8)
-      { id:13, name:"Subway - College Park",       lng:-84.4464, lat:33.6635, food_type:"Packaged Goods", quantity_lbs:35,  hours_left:14.0, transport:"Dry Vehicle",      source_category:"Restaurant", notes:"Pre-made subs approaching date" },
-      { id:14, name:"McDonald's - Ponce City",     lng:-84.3074, lat:33.7903, food_type:"Prepared Meals", quantity_lbs:55,  hours_left:3.5,  transport:"Refrigerated Van", source_category:"Restaurant", notes:"Breakfast surplus" },
-      { id:15, name:"Moe's Southwest Grill",       lng:-84.3899, lat:33.7770, food_type:"Prepared Meals", quantity_lbs:70,  hours_left:1.2,  transport:"Refrigerated Van", source_category:"Restaurant", notes:"Lunch rush leftovers" },
-      { id:16, name:"Rosa's Pizza",                lng:-84.3895, lat:33.7558, food_type:"Prepared Meals", quantity_lbs:45,  hours_left:4.5,  transport:"Dry Vehicle",      source_category:"Restaurant", notes:"End of day pizza" },
-      { id:17, name:"Panera Bread - Midtown",      lng:-84.3750, lat:33.7830, food_type:"Packaged Goods", quantity_lbs:110, hours_left:18.0, transport:"Dry Vehicle",      source_category:"Restaurant", notes:"Day-end bread and pastry" },
-      { id:18, name:"Chipotle - Ponce",            lng:-84.3636, lat:33.7739, food_type:"Prepared Meals", quantity_lbs:80,  hours_left:2.0,  transport:"Refrigerated Van", source_category:"Restaurant", notes:"Catering order canceled" },
-      { id:19, name:"Sensational Subs",            lng:-84.3882, lat:33.7543, food_type:"Packaged Goods", quantity_lbs:25,  hours_left:20.0, transport:"Dry Vehicle",      source_category:"Restaurant", notes:"Wrapped subs" },
-      { id:20, name:"Alibaba's Turkish Food",      lng:-84.3896, lat:33.7558, food_type:"Packaged Goods", quantity_lbs:40,  hours_left:0.8,  transport:"Refrigerated Van", source_category:"Restaurant", notes:"Prepared Mediterranean platters" },
-      // Redistribution (5)
-      { id:21, name:"American Stroke Assoc.",      lng:-84.3612, lat:33.9356, food_type:"Perishable",     quantity_lbs:300, hours_left:1.5,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Donated dairy products" },
-      { id:22, name:"BDI Freeman Campus",          lng:-84.4404, lat:33.8130, food_type:"Produce",        quantity_lbs:250, hours_left:5.0,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Fresh vegetables from farm donation" },
-      { id:23, name:"Center for Visually Impaired",lng:-84.3872, lat:33.7748, food_type:"Produce",        quantity_lbs:180, hours_left:8.0,  transport:"Dry Vehicle",      source_category:"Redistribution", notes:"Root vegetables, long shelf life" },
-      { id:24, name:"Children's Healthcare Egleston",lng:-84.3204, lat:33.7938, food_type:"Perishable",   quantity_lbs:95,  hours_left:3.0,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Cafeteria excess" },
-      { id:25, name:"Children's Healthcare Spalding",lng:-84.3821, lat:33.7538, food_type:"Produce",      quantity_lbs:160, hours_left:0.5,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Fruit salad prep excess" },
-      // Urban Farms & Community (5)
-      { id:26, name:"Truly Living Well Farm",      lng:-84.4020, lat:33.7468, food_type:"Produce",        quantity_lbs:75,  hours_left:16.0, transport:"Dry Vehicle",      source_category:"Urban Farm", notes:"Weekly harvest surplus" },
-      { id:27, name:"Urban Food Forest at Browns Mill", lng:-84.3497, lat:33.7054, food_type:"Produce",   quantity_lbs:50,  hours_left:10.0, transport:"Dry Vehicle",      source_category:"Urban Farm", notes:"Community garden harvest" },
-      { id:28, name:"CO-Collegetown Farm",         lng:-84.4227, lat:33.7519, food_type:"Produce",        quantity_lbs:60,  hours_left:4.0,  transport:"Bike Courier",     source_category:"Urban Farm", notes:"Greenhouse tomatoes and herbs" },
-      { id:29, name:"Goodr Inc.",                  lng:-84.3729, lat:33.7627, food_type:"Bakery",         quantity_lbs:35,  hours_left:5.5,  transport:"Dry Vehicle",      source_category:"Food Recovery", notes:"Recovered baked goods for redistribution" },
-      { id:30, name:"Ben's Backyard",              lng:-84.4143, lat:33.7340, food_type:"Produce",        quantity_lbs:90,  hours_left:22.0, transport:"Dry Vehicle",      source_category:"Community", notes:"Community composting garden harvest" }
+      { id:13, name:"Subway - College Park",          lng:-84.4464, lat:33.6635, food_type:"Packaged Goods", quantity_lbs:35,  hours_left:14.0, transport:"Dry Vehicle",      source_category:"Restaurant",     notes:"Pre-made subs approaching date" },
+      { id:14, name:"McDonald's - Ponce City",        lng:-84.3074, lat:33.7903, food_type:"Prepared Meals", quantity_lbs:55,  hours_left:3.5,  transport:"Refrigerated Van", source_category:"Restaurant",     notes:"Breakfast surplus" },
+      { id:15, name:"Moe's Southwest Grill",          lng:-84.3899, lat:33.7770, food_type:"Prepared Meals", quantity_lbs:70,  hours_left:1.2,  transport:"Refrigerated Van", source_category:"Restaurant",     notes:"Lunch rush leftovers" },
+      { id:16, name:"Rosa's Pizza",                   lng:-84.3895, lat:33.7558, food_type:"Prepared Meals", quantity_lbs:45,  hours_left:4.5,  transport:"Dry Vehicle",      source_category:"Restaurant",     notes:"End of day pizza" },
+      { id:17, name:"Panera Bread - Midtown",         lng:-84.3750, lat:33.7830, food_type:"Packaged Goods", quantity_lbs:110, hours_left:18.0, transport:"Dry Vehicle",      source_category:"Restaurant",     notes:"Day-end bread and pastry" },
+      { id:18, name:"Chipotle - Ponce",               lng:-84.3636, lat:33.7739, food_type:"Prepared Meals", quantity_lbs:80,  hours_left:2.0,  transport:"Refrigerated Van", source_category:"Restaurant",     notes:"Catering order canceled" },
+      { id:19, name:"Sensational Subs",               lng:-84.3882, lat:33.7543, food_type:"Packaged Goods", quantity_lbs:25,  hours_left:20.0, transport:"Dry Vehicle",      source_category:"Restaurant",     notes:"Wrapped subs" },
+      { id:20, name:"Alibaba's Turkish Food",         lng:-84.3896, lat:33.7558, food_type:"Packaged Goods", quantity_lbs:40,  hours_left:0.8,  transport:"Refrigerated Van", source_category:"Restaurant",     notes:"Prepared Mediterranean platters" },
+      { id:21, name:"American Stroke Assoc.",         lng:-84.3612, lat:33.9356, food_type:"Perishable",     quantity_lbs:300, hours_left:1.5,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Donated dairy products" },
+      { id:22, name:"BDI Freeman Campus",             lng:-84.4404, lat:33.8130, food_type:"Produce",        quantity_lbs:250, hours_left:5.0,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Fresh vegetables from farm donation" },
+      { id:23, name:"Center for Visually Impaired",   lng:-84.3872, lat:33.7748, food_type:"Produce",        quantity_lbs:180, hours_left:8.0,  transport:"Dry Vehicle",      source_category:"Redistribution", notes:"Root vegetables, long shelf life" },
+      { id:24, name:"Children's Healthcare Egleston", lng:-84.3204, lat:33.7938, food_type:"Perishable",     quantity_lbs:95,  hours_left:3.0,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Cafeteria excess" },
+      { id:25, name:"Children's Healthcare Spalding", lng:-84.3821, lat:33.7538, food_type:"Produce",        quantity_lbs:160, hours_left:0.5,  transport:"Refrigerated Van", source_category:"Redistribution", notes:"Fruit salad prep excess" },
+      { id:26, name:"Truly Living Well Farm",         lng:-84.4020, lat:33.7468, food_type:"Produce",        quantity_lbs:75,  hours_left:16.0, transport:"Dry Vehicle",      source_category:"Urban Farm",     notes:"Weekly harvest surplus" },
+      { id:27, name:"Urban Food Forest at Browns Mill",lng:-84.3497, lat:33.7054, food_type:"Produce",        quantity_lbs:50,  hours_left:10.0, transport:"Dry Vehicle",      source_category:"Urban Farm",     notes:"Community garden harvest" },
+      { id:28, name:"CO-Collegetown Farm",            lng:-84.4227, lat:33.7519, food_type:"Produce",        quantity_lbs:60,  hours_left:4.0,  transport:"Bike Courier",     source_category:"Urban Farm",     notes:"Greenhouse tomatoes and herbs" },
+      { id:29, name:"Goodr Inc.",                     lng:-84.3729, lat:33.7627, food_type:"Bakery",         quantity_lbs:35,  hours_left:5.5,  transport:"Dry Vehicle",      source_category:"Food Recovery",  notes:"Recovered baked goods for redistribution" },
+      { id:30, name:"Ben's Backyard",                 lng:-84.4143, lat:33.7340, food_type:"Produce",        quantity_lbs:90,  hours_left:22.0, transport:"Dry Vehicle",      source_category:"Community",      notes:"Community composting garden harvest" }
     ];
 
     MOCK_SURPLUS.forEach(s => {
@@ -562,7 +564,6 @@
 
     /* ═══════════════════════════════════════════════════════
        ROUTE CHAIN STOP OPTIONS
-       (Compost uses Fulton County permitted compost sites)
        ═══════════════════════════════════════════════════════ */
     const ROUTE_STOPS = {
       origin: [
@@ -577,38 +578,38 @@
         { name: "CRC Fuel Zone",               lng: -84.3989, lat: 33.7720 }
       ],
       foodRecovery: [
-        { name: "McDonald's - Ponce City",     lng: -84.3074, lat: 33.7903, transport: "Refrigerated Van" },
-        { name: "Moe's Southwest Grill",       lng: -84.3899, lat: 33.7770, transport: "Refrigerated Van" },
-        { name: "Panera Bread - Midtown",      lng: -84.3750, lat: 33.7830, transport: "Dry Vehicle" },
-        { name: "Chipotle - Ponce",            lng: -84.3636, lat: 33.7739, transport: "Refrigerated Van" },
-        { name: "Rosa's Pizza",                lng: -84.3895, lat: 33.7558, transport: "Dry Vehicle" },
-        { name: "Subway - College Park",       lng: -84.4464, lat: 33.6635, transport: "Dry Vehicle" }
+        { name: "McDonald's - Ponce City",    lng: -84.3074, lat: 33.7903, transport: "Refrigerated Van" },
+        { name: "Moe's Southwest Grill",      lng: -84.3899, lat: 33.7770, transport: "Refrigerated Van" },
+        { name: "Panera Bread - Midtown",     lng: -84.3750, lat: 33.7830, transport: "Dry Vehicle" },
+        { name: "Chipotle - Ponce",           lng: -84.3636, lat: 33.7739, transport: "Refrigerated Van" },
+        { name: "Rosa's Pizza",               lng: -84.3895, lat: 33.7558, transport: "Dry Vehicle" },
+        { name: "Subway - College Park",      lng: -84.4464, lat: 33.6635, transport: "Dry Vehicle" }
       ],
       redistribution: [
         { name: "Center for Visually Impaired",    lng: -84.3872, lat: 33.7748, cold_pct: 45, dry_pct: 60, accepting_perishable: true },
         { name: "Children's Healthcare Egleston",  lng: -84.3204, lat: 33.7938, cold_pct: 72, dry_pct: 55, accepting_perishable: true },
         { name: "Children's Healthcare Spalding",  lng: -84.3821, lat: 33.7538, cold_pct: 88, dry_pct: 40, accepting_perishable: true },
         { name: "BDI Freeman Campus",              lng: -84.4404, lat: 33.8130, cold_pct: 30, dry_pct: 75, accepting_perishable: false },
-        { name: "American Stroke Assoc.",           lng: -84.3612, lat: 33.9356, cold_pct: 92, dry_pct: 85, accepting_perishable: true }
+        { name: "American Stroke Assoc.",          lng: -84.3612, lat: 33.9356, cold_pct: 92, dry_pct: 85, accepting_perishable: true }
       ],
       beneficiary: [
-        { name: "North Ave Dining Hall",           lng: -84.3918, lat: 33.7716, cold_pct: 50, dry_pct: 35, accepting_perishable: true },
-        { name: "West Village Dining Commons",     lng: -84.4061, lat: 33.7777, cold_pct: 40, dry_pct: 30, accepting_perishable: true },
-        { name: "Brittain Dining Hall",            lng: -84.3898, lat: 33.7728, cold_pct: 55, dry_pct: 45, accepting_perishable: true },
-        { name: "Center for Visually Impaired",    lng: -84.3872, lat: 33.7748, cold_pct: 60, dry_pct: 70, accepting_perishable: true },
-        { name: "Children's Healthcare Spalding",  lng: -84.3821, lat: 33.7538, cold_pct: 91, dry_pct: 80, accepting_perishable: false }
+        { name: "North Ave Dining Hall",          lng: -84.3918, lat: 33.7716, cold_pct: 50, dry_pct: 35, accepting_perishable: true },
+        { name: "West Village Dining Commons",    lng: -84.4061, lat: 33.7777, cold_pct: 40, dry_pct: 30, accepting_perishable: true },
+        { name: "Brittain Dining Hall",           lng: -84.3898, lat: 33.7728, cold_pct: 55, dry_pct: 45, accepting_perishable: true },
+        { name: "Center for Visually Impaired",   lng: -84.3872, lat: 33.7748, cold_pct: 60, dry_pct: 70, accepting_perishable: true },
+        { name: "Children's Healthcare Spalding", lng: -84.3821, lat: 33.7538, cold_pct: 91, dry_pct: 80, accepting_perishable: false }
       ],
       compost: [
-        { name: "GT Resource Recovery Yard",               lng: -84.4000, lat: 33.7767 },
-        { name: "CHaRM - Hard to Recycle Materials",       lng: -84.3840, lat: 33.7157 },
-        { name: "Ben's Backyard",                          lng: -84.4143, lat: 33.7340 },
-        { name: "CO-Collegetown Farm / Composting Lab",    lng: -84.4227, lat: 33.7519 },
-        { name: "CompostNow",                              lng: -84.4479, lat: 33.6880 },
-        { name: "Goodr Inc.",                              lng: -84.3729, lat: 33.7627 },
-        { name: "Truly Living Well",                       lng: -84.4020, lat: 33.7468 },
-        { name: "Urban Food Forest at Browns Mill",        lng: -84.3497, lat: 33.7054 },
-        { name: "Southern Green Industries",               lng: -84.4804, lat: 33.8262 },
-        { name: "Old Rucker Farm (Alpharetta)",            lng: -84.2980, lat: 34.0755 }
+        { name: "GT Resource Recovery Yard",            lng: -84.4000, lat: 33.7767 },
+        { name: "CHaRM - Hard to Recycle Materials",    lng: -84.3840, lat: 33.7157 },
+        { name: "Ben's Backyard",                       lng: -84.4143, lat: 33.7340 },
+        { name: "CO-Collegetown Farm / Composting Lab", lng: -84.4227, lat: 33.7519 },
+        { name: "CompostNow",                           lng: -84.4479, lat: 33.6880 },
+        { name: "Goodr Inc.",                           lng: -84.3729, lat: 33.7627 },
+        { name: "Truly Living Well",                    lng: -84.4020, lat: 33.7468 },
+        { name: "Urban Food Forest at Browns Mill",     lng: -84.3497, lat: 33.7054 },
+        { name: "Southern Green Industries",            lng: -84.4804, lat: 33.8262 },
+        { name: "Old Rucker Farm (Alpharetta)",         lng: -84.2980, lat: 34.0755 }
       ]
     };
 
@@ -616,10 +617,8 @@
        FLEET MOCK DATA & SCORING CONSTANTS
        ═══════════════════════════════════════════════════════ */
     const MOCK_FLEET = {
-      total_drivers: 42, active_drivers: 38, refrigerated_vehicles: 8,
-      dry_vehicles: 18, bike_couriers: 12, walkin_volunteers: 4,
-      avg_pickup_min: 24, avg_delivery_min: 18,
-      routes_completed_today: 27, lbs_recovered_today: 12400
+      active_drivers: 38, refrigerated_vehicles: 8,
+      avg_pickup_min: 24, lbs_recovered_today: 12400
     };
 
     const SCORING_WEIGHTS = { URGENCY: 0.50, VOLUME: 0.30, DISTANCE: 0.20 };
@@ -641,717 +640,649 @@
     /* ═══════════════════════════════════════════════════════
        SCORING FUNCTIONS (Urgency-Aware Routing)
        ═══════════════════════════════════════════════════════ */
-    function computeUrgencyScore(hoursRemaining) {
-      return 100 * Math.exp(-0.5 * Math.max(0, hoursRemaining));
-    }
-    function computeVolumeScore(lbs) {
-      return Math.min(100, 20 * Math.log10(lbs + 1));
-    }
-    function computeProximityScore(distMi) {
-      return 100 / (1 + distMi);
-    }
+    function computeUrgencyScore(h) { return 100 * Math.exp(-0.5 * Math.max(0, h)); }
+    function computeVolumeScore(lbs) { return Math.min(100, 20 * Math.log10(lbs + 1)); }
+    function computeProximityScore(d) { return 100 / (1 + d); }
+
     function computePriorityScore(item, fromPt) {
-      const hrs = Math.max(0, (new Date(item.expiration) - Date.now()) / 3600000);
+      const hrs = Math.max(0, (new Date(item.expiration) - Date.now()) / H);
       const dist = haversine(fromPt.lat, fromPt.lng, item.lat, item.lng);
       return (SCORING_WEIGHTS.URGENCY * computeUrgencyScore(hrs)) +
              (SCORING_WEIGHTS.VOLUME  * computeVolumeScore(item.quantity_lbs)) +
              (SCORING_WEIGHTS.DISTANCE * computeProximityScore(dist));
     }
-    function isTransportCompatible(required, vehicleCap) {
-      return (TRANSPORT_HIERARCHY[vehicleCap] || 0) >= (TRANSPORT_HIERARCHY[required] || 0);
+
+    function isTransportCompatible(required, cap) {
+      return (TRANSPORT_HIERARCHY[cap] || 0) >= (TRANSPORT_HIERARCHY[required] || 0);
     }
+
     function computeCapacityScore(node, fromPt) {
       const dist = haversine(fromPt.lat, fromPt.lng, node.lat, node.lng);
       let penalty = 0;
-      if (node.cold_pct !== undefined && node.cold_pct > 90) penalty -= 50;
-      if (node.dry_pct  !== undefined && node.dry_pct  > 90) penalty -= 30;
+      if (node.cold_pct > 90) penalty -= 50;
+      if (node.dry_pct  > 90) penalty -= 30;
       return computeProximityScore(dist) + penalty;
     }
 
     /* ═══════════════════════════════════════════════════════
-       ArcGIS AMD MODULES
+       MAPBOX MAP INIT
        ═══════════════════════════════════════════════════════ */
-    require([
-      "esri/Map",
-      "esri/views/MapView",
-      "esri/widgets/Home",
-      "esri/widgets/Compass",
-      "esri/widgets/ScaleBar",
-      "esri/widgets/Search",
-      "esri/rest/route",
-      "esri/rest/support/RouteParameters",
-      "esri/rest/support/FeatureSet",
-      "esri/layers/GraphicsLayer",
-      "esri/Graphic",
-      "esri/config"
-    ], function (Map, MapView, Home, Compass, ScaleBar, Search, routeSolver, RouteParameters, FeatureSet, GraphicsLayer, Graphic, esriConfig) {
+    let map;
+    let surplusMarkers = [];
+    let stopMarkersArr = [];
 
-      /* ─── API Key ─── */
-      let hasApiKey = false;
-      function setApiKey(key) {
-        if (key) {
-          esriConfig.apiKey = key;
-          hasApiKey = true;
-          localStorage.setItem("afcn_arcgis_api_key", key);
-          const notice = document.getElementById("rpApiNotice");
-          if (notice) notice.style.display = "none";
-        }
-      }
-      const savedKey = localStorage.getItem("afcn_arcgis_api_key");
-      if (savedKey) setApiKey(savedKey);
-      const configReady = fetch("/api/config").then(r => r.json()).then(cfg => {
-        if (cfg.arcgisApiKey) setApiKey(cfg.arcgisApiKey);
-      }).catch(() => {});
+    async function initMap() {
+      let token = MAPBOX_FALLBACK;
+      try {
+        const r = await fetch('/api/config');
+        if (r.ok) { const c = await r.json(); if (c.mapboxPublicKey) token = c.mapboxPublicKey; }
+      } catch (_) {}
 
-      /* ═══════════════════════════════════════════════════════
-         SURPLUS & ROUTE GRAPHICS LAYERS
-         ═══════════════════════════════════════════════════════ */
-      const surplusLayer = new GraphicsLayer({ id: "surplusLayer", title: "Real-Time Surplus" });
-      const routeLayer = new GraphicsLayer({ id: "routeLayer", title: "Optimized Route" });
+      mapboxgl.accessToken = token;
 
-      /* ═══════════════════════════════════════════════════════
-         MAP & VIEW
-         ═══════════════════════════════════════════════════════ */
-      const map = new Map({
-        basemap: "dark-gray-vector",
-        layers: [routeLayer, surplusLayer]
+      map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/dark-v11',
+        center: CITY_VIEW.center,
+        zoom: CITY_VIEW.zoom,
+        antialias: true,
       });
 
-      const view = new MapView({
-        container: "viewDiv", map,
-        center: CITY_VIEW.center, zoom: CITY_VIEW.zoom,
-        ui: { components: ["zoom", "attribution"] },
-        popup: { dockEnabled: false }
+      map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
+      map.addControl(new mapboxgl.ScaleControl({ unit: 'imperial' }), 'bottom-left');
+
+      map.on('style.load', () => {
+        // Route GeoJSON source + two layers (glow + dashed line)
+        map.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.addLayer({
+          id: 'route-glow', type: 'line', source: 'route',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': '#b3a369', 'line-width': 10, 'line-opacity': 0.18 }
+        });
+        map.addLayer({
+          id: 'route-line', type: 'line', source: 'route',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': '#b3a369', 'line-width': 3.5, 'line-dasharray': [2, 1.5] }
+        });
+
+        renderSurplusMarkers();
+        initRouteDropdowns();
+        populateFleetPanel();
+        document.getElementById("routePanel").classList.add("open");
+        generateAISuggestion();
       });
+    }
 
-      view.padding = { top: 74 };
-      view.ui.add(new Home({ view }), "top-left");
-      view.ui.add(new Compass({ view }), "top-left");
-      view.ui.add(new ScaleBar({ view, unit: "dual" }), "bottom-left");
-      view.ui.add(new Search({ view, locationEnabled: false, allPlaceholder: "Search locations" }), { position: "top-left", index: 2 });
+    initMap();
 
-      /* ═══════════════════════════════════════════════════════
-         SURPLUS RENDERING
-         ═══════════════════════════════════════════════════════ */
-      function urgencyColor(u) { return u === "Critical" ? "#ff4757" : u === "Soon" ? "#ffc048" : "#2ed573"; }
-      function urgencyGlow(u) { return u === "Critical" ? "rgba(255,71,87,0.4)" : u === "Soon" ? "rgba(255,192,72,0.35)" : "rgba(46,213,115,0.35)"; }
-      function pinSize(lbs) { return lbs < 50 ? 14 : lbs <= 200 ? 18 : 22; }
+    /* ═══════════════════════════════════════════════════════
+       SURPLUS RENDERING — Mapbox HTML markers
+       ═══════════════════════════════════════════════════════ */
+    function urgencyColor(u) { return u === "Critical" ? "#ff4757" : u === "Soon" ? "#ffc048" : "#2ed573"; }
+    function urgencyGlow(u)  { return u === "Critical" ? "rgba(255,71,87,0.5)" : u === "Soon" ? "rgba(255,192,72,0.4)" : "rgba(46,213,115,0.4)"; }
+    function pinSize(lbs)    { return lbs < 50 ? 10 : lbs <= 200 ? 14 : 18; }
 
-      function surplusPopupContent({ graphic }) {
-        const a = graphic.attributes;
-        const exp = new Date(a.expiration);
-        const remaining = exp - Date.now();
-        const hrs = Math.max(0, Math.floor(remaining / H));
-        const mins = Math.max(0, Math.floor((remaining % H) / 60000));
-        const timeStr = remaining > 0 ? `${hrs}h ${mins}m` : "EXPIRED";
-        const urgColor = urgencyColor(a.urgency);
-        const meals = Math.round(a.quantity_lbs * 0.6);
-        const escapedName = a.name.replace(/'/g, "\\'");
+    function surplusPopupHTML(s) {
+      const remaining = new Date(s.expiration) - Date.now();
+      const hrs  = Math.max(0, Math.floor(remaining / H));
+      const mins = Math.max(0, Math.floor((remaining % H) / 60000));
+      const timeStr  = remaining > 0 ? `${hrs}h ${mins}m` : "EXPIRED";
+      const urgColor = urgencyColor(s.urgency);
+      const meals    = Math.round(s.quantity_lbs * 0.6);
+      const safeName = s.name.replace(/'/g, "\\'");
+      return `<div style="font-size:13px;line-height:1.7">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:700">${s.food_type}</span>
+          <span style="background:${urgColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${s.urgency}</span>
+        </div>
+        <div style="margin:4px 0"><strong>${s.quantity_lbs} lbs</strong> <span style="color:#888">(~${meals} meals)</span></div>
+        <div style="color:${urgColor};font-weight:600">Expires in ${timeStr}</div>
+        <div style="color:#9ca6b8;margin:2px 0">Transport: ${s.transport}</div>
+        <div style="color:#888;font-size:12px;margin:2px 0">${s.notes}</div>
+        <button onclick="window._routeFromSurplus(${s.lng},${s.lat},'${safeName}')"
+          style="margin-top:10px;width:100%;padding:8px;background:#b3a369;color:#0a0c14;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px">
+          Route From Here
+        </button>
+      </div>`;
+    }
 
-        return `<div style="font-family:sans-serif;font-size:13px;line-height:1.7;min-width:220px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-weight:700">${a.food_type}</span>
-            <span style="background:${urgColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;box-shadow:0 0 8px ${urgColor}">${a.urgency}</span>
-          </div>
-          <div style="margin:4px 0"><strong>${a.quantity_lbs} lbs</strong> <span style="color:#888">(~${meals} meals)</span></div>
-          <div style="color:${urgColor};font-weight:600">Expires in ${timeStr}</div>
-          <div style="color:#666;margin:2px 0">Transport: ${a.transport}</div>
-          <div style="color:#888;font-size:12px;margin:2px 0">${a.notes}</div>
-          <button onclick="window._routeFromSurplus(${a.lng},${a.lat},'${escapedName}')"
-            style="margin-top:8px;width:100%;padding:8px;background:#b3a369;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px">
-            Route From Here
-          </button>
-        </div>`;
-      }
+    function renderSurplusMarkers() {
+      surplusMarkers.forEach(m => m.remove());
+      surplusMarkers = [];
 
-      function renderSurplusLayer() {
-        surplusLayer.removeAll();
-        MOCK_SURPLUS.forEach(s => {
-          surplusLayer.add(new Graphic({
-            geometry: { type: "point", longitude: s.lng, latitude: s.lat },
-            symbol: {
-              type: "simple-marker", style: "circle",
-              color: urgencyColor(s.urgency),
-              size: pinSize(s.quantity_lbs),
-              outline: { color: urgencyGlow(s.urgency), width: pinSize(s.quantity_lbs) * 0.5 }
-            },
-            attributes: { ...s },
-            popupTemplate: { title: "{name}", content: surplusPopupContent }
-          }));
-        });
-        filterSurplus();
-      }
-
-      /* ═══════════════════════════════════════════════════════
-         SURPLUS FILTERING
-         ═══════════════════════════════════════════════════════ */
-      function filterSurplus() {
-        const checked = new Set();
-        document.querySelectorAll("input[data-surplus]").forEach(cb => {
-          if (cb.checked) checked.add(cb.dataset.surplus);
-        });
-
-        let totalLbs = 0, criticalCount = 0;
-        const counts = { "Prepared Meals": 0, "Packaged Goods": 0, "Produce": 0, "Bakery": 0, "Perishable": 0 };
-
-        surplusLayer.graphics.forEach(g => {
-          const ft = g.attributes.food_type;
-          const visible = checked.has(ft);
-          g.visible = visible;
-          if (visible) {
-            totalLbs += g.attributes.quantity_lbs;
-            if (g.attributes.urgency === "Critical") criticalCount++;
-          }
-          counts[ft] = (counts[ft] || 0) + 1;
-        });
-
-        document.getElementById("countPrepared").textContent = `(${counts["Prepared Meals"]})`;
-        document.getElementById("countPackaged").textContent = `(${counts["Packaged Goods"]})`;
-        document.getElementById("countProduce").textContent = `(${counts["Produce"]})`;
-        document.getElementById("countBakery").textContent = `(${counts["Bakery"]})`;
-        document.getElementById("countPerishable").textContent = `(${counts["Perishable"]})`;
-
-        const meals = Math.round(totalLbs * 0.6);
-        document.getElementById("surplusSummary").innerHTML =
-          `<strong>${totalLbs.toLocaleString()} lbs</strong> available (~${meals} meals)<br>` +
-          `<span style="color:var(--surplus-critical)">${criticalCount} critical pickups needed</span>`;
-      }
-
+      const checked = new Set();
       document.querySelectorAll("input[data-surplus]").forEach(cb => {
-        cb.addEventListener("change", filterSurplus);
+        if (cb.checked) checked.add(cb.dataset.surplus);
       });
 
-      // Show All / Hide All control surplus filters
-      document.getElementById("showAll").addEventListener("click", () => {
-        document.querySelectorAll("input[data-surplus]").forEach(cb => { cb.checked = true; });
-        filterSurplus();
-      });
-      document.getElementById("hideAll").addEventListener("click", () => {
-        document.querySelectorAll("input[data-surplus]").forEach(cb => { cb.checked = false; });
-        filterSurplus();
+      const counts = { "Prepared Meals": 0, "Packaged Goods": 0, "Produce": 0, "Bakery": 0, "Perishable": 0 };
+
+      MOCK_SURPLUS.forEach(s => {
+        counts[s.food_type] = (counts[s.food_type] || 0) + 1;
+        const visible = checked.has(s.food_type);
+        const sz    = pinSize(s.quantity_lbs);
+        const color = urgencyColor(s.urgency);
+        const glow  = urgencyGlow(s.urgency);
+
+        const el = document.createElement('div');
+        el.style.cssText = [
+          `width:${sz}px`, `height:${sz}px`, `border-radius:50%`,
+          `background:${color}`, `border:2px solid rgba(255,255,255,0.3)`,
+          `box-shadow:0 0 ${sz * 1.5}px ${glow}`,
+          `cursor:pointer`, `display:${visible ? 'block' : 'none'}`,
+          s.urgency === 'Critical' ? 'animation:surplusPulse 1.4s ease-in-out infinite' : ''
+        ].join(';');
+
+        const popup = new mapboxgl.Popup({ offset: 14, maxWidth: '280px' })
+          .setHTML(surplusPopupHTML(s));
+
+        const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([s.lng, s.lat])
+          .setPopup(popup)
+          .addTo(map);
+
+        marker._data = s;
+        surplusMarkers.push(marker);
       });
 
-      document.getElementById("layersToggle").addEventListener("click", () => {
-        document.getElementById("layerPanel").classList.toggle("open");
+      refreshSummary(counts);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SURPLUS FILTERING
+       ═══════════════════════════════════════════════════════ */
+    function filterSurplus() {
+      const checked = new Set();
+      document.querySelectorAll("input[data-surplus]").forEach(cb => {
+        if (cb.checked) checked.add(cb.dataset.surplus);
       });
 
-      /* ═══════════════════════════════════════════════════════
-         ROUTE PANEL LOGIC
-         ═══════════════════════════════════════════════════════ */
-      function populateSelect(id, options, showCapacity) {
-        const sel = document.getElementById(id);
-        options.forEach((opt, i) => {
-          const el = document.createElement("option");
-          el.value = i;
-          let label = opt.name;
-          if (showCapacity && opt.cold_pct !== undefined) {
-            const maxPct = Math.max(opt.cold_pct, opt.dry_pct || 0);
-            label += maxPct > 90 ? " [FULL]" : maxPct > 70 ? " [" + maxPct + "%]" : "";
-          }
-          if (opt.transport) label += " (" + opt.transport + ")";
-          el.textContent = label;
-          sel.appendChild(el);
-        });
+      const counts = { "Prepared Meals": 0, "Packaged Goods": 0, "Produce": 0, "Bakery": 0, "Perishable": 0 };
+      let totalLbs = 0, criticalCount = 0;
+
+      surplusMarkers.forEach(m => {
+        const s = m._data;
+        counts[s.food_type] = (counts[s.food_type] || 0) + 1;
+        const visible = checked.has(s.food_type);
+        m.getElement().style.display = visible ? 'block' : 'none';
+        if (visible) { totalLbs += s.quantity_lbs; if (s.urgency === "Critical") criticalCount++; }
+      });
+
+      refreshSummary(counts, totalLbs, criticalCount);
+    }
+
+    function refreshSummary(counts, totalLbs, criticalCount) {
+      document.getElementById("countPrepared").textContent  = `(${counts["Prepared Meals"]  || 0})`;
+      document.getElementById("countPackaged").textContent  = `(${counts["Packaged Goods"]  || 0})`;
+      document.getElementById("countProduce").textContent   = `(${counts["Produce"]          || 0})`;
+      document.getElementById("countBakery").textContent    = `(${counts["Bakery"]           || 0})`;
+      document.getElementById("countPerishable").textContent= `(${counts["Perishable"]       || 0})`;
+
+      if (totalLbs === undefined) {
+        totalLbs = 0; criticalCount = 0;
+        MOCK_SURPLUS.forEach(s => { totalLbs += s.quantity_lbs; if (s.urgency === "Critical") criticalCount++; });
       }
+      const meals = Math.round(totalLbs * 0.6);
+      document.getElementById("surplusSummary").innerHTML =
+        `<strong>${totalLbs.toLocaleString()} lbs</strong> available (~${meals} meals)<br>` +
+        `<span style="color:var(--surplus-critical)">${criticalCount} critical pickups needed</span>`;
+    }
 
-      /* ─── Origin search input with suggestions ─── */
-      let _selectedOrigin = null;   // { name, lat, lng }
-      let _geocodeTimer = null;
+    document.querySelectorAll("input[data-surplus]").forEach(cb => cb.addEventListener("change", filterSurplus));
+    document.getElementById("showAll").addEventListener("click", () => {
+      document.querySelectorAll("input[data-surplus]").forEach(cb => { cb.checked = true; });
+      filterSurplus();
+    });
+    document.getElementById("hideAll").addEventListener("click", () => {
+      document.querySelectorAll("input[data-surplus]").forEach(cb => { cb.checked = false; });
+      filterSurplus();
+    });
+    document.getElementById("layersToggle").addEventListener("click", () => {
+      document.getElementById("layerPanel").classList.toggle("open");
+    });
 
-      function initRouteDropdowns() {
-        const input = document.getElementById("rpOrigin");
+    /* ═══════════════════════════════════════════════════════
+       ROUTE PANEL — dropdowns & origin search
+       ═══════════════════════════════════════════════════════ */
+    function populateSelect(id, options, showCapacity) {
+      const sel = document.getElementById(id);
+      options.forEach((opt, i) => {
+        const el = document.createElement("option");
+        el.value = i;
+        let label = opt.name;
+        if (showCapacity && opt.cold_pct !== undefined) {
+          const maxPct = Math.max(opt.cold_pct, opt.dry_pct || 0);
+          label += maxPct > 90 ? " [FULL]" : maxPct > 70 ? ` [${maxPct}%]` : "";
+        }
+        if (opt.transport) label += ` (${opt.transport})`;
+        el.textContent = label;
+        sel.appendChild(el);
+      });
+    }
+
+    let _selectedOrigin = null;
+    let _geocodeTimer   = null;
+
+    function initRouteDropdowns() {
+      _selectedOrigin = ROUTE_STOPS.origin[0];
+      document.getElementById("rpOrigin").value = _selectedOrigin.name;
+
+      document.getElementById("rpOrigin").addEventListener("focus", () => showOriginSuggestions(document.getElementById("rpOrigin").value));
+      document.getElementById("rpOrigin").addEventListener("input", () => {
+        const q = document.getElementById("rpOrigin").value.trim();
+        showOriginSuggestions(q);
+        clearTimeout(_geocodeTimer);
+        if (q.length >= 3) _geocodeTimer = setTimeout(() => geocodeOrigin(q), 400);
+      });
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".rp-origin-wrap")) document.getElementById("rpOriginSuggestions").classList.remove("open");
+      });
+
+      populateSelect("rpStop1", ROUTE_STOPS.foodRecovery, false);
+      populateSelect("rpStop2", ROUTE_STOPS.redistribution, true);
+      populateSelect("rpStop3", ROUTE_STOPS.beneficiary, true);
+      populateSelect("rpStop4", ROUTE_STOPS.compost, false);
+    }
+
+    function showOriginSuggestions(query) {
+      const sugBox = document.getElementById("rpOriginSuggestions");
+      const q = (query || "").toLowerCase();
+      let html = "";
+      ROUTE_STOPS.origin.forEach((o, i) => {
+        if (!q || o.name.toLowerCase().includes(q))
+          html += `<div class="rp-sug-item" data-type="preset" data-idx="${i}">${o.name}</div>`;
+      });
+      sugBox.querySelectorAll(".rp-sug-geo").forEach(el => { html += el.outerHTML; });
+      if (html) { sugBox.innerHTML = html; sugBox.classList.add("open"); wireOriginSugClicks(); }
+      else { sugBox.classList.remove("open"); }
+    }
+
+    async function geocodeOrigin(query) {
+      try {
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json` +
+          `?proximity=-84.39,33.77&bbox=-84.55,33.65,-84.25,33.90&access_token=${mapboxgl.accessToken}&limit=4`;
+        const data = await fetch(url).then(r => r.json());
+        if (!data.features?.length) return;
         const sugBox = document.getElementById("rpOriginSuggestions");
+        sugBox.querySelectorAll(".rp-sug-geo").forEach(el => el.remove());
+        data.features.forEach(f => {
+          const div = document.createElement("div");
+          div.className = "rp-sug-item rp-sug-geo";
+          div.dataset.type = "geocode";
+          div.dataset.lng  = f.center[0];
+          div.dataset.lat  = f.center[1];
+          div.dataset.text = f.place_name;
+          div.innerHTML = `${f.text}<div class="rp-sug-sub">${f.place_name}</div>`;
+          sugBox.appendChild(div);
+        });
+        sugBox.classList.add("open");
+        wireOriginSugClicks();
+      } catch(_) {}
+    }
 
-        // Set default origin
-        _selectedOrigin = ROUTE_STOPS.origin[0];
-        input.value = _selectedOrigin.name;
-
-        // Show suggestions on focus
-        input.addEventListener("focus", () => { showOriginSuggestions(input.value); });
-
-        // Filter + geocode on input
-        input.addEventListener("input", () => {
-          const q = input.value.trim();
-          showOriginSuggestions(q);
-          clearTimeout(_geocodeTimer);
-          if (q.length >= 3) {
-            _geocodeTimer = setTimeout(() => geocodeOrigin(q), 400);
+    function wireOriginSugClicks() {
+      document.getElementById("rpOriginSuggestions").querySelectorAll(".rp-sug-item").forEach(item => {
+        item.onclick = function() {
+          const input = document.getElementById("rpOrigin");
+          if (this.dataset.type === "preset") {
+            _selectedOrigin = ROUTE_STOPS.origin[parseInt(this.dataset.idx)];
+            input.value = _selectedOrigin.name;
+          } else if (this.dataset.type === "geocode") {
+            _selectedOrigin = { name: this.dataset.text, lng: parseFloat(this.dataset.lng), lat: parseFloat(this.dataset.lat) };
+            input.value = _selectedOrigin.name;
+            map.flyTo({ center: [_selectedOrigin.lng, _selectedOrigin.lat], zoom: 15, duration: 600 });
           }
-        });
+          document.getElementById("rpOriginSuggestions").classList.remove("open");
+        };
+      });
+    }
 
-        // Close suggestions on outside click
-        document.addEventListener("click", (e) => {
-          if (!e.target.closest(".rp-origin-wrap")) sugBox.classList.remove("open");
-        });
+    function getOrigin() { return _selectedOrigin || ROUTE_STOPS.origin[0]; }
 
-        populateSelect("rpStop1", ROUTE_STOPS.foodRecovery, false);
-        populateSelect("rpStop2", ROUTE_STOPS.redistribution, true);
-        populateSelect("rpStop3", ROUTE_STOPS.beneficiary, true);
-        populateSelect("rpStop4", ROUTE_STOPS.compost, false);
+    function findNearest(from, candidates) {
+      let minDist = Infinity, nearest = candidates[0];
+      candidates.forEach(c => {
+        const d = haversine(from.lat, from.lng, c.lat, c.lng);
+        if (d < minDist) { minDist = d; nearest = c; }
+      });
+      return nearest;
+    }
+
+    /* ─── Smart Selection ─── */
+    function smartSelectRecovery(fromPt, vehicleType) {
+      let bestScore = -Infinity, bestItem = null;
+      MOCK_SURPLUS.forEach(s => {
+        if (!isTransportCompatible(s.transport, vehicleType)) return;
+        const hrs = (new Date(s.expiration) - Date.now()) / H;
+        if (hrs <= 0) return;
+        const score = computePriorityScore(s, fromPt);
+        if (score > bestScore) { bestScore = score; bestItem = s; }
+      });
+      if (!bestItem) return { stop: findNearest(fromPt, ROUTE_STOPS.foodRecovery) };
+      return { stop: { name: bestItem.name, lng: bestItem.lng, lat: bestItem.lat }, surplusItem: bestItem };
+    }
+
+    function smartSelectCapacityNode(fromPt, candidates, needsRefrig) {
+      let bestScore = -Infinity, bestNode = null, bestIdx = 0;
+      candidates.forEach((node, idx) => {
+        if (needsRefrig && node.accepting_perishable === false) return;
+        if (needsRefrig && node.cold_pct > 95) return;
+        const score = computeCapacityScore(node, fromPt);
+        if (score > bestScore) { bestScore = score; bestNode = node; bestIdx = idx; }
+      });
+      if (!bestNode) { bestNode = findNearest(fromPt, candidates); bestIdx = candidates.indexOf(bestNode); }
+      return { node: bestNode, index: bestIdx };
+    }
+
+    function autoSelectNearest() {
+      const origin      = getOrigin();
+      const vehicleType = document.getElementById("rpVehicle").value;
+      const recovResult = smartSelectRecovery(origin, vehicleType);
+      const recovStop   = recovResult.stop;
+
+      const rpStop1  = document.getElementById("rpStop1");
+      const matchIdx = ROUTE_STOPS.foodRecovery.findIndex(r => r.name === recovStop.name);
+      if (matchIdx >= 0) {
+        rpStop1.value = matchIdx;
+      } else {
+        let opt = rpStop1.querySelector('option[value="surplus_custom"]');
+        if (!opt) { opt = document.createElement("option"); opt.value = "surplus_custom"; rpStop1.appendChild(opt); }
+        opt.textContent   = recovStop.name + " (priority)";
+        opt.dataset.lng   = recovStop.lng;
+        opt.dataset.lat   = recovStop.lat;
+        rpStop1.value = "surplus_custom";
       }
 
-      function showOriginSuggestions(query) {
-        const sugBox = document.getElementById("rpOriginSuggestions");
-        const q = (query || "").toLowerCase();
-        let html = "";
-        ROUTE_STOPS.origin.forEach((o, i) => {
-          if (!q || o.name.toLowerCase().includes(q)) {
-            html += `<div class="rp-sug-item" data-type="preset" data-idx="${i}">${o.name}</div>`;
-          }
-        });
-        // Keep existing geocode results if any
-        sugBox.querySelectorAll(".rp-sug-geo").forEach(el => {
-          html += el.outerHTML;
-        });
-        if (html) { sugBox.innerHTML = html; sugBox.classList.add("open"); wireOriginSugClicks(); }
-        else { sugBox.classList.remove("open"); }
-      }
+      const needsRefrig = vehicleType === "Refrigerated Van" ||
+        (recovResult.surplusItem?.transport === "Refrigerated Van");
 
-      async function geocodeOrigin(query) {
-        try {
-          const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=json&text=${encodeURIComponent(query)}&location=-84.39,33.77&maxSuggestions=4`;
-          const res = await fetch(url).then(r => r.json());
-          if (!res.suggestions || !res.suggestions.length) return;
-          const sugBox = document.getElementById("rpOriginSuggestions");
-          // Remove old geocode items
-          sugBox.querySelectorAll(".rp-sug-geo").forEach(el => el.remove());
-          res.suggestions.forEach(s => {
-            const div = document.createElement("div");
-            div.className = "rp-sug-item rp-sug-geo";
-            div.dataset.type = "geocode";
-            div.dataset.magicKey = s.magicKey;
-            div.dataset.text = s.text;
-            div.innerHTML = `${s.text}<div class="rp-sug-sub">Address result</div>`;
-            sugBox.appendChild(div);
-          });
-          sugBox.classList.add("open");
-          wireOriginSugClicks();
-        } catch(e) { /* geocoding unavailable */ }
-      }
+      const redistResult = smartSelectCapacityNode(recovStop, ROUTE_STOPS.redistribution, needsRefrig);
+      document.getElementById("rpStop2").value = redistResult.index;
 
-      function wireOriginSugClicks() {
-        const sugBox = document.getElementById("rpOriginSuggestions");
-        sugBox.querySelectorAll(".rp-sug-item").forEach(item => {
-          item.onclick = async function() {
-            const input = document.getElementById("rpOrigin");
-            if (this.dataset.type === "preset") {
-              const idx = parseInt(this.dataset.idx);
-              _selectedOrigin = ROUTE_STOPS.origin[idx];
-              input.value = _selectedOrigin.name;
-            } else if (this.dataset.type === "geocode") {
-              // Resolve geocode to coordinates
-              try {
-                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(this.dataset.text)}&magicKey=${this.dataset.magicKey}&outFields=*&maxLocations=1`;
-                const res = await fetch(url).then(r => r.json());
-                if (res.candidates && res.candidates.length) {
-                  const c = res.candidates[0];
-                  _selectedOrigin = { name: c.address, lng: c.location.x, lat: c.location.y };
-                  input.value = c.address;
-                  view.goTo({ center: [c.location.x, c.location.y], zoom: 15 }, { duration: 600 });
-                }
-              } catch(e) { /* geocoding failed */ }
-            } else if (this.dataset.type === "custom") {
-              _selectedOrigin = { name: this.dataset.name, lng: parseFloat(this.dataset.lng), lat: parseFloat(this.dataset.lat) };
-              input.value = this.dataset.name;
-            }
-            sugBox.classList.remove("open");
-          };
-        });
-      }
+      const benResult = smartSelectCapacityNode(redistResult.node, ROUTE_STOPS.beneficiary, needsRefrig);
+      document.getElementById("rpStop3").value = benResult.index;
 
-      function getSelectedOrigin() {
-        return _selectedOrigin || ROUTE_STOPS.origin[0];
-      }
+      document.getElementById("rpStop4").value = ROUTE_STOPS.compost.indexOf(findNearest(benResult.node, ROUTE_STOPS.compost));
+    }
 
-      function findNearest(from, candidates) {
-        let minDist = Infinity, nearest = candidates[0];
-        candidates.forEach(c => {
-          const d = haversine(from.lat, from.lng, c.lat, c.lng);
-          if (d < minDist) { minDist = d; nearest = c; }
-        });
-        return nearest;
-      }
+    function getAllStops() {
+      const origin = getOrigin();
+      const stops  = [origin];
+      const cats   = ["foodRecovery","redistribution","beneficiary","compost"];
+      const sels   = ["rpStop1","rpStop2","rpStop3","rpStop4"];
+      let prev = origin;
 
-      /* ─── Smart Selection: urgency + volume + transport + capacity ─── */
-      function smartSelectRecovery(fromPt, vehicleType) {
-        let bestScore = -Infinity, bestItem = null;
-        MOCK_SURPLUS.forEach(s => {
-          if (!isTransportCompatible(s.transport, vehicleType)) return;
-          const hrs = (new Date(s.expiration) - Date.now()) / 3600000;
-          if (hrs <= 0) return;
-          const score = computePriorityScore(s, fromPt);
-          if (score > bestScore) { bestScore = score; bestItem = s; }
-        });
-        if (!bestItem) return { source: "route_stops", stop: findNearest(fromPt, ROUTE_STOPS.foodRecovery) };
-        return { source: "surplus", stop: { name: bestItem.name, lng: bestItem.lng, lat: bestItem.lat }, surplusItem: bestItem, score: bestScore };
-      }
-
-      function smartSelectCapacityNode(fromPt, candidates, needsRefrig) {
-        let bestScore = -Infinity, bestNode = null, bestIdx = 0;
-        candidates.forEach((node, idx) => {
-          if (needsRefrig && node.accepting_perishable === false) return;
-          if (needsRefrig && node.cold_pct !== undefined && node.cold_pct > 95) return;
-          const score = computeCapacityScore(node, fromPt);
-          if (score > bestScore) { bestScore = score; bestNode = node; bestIdx = idx; }
-        });
-        if (!bestNode) { bestNode = findNearest(fromPt, candidates); bestIdx = candidates.indexOf(bestNode); }
-        return { node: bestNode, index: bestIdx };
-      }
-
-      function autoSelectNearest() {
-        const origin = getSelectedOrigin();
-        const vehicleType = document.getElementById("rpVehicle").value;
-
-        // Step 1: Smart food recovery (urgency + volume + distance + transport)
-        const recoveryResult = smartSelectRecovery(origin, vehicleType);
-        const recoveryStop = recoveryResult.stop;
-        const rpStop1 = document.getElementById("rpStop1");
-        const matchIdx = ROUTE_STOPS.foodRecovery.findIndex(r => r.name === recoveryStop.name);
-        if (matchIdx >= 0) {
-          rpStop1.value = matchIdx;
+      cats.forEach((cat, i) => {
+        const sel = document.getElementById(sels[i]);
+        let stop;
+        if (!sel.value) {
+          stop = findNearest(prev, ROUTE_STOPS[cat]);
+          sel.value = ROUTE_STOPS[cat].indexOf(stop);
+        } else if (sel.value === "surplus_custom") {
+          const opt = sel.querySelector('option[value="surplus_custom"]');
+          stop = { name: opt.textContent.replace(" (priority)","").replace(" (AI)",""), lng: parseFloat(opt.dataset.lng), lat: parseFloat(opt.dataset.lat) };
         } else {
-          let customOpt = rpStop1.querySelector('option[value="surplus_custom"]');
-          if (!customOpt) { customOpt = document.createElement("option"); customOpt.value = "surplus_custom"; rpStop1.appendChild(customOpt); }
-          customOpt.textContent = recoveryStop.name + " (priority)";
-          customOpt.dataset.lng = recoveryStop.lng; customOpt.dataset.lat = recoveryStop.lat;
-          rpStop1.value = "surplus_custom";
+          stop = ROUTE_STOPS[cat][parseInt(sel.value)];
         }
+        stops.push(stop);
+        prev = stop;
+      });
+      return stops;
+    }
 
-        // Determine if load needs refrigeration
-        const needsRefrig = vehicleType === "Refrigerated Van" ||
-          (recoveryResult.surplusItem && recoveryResult.surplusItem.transport === "Refrigerated Van");
+    let currentStops = [];
 
-        // Step 2: Smart redistribution (capacity-aware)
-        const redistResult = smartSelectCapacityNode(recoveryStop, ROUTE_STOPS.redistribution, needsRefrig);
-        document.getElementById("rpStop2").value = redistResult.index;
+    /* ─── Route via Mapbox Directions API ─── */
+    async function calculateRoute() {
+      const spinner = document.getElementById("rpSpinner");
+      const results = document.getElementById("rpResults");
+      spinner.classList.add("visible");
+      results.classList.remove("visible");
 
-        // Step 3: Smart beneficiary (capacity-aware)
-        const benResult = smartSelectCapacityNode(redistResult.node, ROUTE_STOPS.beneficiary, needsRefrig);
-        document.getElementById("rpStop3").value = benResult.index;
+      map.getSource('route').setData({ type: 'FeatureCollection', features: [] });
+      clearStopMarkers();
 
-        // Step 4: Compost — nearest (no capacity data)
-        const nearestCompost = findNearest(benResult.node, ROUTE_STOPS.compost);
-        document.getElementById("rpStop4").value = ROUTE_STOPS.compost.indexOf(nearestCompost);
-      }
+      const stops = getAllStops();
+      currentStops = stops;
+      const origin = stops[0];
 
-      function getAllStops() {
-        const origin = getSelectedOrigin();
-        const stops = [origin];
-        const categories = ["foodRecovery", "redistribution", "beneficiary", "compost"];
-        const selectors = ["rpStop1", "rpStop2", "rpStop3", "rpStop4"];
-        let prevPoint = origin;
+      let baselineDist = 0;
+      for (let i = 1; i < stops.length; i++)
+        baselineDist += 2 * haversine(origin.lat, origin.lng, stops[i].lat, stops[i].lng);
 
-        categories.forEach((cat, i) => {
-          const sel = document.getElementById(selectors[i]);
-          let stop;
-          if (sel.value === "" || sel.value === null) {
-            stop = findNearest(prevPoint, ROUTE_STOPS[cat]);
-            sel.value = ROUTE_STOPS[cat].indexOf(stop);
-          } else if (sel.value === "surplus_custom") {
-            const opt = sel.querySelector('option[value="surplus_custom"]');
-            stop = { name: opt.textContent.replace(" (priority)", "").replace(" (AI)", ""), lng: parseFloat(opt.dataset.lng), lat: parseFloat(opt.dataset.lat) };
-          } else {
-            stop = ROUTE_STOPS[cat][parseInt(sel.value)];
-          }
-          stops.push(stop);
-          prevPoint = stop;
-        });
-        return stops;
-      }
+      const totalVolume = MOCK_SURPLUS.reduce((s, x) => s + x.quantity_lbs, 0);
 
-      let currentStops = [];
+      try {
+        const coords = stops.map(s => `${s.lng},${s.lat}`).join(';');
+        const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coords}` +
+          `?geometries=geojson&overview=full&access_token=${mapboxgl.accessToken}`;
+        const data = await fetch(url).then(r => r.json());
 
-      async function calculateRoute() {
-        const spinner = document.getElementById("rpSpinner");
-        const results = document.getElementById("rpResults");
-        spinner.classList.add("visible");
-        results.classList.remove("visible");
-        routeLayer.removeAll();
+        if (data.routes?.length) {
+          const route = data.routes[0];
+          map.getSource('route').setData({ type: 'Feature', geometry: route.geometry });
 
-        const stops = getAllStops();
-        currentStops = stops;
+          const miles   = (route.distance * 0.000621371).toFixed(1);
+          const minutes = Math.round(route.duration / 60);
+          const cs      = route.geometry.coordinates;
+          const lngs    = cs.map(c => c[0]), lats = cs.map(c => c[1]);
 
-        const origin = stops[0];
-        let baselineDist = 0;
-        for (let i = 1; i < stops.length; i++) {
-          baselineDist += 2 * haversine(origin.lat, origin.lng, stops[i].lat, stops[i].lng);
-        }
+          map.fitBounds(
+            [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+            { padding: { top: 80, bottom: 60, left: 60, right: 380 } }
+          );
 
-        const totalVolume = MOCK_SURPLUS.reduce((sum, s) => sum + s.quantity_lbs, 0);
-
-        if (hasApiKey) {
-          try {
-            const stopGraphics = stops.map(s => new Graphic({
-              geometry: { type: "point", longitude: s.lng, latitude: s.lat }
-            }));
-
-            const params = new RouteParameters({
-              stops: new FeatureSet({ features: stopGraphics }),
-              returnDirections: true,
-              outSpatialReference: { wkid: 4326 },
-              startTime: new Date()
-            });
-
-            const result = await routeSolver.solve(ROUTE_URL, params);
-            const routeResult = result.routeResults[0];
-            const routeGeom = routeResult.route.geometry;
-            const attrs = routeResult.route.attributes;
-            const miles = attrs.Total_Miles || (attrs.Total_Kilometers ? attrs.Total_Kilometers * 0.621371 : 0);
-            const minutes = attrs.Total_TravelTime || 0;
-
-            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: [179, 163, 105, 0.15], width: 14, cap: "round", join: "round" } }));
-            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: [179, 163, 105, 0.4], width: 6, cap: "round", join: "round" } }));
-            routeLayer.add(new Graphic({ geometry: routeGeom, symbol: { type: "simple-line", color: "#b3a369", width: 3, cap: "round", join: "round" } }));
-
-            drawStopMarkers(stops);
-
-            const saved = baselineDist > 0 ? Math.round((1 - miles / baselineDist) * 100) : 0;
-            displayStats(miles.toFixed(1) + " mi", Math.round(minutes) + " min", totalVolume.toLocaleString() + " lbs", Math.max(0, saved) + "%", stops);
-
-            view.goTo(routeGeom.extent.expand(1.3)).catch(() => {});
-          } catch (err) {
-            console.warn("Route API failed, using fallback:", err.message);
-            displayFallbackRoute(stops, baselineDist, totalVolume);
-          }
+          drawStopMarkers(stops);
+          const saved = baselineDist > 0 ? Math.max(0, Math.round((1 - parseFloat(miles) / baselineDist) * 100)) : 0;
+          displayStats(`${miles} mi`, `${minutes} min`, `${totalVolume.toLocaleString()} lbs`, `${saved}%`, stops);
         } else {
           displayFallbackRoute(stops, baselineDist, totalVolume);
         }
-
-        spinner.classList.remove("visible");
-        results.classList.add("visible");
+      } catch(_) {
+        displayFallbackRoute(stops, baselineDist, totalVolume);
       }
 
-      function displayFallbackRoute(stops, baselineDist, totalVolume) {
-        for (let i = 0; i < stops.length - 1; i++) {
-          const segGeom = { type: "polyline", paths: [[[stops[i].lng, stops[i].lat], [stops[i + 1].lng, stops[i + 1].lat]]] };
-          routeLayer.add(new Graphic({ geometry: segGeom, symbol: { type: "simple-line", color: [179, 163, 105, 0.12], width: 10, cap: "round" } }));
-          routeLayer.add(new Graphic({ geometry: segGeom, symbol: { type: "simple-line", color: "#b3a369", width: 2.5, style: "dash", cap: "round" } }));
-        }
-        drawStopMarkers(stops);
+      spinner.classList.remove("visible");
+      results.classList.add("visible");
+    }
 
-        let chainDist = 0;
-        for (let i = 0; i < stops.length - 1; i++) {
-          chainDist += haversine(stops[i].lat, stops[i].lng, stops[i + 1].lat, stops[i + 1].lng);
-        }
-        const estTime = Math.round((chainDist / 25) * 60);
-        const saved = baselineDist > 0 ? Math.round((1 - chainDist / baselineDist) * 100) : 0;
-        displayStats(chainDist.toFixed(1) + " mi (est.)", estTime + " min (est.)", totalVolume.toLocaleString() + " lbs", Math.max(0, saved) + "%", stops);
-
-        const lngs = stops.map(s => s.lng), lats = stops.map(s => s.lat);
-        view.goTo({ target: { type: "extent", xmin: Math.min(...lngs) - 0.02, ymin: Math.min(...lats) - 0.02, xmax: Math.max(...lngs) + 0.02, ymax: Math.max(...lats) + 0.02, spatialReference: { wkid: 4326 } } }).catch(() => {});
+    function displayFallbackRoute(stops, baselineDist, totalVolume) {
+      const features = [];
+      for (let i = 0; i < stops.length - 1; i++) {
+        features.push({ type: 'Feature', geometry: { type: 'LineString',
+          coordinates: [[stops[i].lng, stops[i].lat], [stops[i+1].lng, stops[i+1].lat]] } });
       }
+      map.getSource('route').setData({ type: 'FeatureCollection', features });
+      drawStopMarkers(stops);
 
-      function drawStopMarkers(stops) {
-        stops.forEach((stop, i) => {
-          routeLayer.add(new Graphic({
-            geometry: { type: "point", longitude: stop.lng, latitude: stop.lat },
-            symbol: {
-              type: "simple-marker", style: "circle",
-              color: "#b3a369",
-              size: i === 0 ? 16 : 14,
-              outline: { color: "rgba(179, 163, 105, 0.3)", width: i === 0 ? 8 : 6 }
-            },
-            attributes: { name: stop.name, order: i },
-            popupTemplate: { title: i === 0 ? "Origin: {name}" : `Stop ${i}: {name}` }
-          }));
-          routeLayer.add(new Graphic({
-            geometry: { type: "point", longitude: stop.lng, latitude: stop.lat },
-            symbol: { type: "text", text: i === 0 ? "O" : String(i), color: "#ffffff", font: { size: 9, weight: "bold" }, yoffset: 0 }
-          }));
-        });
-      }
+      let chainDist = 0;
+      for (let i = 0; i < stops.length - 1; i++)
+        chainDist += haversine(stops[i].lat, stops[i].lng, stops[i+1].lat, stops[i+1].lng);
 
-      function displayStats(dist, time, volume, saved, stops) {
-        document.getElementById("rpDistance").textContent = dist;
-        document.getElementById("rpTime").textContent = time;
-        document.getElementById("rpVolume").textContent = volume;
-        document.getElementById("rpSaved").textContent = saved;
+      const estTime = Math.round((chainDist / 25) * 60);
+      const saved   = baselineDist > 0 ? Math.max(0, Math.round((1 - chainDist / baselineDist) * 100)) : 0;
+      displayStats(`${chainDist.toFixed(1)} mi (est.)`, `${estTime} min (est.)`, `${totalVolume.toLocaleString()} lbs`, `${saved}%`, stops);
 
-        const container = document.getElementById("rpLegsContainer");
-        container.innerHTML = "";
-        for (let i = 0; i < stops.length - 1; i++) {
-          const legDist = haversine(stops[i].lat, stops[i].lng, stops[i + 1].lat, stops[i + 1].lng);
-          const div = document.createElement("div");
-          div.className = "rp-leg";
-          div.innerHTML = `${stops[i].name} &rarr; ${stops[i + 1].name} <span>${legDist.toFixed(1)} mi</span>`;
-          container.appendChild(div);
-        }
+      const lngs = stops.map(s => s.lng), lats = stops.map(s => s.lat);
+      map.fitBounds(
+        [[Math.min(...lngs) - 0.02, Math.min(...lats) - 0.02], [Math.max(...lngs) + 0.02, Math.max(...lats) + 0.02]],
+        { padding: { top: 80, bottom: 60, left: 60, right: 380 } }
+      );
+    }
 
-        // Urgency context for the recovery pickup
-        const recoveryStop = stops[1];
-        if (recoveryStop) {
-          const match = MOCK_SURPLUS.find(s => s.name === recoveryStop.name);
-          if (match) {
-            const hrsLeft = Math.max(0, (new Date(match.expiration) - Date.now()) / 3600000);
-            const urgLabel = hrsLeft <= 2 ? "CRITICAL" : hrsLeft <= 6 ? "SOON" : "STABLE";
-            const urgColor = hrsLeft <= 2 ? "#ff4757" : hrsLeft <= 6 ? "#ffc048" : "#2ed573";
-            const urgDiv = document.createElement("div");
-            urgDiv.style.cssText = "margin-top:8px;padding:6px 8px;background:#141924;border-radius:6px;font-size:11px;";
-            urgDiv.innerHTML = `<span style="color:${urgColor};font-weight:700">${urgLabel}</span> pickup: ${match.quantity_lbs} lbs ${match.food_type} — ${hrsLeft.toFixed(1)}h remaining<br><span style="color:var(--muted)">Transport: ${match.transport}</span>`;
-            container.appendChild(urgDiv);
-          }
-        }
+    /* ─── Stop markers ─── */
+    function drawStopMarkers(stops) {
+      clearStopMarkers();
+      stops.forEach((stop, i) => {
+        const el = document.createElement('div');
+        el.style.cssText = [
+          'width:22px','height:22px','border-radius:50%',
+          'background:#b3a369','color:#0a0c14',
+          'font-size:10px','font-weight:700',
+          'display:flex','align-items:center','justify-content:center',
+          'border:2px solid rgba(255,255,255,0.4)',
+          'box-shadow:0 0 10px rgba(179,163,105,0.5)','cursor:pointer'
+        ].join(';');
+        el.textContent = i === 0 ? 'O' : String(i);
 
-        document.getElementById("rpDirections").style.display = "block";
-      }
+        const popup = new mapboxgl.Popup({ offset: 14, closeButton: false })
+          .setHTML(`<div style="font-size:12px;font-weight:700;color:#e6ecf5">${i === 0 ? 'Origin' : 'Stop ' + i}: ${stop.name}</div>`);
 
-      function clearRoute() {
-        routeLayer.removeAll();
-        document.getElementById("rpResults").classList.remove("visible");
-        document.getElementById("rpDistance").textContent = "--";
-        document.getElementById("rpTime").textContent = "--";
-        document.getElementById("rpVolume").textContent = "--";
-        document.getElementById("rpSaved").textContent = "--";
-        document.getElementById("rpLegsContainer").innerHTML = "";
-        currentStops = [];
-      }
-
-      function openGoogleMapsDirections() {
-        if (currentStops.length < 2) return;
-        const origin = currentStops[0];
-        const dest = currentStops[currentStops.length - 1];
-        const waypoints = currentStops.slice(1, -1).map(s => `${s.lat},${s.lng}`).join("|");
-        const url = `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${dest.lat},${dest.lng}&waypoints=${waypoints}`;
-        window.open(url, "_blank");
-      }
-
-      /* ═══════════════════════════════════════════════════════
-         FLEET INTELLIGENCE & AI SUGGESTION
-         ═══════════════════════════════════════════════════════ */
-      function populateFleetPanel() {
-        document.getElementById("fleetDrivers").textContent = MOCK_FLEET.active_drivers;
-        document.getElementById("fleetRefrig").textContent = MOCK_FLEET.refrigerated_vehicles;
-        document.getElementById("fleetPickup").textContent = MOCK_FLEET.avg_pickup_min + " min";
-        document.getElementById("fleetRecovered").textContent = MOCK_FLEET.lbs_recovered_today.toLocaleString();
-      }
-
-      function generateAISuggestion() {
-        const origin = getSelectedOrigin();
-        const vehicleType = document.getElementById("rpVehicle").value;
-
-        const recoveryResult = smartSelectRecovery(origin, vehicleType);
-        if (!recoveryResult.stop) return;
-        const recoveryStop = recoveryResult.stop;
-        const needsRefrig = vehicleType === "Refrigerated Van" ||
-          (recoveryResult.surplusItem && recoveryResult.surplusItem.transport === "Refrigerated Van");
-
-        const redistResult = smartSelectCapacityNode(recoveryStop, ROUTE_STOPS.redistribution, needsRefrig);
-        const benResult = smartSelectCapacityNode(redistResult.node, ROUTE_STOPS.beneficiary, needsRefrig);
-        const compostStop = findNearest(benResult.node, ROUTE_STOPS.compost);
-
-        const chain = [origin, recoveryStop, redistResult.node, benResult.node, compostStop];
-        const shortName = s => s.name.split(" - ")[0].split(" / ")[0].substring(0, 22);
-        document.getElementById("aiRouteChain").innerHTML = chain.map(shortName).join(' <span class="ai-arrow">&#8594;</span> ');
-
-        let chainDist = 0;
-        for (let i = 0; i < chain.length - 1; i++) chainDist += haversine(chain[i].lat, chain[i].lng, chain[i + 1].lat, chain[i + 1].lng);
-        let baselineDist = 0;
-        for (let i = 1; i < chain.length; i++) baselineDist += 2 * haversine(origin.lat, origin.lng, chain[i].lat, chain[i].lng);
-        const savedPct = baselineDist > 0 ? Math.round((1 - chainDist / baselineDist) * 100) : 0;
-        const criticalLbs = MOCK_SURPLUS.filter(s => s.urgency === "Critical").reduce((sum, s) => sum + s.quantity_lbs, 0);
-
-        document.getElementById("aiTimeSaved").textContent = "Time Saved: " + Math.max(0, savedPct) + "%";
-        document.getElementById("aiFoodSaved").textContent = "Food at Risk: " + criticalLbs.toLocaleString() + " lbs";
-
-        window._aiSuggestion = { recoveryResult, redistIdx: redistResult.index, benIdx: benResult.index, compostIdx: ROUTE_STOPS.compost.indexOf(compostStop) };
-        document.getElementById("aiSuggestion").style.display = "block";
-      }
-
-      function acceptAISuggestion() {
-        if (!window._aiSuggestion) return;
-        const s = window._aiSuggestion;
-        const rpStop1 = document.getElementById("rpStop1");
-        const matchIdx = ROUTE_STOPS.foodRecovery.findIndex(r => r.name === s.recoveryResult.stop.name);
-        if (matchIdx >= 0) {
-          rpStop1.value = matchIdx;
-        } else {
-          let customOpt = rpStop1.querySelector('option[value="surplus_custom"]');
-          if (!customOpt) { customOpt = document.createElement("option"); customOpt.value = "surplus_custom"; rpStop1.appendChild(customOpt); }
-          customOpt.textContent = s.recoveryResult.stop.name + " (AI)";
-          customOpt.dataset.lng = s.recoveryResult.stop.lng; customOpt.dataset.lat = s.recoveryResult.stop.lat;
-          rpStop1.value = "surplus_custom";
-        }
-        document.getElementById("rpStop2").value = s.redistIdx;
-        document.getElementById("rpStop3").value = s.benIdx;
-        document.getElementById("rpStop4").value = s.compostIdx;
-        document.getElementById("aiSuggestion").style.display = "none";
-        calculateRoute();
-      }
-
-      function dismissAISuggestion() {
-        document.getElementById("aiSuggestion").style.display = "none";
-        window._aiSuggestion = null;
-      }
-
-      /* ═══════════════════════════════════════════════════════
-         ROUTE FROM SURPLUS PIN (global handler)
-         ═══════════════════════════════════════════════════════ */
-      window._routeFromSurplus = function (lng, lat, name) {
-        view.popup.close();
-        const panel = document.getElementById("routePanel");
-        panel.classList.add("open");
-
-        _selectedOrigin = { name: name, lng: lng, lat: lat };
-        document.getElementById("rpOrigin").value = name;
-
-        autoSelectNearest();
-        calculateRoute();
-      };
-
-      /* ═══════════════════════════════════════════════════════
-         EVENT WIRING
-         ═══════════════════════════════════════════════════════ */
-      document.getElementById("routeToggle").addEventListener("click", () => {
-        document.getElementById("routePanel").classList.toggle("open");
+        const m = new mapboxgl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([stop.lng, stop.lat])
+          .setPopup(popup)
+          .addTo(map);
+        stopMarkersArr.push(m);
       });
-      document.getElementById("rpClose").addEventListener("click", () => {
-        document.getElementById("routePanel").classList.remove("open");
-      });
+    }
 
-      document.getElementById("rpApiKeySave").addEventListener("click", () => {
-        const key = document.getElementById("rpApiKeyInput").value.trim();
-        if (key) {
-          localStorage.setItem("afcn_arcgis_api_key", key);
-          esriConfig.apiKey = key;
-          hasApiKey = true;
-          document.getElementById("rpApiNotice").style.display = "none";
+    function clearStopMarkers() {
+      stopMarkersArr.forEach(m => m.remove());
+      stopMarkersArr = [];
+    }
+
+    function displayStats(dist, time, volume, saved, stops) {
+      document.getElementById("rpDistance").textContent = dist;
+      document.getElementById("rpTime").textContent     = time;
+      document.getElementById("rpVolume").textContent   = volume;
+      document.getElementById("rpSaved").textContent    = saved;
+
+      const container = document.getElementById("rpLegsContainer");
+      container.innerHTML = "";
+      for (let i = 0; i < stops.length - 1; i++) {
+        const legDist = haversine(stops[i].lat, stops[i].lng, stops[i+1].lat, stops[i+1].lng);
+        const div = document.createElement("div");
+        div.className = "rp-leg";
+        div.innerHTML = `${stops[i].name} &rarr; ${stops[i+1].name} <span>${legDist.toFixed(1)} mi</span>`;
+        container.appendChild(div);
+      }
+
+      const recoveryStop = stops[1];
+      if (recoveryStop) {
+        const match = MOCK_SURPLUS.find(s => s.name === recoveryStop.name);
+        if (match) {
+          const hrsLeft  = Math.max(0, (new Date(match.expiration) - Date.now()) / H);
+          const urgLabel = hrsLeft <= 2 ? "CRITICAL" : hrsLeft <= 6 ? "SOON" : "STABLE";
+          const urgColor = hrsLeft <= 2 ? "#ff4757" : hrsLeft <= 6 ? "#ffc048" : "#2ed573";
+          const urgDiv   = document.createElement("div");
+          urgDiv.style.cssText = "margin-top:8px;padding:6px 8px;background:#141924;border-radius:6px;font-size:11px";
+          urgDiv.innerHTML = `<span style="color:${urgColor};font-weight:700">${urgLabel}</span> pickup: ${match.quantity_lbs} lbs ${match.food_type} — ${hrsLeft.toFixed(1)}h remaining<br><span style="color:var(--muted)">Transport: ${match.transport}</span>`;
+          container.appendChild(urgDiv);
         }
-      });
+      }
+    }
 
-      document.getElementById("rpAutoSelect").addEventListener("click", autoSelectNearest);
-      document.getElementById("rpOptimize").addEventListener("click", calculateRoute);
-      document.getElementById("rpClear").addEventListener("click", clearRoute);
-      document.getElementById("rpDirections").addEventListener("click", openGoogleMapsDirections);
+    function clearRoute() {
+      map.getSource('route').setData({ type: 'FeatureCollection', features: [] });
+      clearStopMarkers();
+      document.getElementById("rpResults").classList.remove("visible");
+      ["rpDistance","rpTime","rpVolume","rpSaved"].forEach(id => document.getElementById(id).textContent = "--");
+      document.getElementById("rpLegsContainer").innerHTML = "";
+      currentStops = [];
+    }
 
-      // Fleet Intelligence & AI Suggestion events
-      document.getElementById("aiAccept").addEventListener("click", acceptAISuggestion);
-      document.getElementById("aiDismiss").addEventListener("click", dismissAISuggestion);
-      document.getElementById("rpOrigin").addEventListener("change", () => {
-        if (document.getElementById("aiSuggestion").style.display !== "none") generateAISuggestion();
-      });
-      document.getElementById("rpVehicle").addEventListener("change", () => {
-        if (document.getElementById("aiSuggestion").style.display !== "none") generateAISuggestion();
-      });
+    function openGoogleMapsDirections() {
+      if (currentStops.length < 2) return;
+      const origin = currentStops[0];
+      const dest   = currentStops[currentStops.length - 1];
+      const wpts   = currentStops.slice(1, -1).map(s => `${s.lat},${s.lng}`).join("|");
+      window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${dest.lat},${dest.lng}&waypoints=${wpts}`, "_blank");
+    }
 
-      /* ═══════════════════════════════════════════════════════
-         INITIALIZATION
-         ═══════════════════════════════════════════════════════ */
-      view.when(() => {
-        renderSurplusLayer();
-        initRouteDropdowns();
-        populateFleetPanel();
+    /* ═══════════════════════════════════════════════════════
+       FLEET INTELLIGENCE & AI SUGGESTION
+       ═══════════════════════════════════════════════════════ */
+    function populateFleetPanel() {
+      document.getElementById("fleetDrivers").textContent  = MOCK_FLEET.active_drivers;
+      document.getElementById("fleetRefrig").textContent   = MOCK_FLEET.refrigerated_vehicles;
+      document.getElementById("fleetPickup").textContent   = MOCK_FLEET.avg_pickup_min + " min";
+      document.getElementById("fleetRecovered").textContent= MOCK_FLEET.lbs_recovered_today.toLocaleString();
+    }
 
-        // Open route panel by default
-        document.getElementById("routePanel").classList.add("open");
+    function generateAISuggestion() {
+      const origin      = getOrigin();
+      const vehicleType = document.getElementById("rpVehicle").value;
+      const recovResult = smartSelectRecovery(origin, vehicleType);
+      if (!recovResult.stop) return;
+      const recovStop   = recovResult.stop;
+      const needsRefrig = vehicleType === "Refrigerated Van" || recovResult.surplusItem?.transport === "Refrigerated Van";
 
-        configReady.finally(() => {
-          if (!hasApiKey) {
-            document.getElementById("rpApiNotice").style.display = "block";
-          }
-          generateAISuggestion();
-        });
-      });
+      const redistResult  = smartSelectCapacityNode(recovStop, ROUTE_STOPS.redistribution, needsRefrig);
+      const benResult     = smartSelectCapacityNode(redistResult.node, ROUTE_STOPS.beneficiary, needsRefrig);
+      const compostStop   = findNearest(benResult.node, ROUTE_STOPS.compost);
 
+      const chain     = [origin, recovStop, redistResult.node, benResult.node, compostStop];
+      const shortName = s => s.name.split(" - ")[0].split(" / ")[0].substring(0, 22);
+      document.getElementById("aiRouteChain").innerHTML = chain.map(shortName).join(' <span class="ai-arrow">&#8594;</span> ');
+
+      let chainDist = 0, baselineDist = 0;
+      for (let i = 0; i < chain.length - 1; i++) chainDist += haversine(chain[i].lat, chain[i].lng, chain[i+1].lat, chain[i+1].lng);
+      for (let i = 1; i < chain.length; i++)     baselineDist += 2 * haversine(origin.lat, origin.lng, chain[i].lat, chain[i].lng);
+      const savedPct   = baselineDist > 0 ? Math.round((1 - chainDist / baselineDist) * 100) : 0;
+      const criticalLbs= MOCK_SURPLUS.filter(s => s.urgency === "Critical").reduce((sum, s) => sum + s.quantity_lbs, 0);
+
+      document.getElementById("aiTimeSaved").textContent = "Time Saved: " + Math.max(0, savedPct) + "%";
+      document.getElementById("aiFoodSaved").textContent = "Food at Risk: " + criticalLbs.toLocaleString() + " lbs";
+
+      window._aiSuggestion = { recovResult, redistIdx: redistResult.index, benIdx: benResult.index, compostIdx: ROUTE_STOPS.compost.indexOf(compostStop) };
+      document.getElementById("aiSuggestion").style.display = "block";
+    }
+
+    function acceptAISuggestion() {
+      if (!window._aiSuggestion) return;
+      const s      = window._aiSuggestion;
+      const rpStop1= document.getElementById("rpStop1");
+      const matchIdx = ROUTE_STOPS.foodRecovery.findIndex(r => r.name === s.recovResult.stop.name);
+      if (matchIdx >= 0) {
+        rpStop1.value = matchIdx;
+      } else {
+        let opt = rpStop1.querySelector('option[value="surplus_custom"]');
+        if (!opt) { opt = document.createElement("option"); opt.value = "surplus_custom"; rpStop1.appendChild(opt); }
+        opt.textContent = s.recovResult.stop.name + " (AI)";
+        opt.dataset.lng = s.recovResult.stop.lng;
+        opt.dataset.lat = s.recovResult.stop.lat;
+        rpStop1.value = "surplus_custom";
+      }
+      document.getElementById("rpStop2").value = s.redistIdx;
+      document.getElementById("rpStop3").value = s.benIdx;
+      document.getElementById("rpStop4").value = s.compostIdx;
+      document.getElementById("aiSuggestion").style.display = "none";
+      calculateRoute();
+    }
+
+    function dismissAISuggestion() {
+      document.getElementById("aiSuggestion").style.display = "none";
+      window._aiSuggestion = null;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ROUTE FROM SURPLUS PIN (popup button handler)
+       ═══════════════════════════════════════════════════════ */
+    window._routeFromSurplus = function(lng, lat, name) {
+      document.querySelectorAll('.mapboxgl-popup').forEach(p => p.remove());
+      document.getElementById("routePanel").classList.add("open");
+      _selectedOrigin = { name, lng, lat };
+      document.getElementById("rpOrigin").value = name;
+      autoSelectNearest();
+      calculateRoute();
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       EVENT WIRING
+       ═══════════════════════════════════════════════════════ */
+    document.getElementById("routeToggle").addEventListener("click", () => document.getElementById("routePanel").classList.toggle("open"));
+    document.getElementById("rpClose").addEventListener("click",     () => document.getElementById("routePanel").classList.remove("open"));
+    document.getElementById("rpAutoSelect").addEventListener("click", autoSelectNearest);
+    document.getElementById("rpOptimize").addEventListener("click",   calculateRoute);
+    document.getElementById("rpClear").addEventListener("click",      clearRoute);
+    document.getElementById("rpDirections").addEventListener("click", openGoogleMapsDirections);
+    document.getElementById("aiAccept").addEventListener("click",     acceptAISuggestion);
+    document.getElementById("aiDismiss").addEventListener("click",    dismissAISuggestion);
+    document.getElementById("rpOrigin").addEventListener("change", () => {
+      if (document.getElementById("aiSuggestion").style.display !== "none") generateAISuggestion();
+    });
+    document.getElementById("rpVehicle").addEventListener("change", () => {
+      if (document.getElementById("aiSuggestion").style.display !== "none") generateAISuggestion();
     });
   </script>
 </body>
