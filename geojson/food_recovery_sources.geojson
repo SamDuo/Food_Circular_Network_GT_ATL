@@ -1,0 +1,347 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4002,
+                                                              33.7553
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Mercedes-Benz Stadium",
+                                            "category":  "Stadium",
+                                            "address":  "1 AMB Dr NW, Atlanta, GA 30313",
+                                            "est_lbs_week":  4200,
+                                            "status":  "Active",
+                                            "contact":  "sustainability@mercedesbenzstadium.com",
+                                            "hours":  "Daily 8:00-22:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3963,
+                                                              33.7571
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "State Farm Arena",
+                                            "category":  "Stadium",
+                                            "address":  "1 State Farm Dr, Atlanta, GA 30303",
+                                            "est_lbs_week":  3800,
+                                            "status":  "Active",
+                                            "contact":  "operations@statefarmarena.com",
+                                            "hours":  "Daily 9:00-22:30"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3672,
+                                                              33.7721
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Ponce City Market",
+                                            "category":  "EventVenue",
+                                            "address":  "675 Ponce De Leon Ave NE, Atlanta, GA 30308",
+                                            "est_lbs_week":  1900,
+                                            "status":  "Active",
+                                            "contact":  "events@poncecitymarket.com",
+                                            "hours":  "Daily 10:00-21:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3774,
+                                                              33.7546
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Sweet Auburn Curb Market",
+                                            "category":  "FarmersMarket",
+                                            "address":  "209 Edgewood Ave SE, Atlanta, GA 30303",
+                                            "est_lbs_week":  1300,
+                                            "status":  "Active",
+                                            "contact":  "manager@sweetauburnmarket.com",
+                                            "hours":  "Tue-Sun 8:00-18:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3633,
+                                                              33.8466
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Peachtree Rd Farmers Market",
+                                            "category":  "FarmersMarket",
+                                            "address":  "2744 Peachtree Rd NW, Atlanta, GA 30305",
+                                            "est_lbs_week":  900,
+                                            "status":  "Inactive",
+                                            "contact":  "info@peachtreefarmersmarket.org",
+                                            "hours":  "Sat 8:30-12:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3868,
+                                                              33.7854
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Whole Foods Midtown",
+                                            "category":  "Grocery",
+                                            "address":  "22 14th St NW, Atlanta, GA 30309",
+                                            "est_lbs_week":  1450,
+                                            "status":  "Active",
+                                            "contact":  "midtown@wholefoods.com",
+                                            "hours":  "Daily 7:00-22:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3508,
+                                                              33.7681
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Kroger Little Five Points",
+                                            "category":  "Grocery",
+                                            "address":  "725 Ponce De Leon Ave NE, Atlanta, GA 30306",
+                                            "est_lbs_week":  1200,
+                                            "status":  "Active",
+                                            "contact":  "manager@kroger.com",
+                                            "hours":  "Daily 6:00-23:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3634,
+                                                              33.8378
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Trader Joe\u0027s Buckhead",
+                                            "category":  "Grocery",
+                                            "address":  "3183 Peachtree Rd NE, Atlanta, GA 30305",
+                                            "est_lbs_week":  980,
+                                            "status":  "Active",
+                                            "contact":  "buckhead@traderjoes.com",
+                                            "hours":  "Daily 8:00-21:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3724,
+                                                              33.7632
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Staplehouse Restaurant",
+                                            "category":  "Restaurant",
+                                            "address":  "541 Edgewood Ave SE, Atlanta, GA 30312",
+                                            "est_lbs_week":  420,
+                                            "status":  "Active",
+                                            "contact":  "hello@staplehouse.com",
+                                            "hours":  "Wed-Sun 17:00-22:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4078,
+                                                              33.7493
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Busy Bee Cafe",
+                                            "category":  "Restaurant",
+                                            "address":  "810 M.L.K. Jr Dr SW, Atlanta, GA 30314",
+                                            "est_lbs_week":  350,
+                                            "status":  "Active",
+                                            "contact":  "events@busybeecafe.com",
+                                            "hours":  "Tue-Sat 11:00-20:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3876,
+                                                              33.7534
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Georgia-Pacific HQ Cafeteria",
+                                            "category":  "Corporate",
+                                            "address":  "133 Peachtree St NE, Atlanta, GA 30303",
+                                            "est_lbs_week":  700,
+                                            "status":  "Pilot",
+                                            "contact":  "corpfood@gapac.com",
+                                            "hours":  "Mon-Fri 7:00-15:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.388,
+                                                              33.756
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "NCR Voyix Corporate Cafeteria",
+                                            "category":  "Corporate",
+                                            "address":  "864 Spring St NW, Atlanta, GA 30308",
+                                            "est_lbs_week":  620,
+                                            "status":  "Pilot",
+                                            "contact":  "cafeteria@ncrvoyix.com",
+                                            "hours":  "Mon-Fri 7:30-15:30"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3875,
+                                                              33.7728
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Fox Theatre Concessions",
+                                            "category":  "EventVenue",
+                                            "address":  "660 Peachtree St NE, Atlanta, GA 30308",
+                                            "est_lbs_week":  840,
+                                            "status":  "Active",
+                                            "contact":  "events@foxtheatre.org",
+                                            "hours":  "Event days 12:00-23:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3861,
+                                                              33.7812
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Midtown Organic Kitchen",
+                                            "category":  "Restaurant",
+                                            "address":  "1071 Piedmont Ave NE, Atlanta, GA 30309",
+                                            "est_lbs_week":  280,
+                                            "status":  "Pilot",
+                                            "contact":  "ops@midtownorganickitchen.com",
+                                            "hours":  "Daily 11:00-21:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3605,
+                                                              33.7384
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Grant Park Farmers Market",
+                                            "category":  "FarmersMarket",
+                                            "address":  "470 Cherokee Ave SE, Atlanta, GA 30312",
+                                            "est_lbs_week":  760,
+                                            "status":  "Inactive",
+                                            "contact":  "market@grantparkfarmersmarket.org",
+                                            "hours":  "Sun 9:00-13:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4459,
+                                                              33.7177
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Film Row Catering (Tyler Perry Studios)",
+                                            "category":  "FilmCatering",
+                                            "address":  "315 Deshler St SW, Atlanta, GA 30310",
+                                            "est_lbs_week":  1650,
+                                            "status":  "Pilot",
+                                            "contact":  "catering@filmrowatl.com",
+                                            "hours":  "Mon-Sat 6:00-20:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.362,
+                                                              33.8421
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Buckhead Village Restaurants",
+                                            "category":  "Restaurant",
+                                            "address":  "3035 Peachtree Rd NE, Atlanta, GA 30305",
+                                            "est_lbs_week":  1100,
+                                            "status":  "Active",
+                                            "contact":  "district@buckheadvillagedistrict.com",
+                                            "hours":  "Daily 11:00-23:00"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3249,
+                                                              33.7949
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Emory University Cafeteria",
+                                            "category":  "Corporate",
+                                            "address":  "201 Dowman Dr, Atlanta, GA 30322",
+                                            "est_lbs_week":  2100,
+                                            "status":  "Active",
+                                            "contact":  "dining@emory.edu",
+                                            "hours":  "Daily 7:00-21:00"
+                                        }
+                     }
+                 ]
+}

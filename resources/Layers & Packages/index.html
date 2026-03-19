@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlanta Food Circular Network</title>
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Mapbox Geocoder plugin -->
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       DESIGN TOKENS
+       ═══════════════════════════════════════════════════════ */
+    :root {
+      --header-h: 64px;
+      --bg-dark:  #07090f;
+      --text:     #e6ecf5;
+      --muted:    #9ca6b8;
+      --gold:     #b3a369;
+
+      /* Layer colours */
+      --food-recovery:  #ff6b6b;
+      --redistribution: #00d2ff;
+      --beneficiary:    #38ef7d;
+      --compost:        #f2994a;
+      --food-desert:    #ff6348;
+      --food-insecurity:#c56cf0;
+      --gt-dining:      #f4d35e;
+      --gt-compost:     #66bb6a;
+      --gt-vending:     #ffa502;
+      --gt-recycling:   #45aaf2;
+      --gt-buildings:   #d4c9a8;
+      --gt-sidewalks:   #b3a369;
+
+      /* Phase 2 — Framework Map layers */
+      --grocery:        #4fc3f7;
+      --supermarket:    #ab47bc;
+      --convenience:    #ffab40;
+      --fast-food-pin:  #ef5350;
+      --farmers-market: #66bb6a;
+      --marta-routes:   #2979ff;
+      --marta-stops:    #80d8ff;
+      --transit-routes: #ff8a65;
+      --vehicle-avail:  #e040fb;
+      --grocery-dist:   #ff7043;
+
+      /* Glassmorphism */
+      --glass-bg:     rgba(8, 12, 24, 0.78);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur:   blur(16px) saturate(1.2);
+
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #app { width: 100%; height: 100%; overflow: hidden; font-family: var(--font); }
+    #app { position: relative; background: #0c1118; color: var(--text); }
+
+    /* ═══════════════════════════════════════════════════════
+       TOPBAR
+       ═══════════════════════════════════════════════════════ */
+    #topbar {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 30;
+      height: var(--header-h);
+      background: rgba(7, 9, 15, 0.88);
+      backdrop-filter: blur(12px) saturate(1.1);
+      -webkit-backdrop-filter: blur(12px) saturate(1.1);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+    }
+
+    #brandWrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    #logoWrap {
+      width: 150px; height: 42px; border-radius: 8px;
+      background: transparent; overflow: hidden; flex-shrink: 0;
+    }
+    #logoWrap img { width: 100%; height: 100%; object-fit: contain; }
+
+    #titleWrap { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    #titleWrap h1 { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+    #i2ceLink  { color: var(--gold); text-decoration: none; font-weight: 700; font-size: 12px; }
+    #i2ceLink:hover { color: #f2e7bd; text-decoration: underline; }
+
+    #topbarRight { display: flex; align-items: center; gap: 10px; }
+
+    .navLink {
+      color: var(--gold); text-decoration: none; font-size: 12px; font-weight: 700;
+      padding: 7px 14px; border: 1px solid rgba(179,163,105,0.45); border-radius: 999px;
+      white-space: nowrap; transition: background 0.2s, box-shadow 0.2s;
+    }
+    .navLink:hover { background: rgba(179,163,105,0.1); box-shadow: 0 0 10px rgba(179,163,105,0.15); }
+
+    #modeToggle { display: inline-flex; border: 1px solid #3a4254; border-radius: 999px; overflow: hidden; }
+    #modeToggle button {
+      border: 0; background: #141924; color: #d8dde6;
+      padding: 8px 14px; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: var(--font); transition: background 0.2s;
+    }
+    #modeToggle button.active {
+      background: linear-gradient(135deg, var(--gold), #d4c48a);
+      color: #1d232c; box-shadow: 0 0 10px rgba(179,163,105,0.3);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MAP
+       ═══════════════════════════════════════════════════════ */
+    #map { position: absolute; inset: 0; }
+
+    /* Mapbox popup style override */
+    .mapboxgl-popup-content {
+      background: rgba(8,12,24,0.95) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: 10px !important;
+      padding: 14px !important;
+      font-family: var(--font) !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6) !important;
+      max-width: 380px !important;
+    }
+    .mapboxgl-popup-tip { border-top-color: rgba(8,12,24,0.95) !important; }
+    .mapboxgl-popup-close-button { color: var(--muted) !important; font-size: 18px !important; right: 8px !important; top: 8px !important; }
+    .popup-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .popup-body  { font-size: 12px; color: #9ca6b8; line-height: 1.55; word-break: break-word; }
+
+    /* Mapbox controls nudge below topbar */
+    .mapboxgl-ctrl-top-right { top: calc(var(--header-h) + 10px) !important; }
+    .mapboxgl-ctrl-top-left  { top: calc(var(--header-h) + 10px) !important; left: 320px !important; }
+    .mapboxgl-ctrl-bottom-left { bottom: 72px !important; }
+
+    /* ═══════════════════════════════════════════════════════
+       STATS RAIL
+       ═══════════════════════════════════════════════════════ */
+    #statsRail {
+      position: absolute; bottom: 88px; right: 10px; z-index: 24;
+      display: grid; gap: 6px; width: 210px;
+    }
+    .statCard {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px; padding: 7px 10px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .statCard:hover {
+      border-color: rgba(179,163,105,0.25);
+      box-shadow: 0 0 12px rgba(179,163,105,0.08);
+    }
+    .statLabel { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; }
+    .statValue { margin-top: 3px; font-size: 17px; font-weight: 800; color: #fff; }
+
+    /* ═══════════════════════════════════════════════════════
+       LAYER PANEL
+       ═══════════════════════════════════════════════════════ */
+    #layersToggle {
+      position: absolute; left: 12px; bottom: 88px; z-index: 26;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      color: #fff; cursor: pointer; font-size: 13px; font-weight: 700;
+    }
+
+    #layerPanel {
+      position: absolute; top: calc(var(--header-h) + 10px); left: 12px; z-index: 25;
+      width: 296px; max-height: calc(100vh - 170px); overflow-y: auto;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius); padding: 10px;
+      display: none; scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+    #layerPanel.open { display: block; }
+    #layerPanel::-webkit-scrollbar { width: 4px; }
+    #layerPanel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    .panelHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .panelHeader h3 { font-size: 12px; color: #aab4c6; text-transform: uppercase; letter-spacing: 0.5px; }
+    .panelBtns { display: flex; gap: 4px; }
+    .panelBtn {
+      border: 1px solid #3a4254; background: #101621; color: #d8dde6;
+      font-size: 10px; font-weight: 700; border-radius: 6px; padding: 4px 8px;
+      cursor: pointer; font-family: var(--font);
+    }
+    .groupTitle {
+      margin: 10px 0 6px; font-size: 10px; color: #8e98aa;
+      text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .layerRow, .layerStatic {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 12px;
+    }
+    .layerRow input { width: 14px; height: 14px; accent-color: var(--gold); cursor: pointer; }
+    .layerStatic { color: #c7d0df; opacity: 0.85; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .dot.line { width: 14px; height: 4px; border-radius: 4px; }
+    .dot.poly { border-radius: 2px; border: 1px solid #757d8f; }
+
+    /* ═══════════════════════════════════════════════════════
+       PARTNER BAR
+       ═══════════════════════════════════════════════════════ */
+    #partnerBar {
+      position: absolute; top: calc(var(--header-h) + 8px); left: 50%; transform: translateX(-50%); z-index: 25;
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 18px; border-radius: 10px;
+      background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      max-width: calc(100vw - 24px); overflow-x: auto;
+    }
+    #partnerBar::-webkit-scrollbar { display: none; }
+    .partnerLabel {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); white-space: nowrap; margin-right: 4px;
+    }
+    .partnerLogos { display: flex; align-items: center; gap: 14px; }
+    .partnerLogos a {
+      display: flex; align-items: center; flex-shrink: 0;
+      opacity: 0.5; filter: grayscale(100%) brightness(1.5);
+      transition: all 0.3s ease;
+    }
+    .partnerLogos a:hover { opacity: 1; filter: grayscale(0%) brightness(1); transform: scale(1.12); }
+    .partnerLogos img { height: 24px; width: auto; max-width: 80px; object-fit: contain; }
+
+    /* ═══════════════════════════════════════════════════════
+       DOCK
+       ═══════════════════════════════════════════════════════ */
+    #dock {
+      position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 24;
+      display: flex; gap: 6px; max-width: calc(100vw - 24px); overflow-x: auto;
+      padding: 6px; border-radius: 14px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+    }
+    #dock::-webkit-scrollbar { display: none; }
+    #dock button {
+      border: 0; background: transparent; color: #d2d9e5;
+      padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      white-space: nowrap; cursor: pointer; transition: background 0.2s; font-family: var(--font);
+    }
+    #dock button.active {
+      background: linear-gradient(135deg, rgba(179,163,105,0.3), rgba(79,104,114,0.4));
+      color: #fff; border: 1px solid rgba(179,163,105,0.3);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       API KEY NOTICE
+       ═══════════════════════════════════════════════════════ */
+    #keyNotice {
+      position: absolute; top: calc(var(--header-h) + 10px); left: 50%; transform: translateX(-50%);
+      z-index: 25; background: rgba(255,193,7,0.15); border: 1px solid rgba(255,193,7,0.4);
+      border-radius: 8px; padding: 8px 16px; font-size: 11px; color: #ffc107;
+      display: none; white-space: nowrap;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE
+       ═══════════════════════════════════════════════════════ */
+    @media (max-width: 760px) {
+      #topbar { height: 82px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; }
+      #logoWrap { width: 120px; height: 34px; }
+      #titleWrap h1 { font-size: 18px; }
+      #statsRail { bottom: 88px; right: 8px; width: 150px; }
+    }
+
+    /* Geocoder overrides */
+    .mapboxgl-ctrl-geocoder {
+      background: var(--glass-bg) !important;
+      backdrop-filter: var(--glass-blur) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: 999px !important;
+      box-shadow: none !important;
+      font-family: var(--font) !important;
+      min-width: 280px !important;
+      max-width: 320px !important;
+    }
+    .mapboxgl-ctrl-geocoder input {
+      color: var(--text) !important;
+      font-family: var(--font) !important;
+      font-size: 13px !important;
+      padding: 0 36px 0 40px !important;
+      height: 40px !important;
+    }
+    .mapboxgl-ctrl-geocoder input::placeholder { color: var(--muted) !important; }
+    .mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon { fill: var(--muted) !important; }
+    .mapboxgl-ctrl-geocoder .suggestions {
+      background: var(--surface) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: var(--radius-sm) !important;
+      font-family: var(--font) !important;
+    }
+    .mapboxgl-ctrl-geocoder .suggestions li a { color: var(--text) !important; font-size: 12px !important; }
+    .mapboxgl-ctrl-geocoder .suggestions .active > a,
+    .mapboxgl-ctrl-geocoder .suggestions li a:hover { background: rgba(179,163,105,0.12) !important; }
+
+    /* ═══ EXPORT MAP MODAL ═══ */
+    #exportModal {
+      display:none; position:fixed; inset:0; z-index:100;
+      background:rgba(0,0,0,0.65); backdrop-filter:blur(4px);
+      align-items:center; justify-content:center;
+    }
+    #exportModal.open { display:flex; }
+    #exportModalInner {
+      background:#111722; border:1px solid rgba(255,255,255,0.1); border-radius:14px;
+      padding:24px 28px; width:380px; max-width:92vw; color:var(--text); font-family:var(--font);
+    }
+    #exportModalInner h3 { font-size:16px; font-weight:800; margin-bottom:14px; }
+    .export-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; }
+    .export-row label { color:var(--muted); font-weight:600; }
+    .export-row select, .export-row input[type=checkbox] { accent-color:var(--gold); }
+    .export-row select {
+      background:#1a2233; color:var(--text); border:1px solid #2e3d55; border-radius:6px;
+      padding:5px 8px; font-size:12px; font-family:var(--font);
+    }
+    .export-actions { display:flex; gap:8px; margin-top:16px; justify-content:flex-end; }
+    .export-actions button {
+      padding:8px 18px; border-radius:999px; font-size:12px; font-weight:700;
+      font-family:var(--font); cursor:pointer; border:1px solid #2e3d55;
+    }
+    #exportCancel { background:#1a2233; color:var(--muted); }
+    #exportConfirm {
+      background:linear-gradient(135deg,var(--gold),#d4c48a); color:#1d232c; border-color:var(--gold);
+    }
+    #exportStatus { font-size:11px; color:var(--muted); margin-top:8px; min-height:16px; }
+  </style>
+</head>
+
+<body>
+<div id="app">
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header id="topbar">
+    <div id="brandWrap">
+      <div id="logoWrap">
+        <img src="/resources/GT%20logo/Primary%20Logos/Georgia%20Tech%20One%20Line/GTOneLine_White.svg" alt="GT" />
+      </div>
+      <div id="titleWrap">
+        <h1>Atlanta Food Circular Network</h1>
+        <a id="i2ceLink" href="https://sites.gatech.edu/i2ce/" target="_blank" rel="noopener">
+          Georgia Tech Circular Economy Lab [I2CE]
+        </a>
+      </div>
+    </div>
+    <div id="topbarRight">
+      <a href="surplus-map.html"    class="navLink">Surplus Map</a>
+      <a href="fleet-analytics.html" class="navLink">Fleet</a>
+      <a href="gt-campus-hub.html"  class="navLink">Campus Hub</a>
+      <button id="exportMapBtn" class="navLink" type="button" style="cursor:pointer;background:none">Export Map</button>
+      <div id="modeToggle">
+        <button id="btnCity"   class="active" type="button">Atlanta</button>
+        <button id="btnCampus" type="button">GT Campus</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ MAP ═══ -->
+  <div id="map"></div>
+
+  <!-- API key notice (shown when no key loaded) -->
+  <div id="keyNotice">⚠ Mapbox key not found — map running in demo mode</div>
+
+  <!-- ═══ STATS RAIL ═══ -->
+  <section id="statsRail"></section>
+
+  <!-- ═══ LAYER TOGGLE BUTTON ═══ -->
+  <button id="layersToggle" type="button" title="Toggle layer panel">L</button>
+
+  <!-- ═══ LAYER PANEL ═══ -->
+  <aside id="layerPanel" class="open">
+    <div class="panelHeader">
+      <h3>Layers</h3>
+      <div class="panelBtns">
+        <button class="panelBtn" id="showAll"  type="button">Show All</button>
+        <button class="panelBtn" id="hideAll"  type="button">Hide All</button>
+      </div>
+    </div>
+
+    <!-- Atlanta layers -->
+    <div class="groupTitle" id="grpAtlanta">Atlanta Network</div>
+    <label class="layerRow" id="row-foodRecovery">
+      <input type="checkbox" data-layer="foodRecovery" checked />
+      <span class="dot" style="background:var(--food-recovery);box-shadow:0 0 5px var(--food-recovery)"></span>
+      <span>Food Recovery Sources</span>
+    </label>
+    <label class="layerRow" id="row-redistribution">
+      <input type="checkbox" data-layer="redistribution" checked />
+      <span class="dot" style="background:var(--redistribution);box-shadow:0 0 5px var(--redistribution)"></span>
+      <span>Redistribution Nodes</span>
+    </label>
+    <label class="layerRow" id="row-beneficiary">
+      <input type="checkbox" data-layer="beneficiary" />
+      <span class="dot" style="background:var(--beneficiary);box-shadow:0 0 5px var(--beneficiary)"></span>
+      <span>Beneficiary Access Points</span>
+    </label>
+    <label class="layerRow" id="row-circular">
+      <input type="checkbox" data-layer="circular" checked />
+      <span class="dot" style="background:var(--compost);box-shadow:0 0 5px var(--compost)"></span>
+      <span>Circular/Compost Network</span>
+    </label>
+    <label class="layerRow" id="row-foodDeserts">
+      <input type="checkbox" data-layer="foodDeserts" />
+      <span class="dot poly" style="background:var(--food-desert);box-shadow:0 0 5px var(--food-desert)"></span>
+      <span>Food Deserts</span>
+    </label>
+    <label class="layerRow" id="row-foodInsecurity">
+      <input type="checkbox" data-layer="foodInsecurity" />
+      <span class="dot poly" style="background:var(--food-insecurity);box-shadow:0 0 5px var(--food-insecurity)"></span>
+      <span>Food Insecurity (CDC)</span>
+    </label>
+
+    <!-- Phase 2 Analytical Framework Maps (city mode only) -->
+    <div id="phase2CityGroups">
+
+    <!-- Map 1: Food Retail Environment -->
+    <div class="groupTitle" id="grpFoodRetail">1 · Food Retail Environment</div>
+    <label class="layerRow" id="row-map1Retail">
+      <input type="checkbox" data-layer="map1Retail" />
+      <span class="dot poly" style="background:var(--grocery-dist);box-shadow:0 0 5px var(--grocery-dist)"></span>
+      <span>Food Access Gap Score</span>
+    </label>
+    <div style="font-size:9px;color:#66bb6a;font-weight:700;letter-spacing:0.05em;padding:6px 0 2px 8px">HEALTHY (green)</div>
+    <label class="layerRow" id="row-pkgGrocery">
+      <input type="checkbox" data-layer="pkgGrocery" />
+      <span class="dot" style="background:#2e7d32;box-shadow:0 0 5px #2e7d32"></span>
+      <span>🛒 Grocery Stores</span>
+    </label>
+    <label class="layerRow" id="row-pkgSupermarkets">
+      <input type="checkbox" data-layer="pkgSupermarkets" />
+      <span class="dot" style="background:#1b5e20;box-shadow:0 0 5px #1b5e20"></span>
+      <span>🏪 Supermarkets</span>
+    </label>
+    <label class="layerRow" id="row-pkgFarmersMarkets">
+      <input type="checkbox" data-layer="pkgFarmersMarkets" />
+      <span class="dot" style="background:#388e3c;box-shadow:0 0 5px #388e3c"></span>
+      <span>🥬 Farmers Markets</span>
+    </label>
+    <div style="font-size:9px;color:#ef5350;font-weight:700;letter-spacing:0.05em;padding:6px 0 2px 8px">UNHEALTHY (red)</div>
+    <label class="layerRow" id="row-pkgFastFood">
+      <input type="checkbox" data-layer="pkgFastFood" />
+      <span class="dot" style="background:#b71c1c;box-shadow:0 0 5px #b71c1c"></span>
+      <span>🍔 Fast Food</span>
+    </label>
+    <label class="layerRow" id="row-convenienceStores">
+      <input type="checkbox" data-layer="convenienceStores" />
+      <span class="dot" style="background:#d84315;box-shadow:0 0 5px #d84315"></span>
+      <span>🏠 Convenience / Dollar Stores</span>
+    </label>
+
+    <!-- Map 2: Food Access Distance -->
+    <div class="groupTitle" id="grpFoodAccess">2 · Food Access Distance</div>
+    <label class="layerRow" id="row-healthyCoverage">
+      <input type="checkbox" data-layer="healthyCoverage" />
+      <span class="dot poly" style="background:#66bb6a;box-shadow:0 0 5px #66bb6a"></span>
+      <span>1-Mile Coverage (USDA)</span>
+    </label>
+    <label class="layerRow" id="row-map2Access">
+      <input type="checkbox" data-layer="map2Access" />
+      <span class="dot poly" style="background:var(--grocery-dist);box-shadow:0 0 5px var(--grocery-dist)"></span>
+      <span>Grocery Distance</span>
+    </label>
+
+    <!-- Map 3: Transportation Accessibility -->
+    <div class="groupTitle" id="grpTransport">3 · Transportation Accessibility</div>
+    <label class="layerRow" id="row-map3Transport">
+      <input type="checkbox" data-layer="map3Transport" />
+      <span class="dot poly" style="background:var(--marta-routes);box-shadow:0 0 5px var(--marta-routes)"></span>
+      <span>Vehicle Access Barrier</span>
+    </label>
+    <label class="layerRow" id="row-martaRoutes">
+      <input type="checkbox" data-layer="martaRoutes" />
+      <span class="dot line" style="background:var(--marta-routes);box-shadow:0 0 5px var(--marta-routes)"></span>
+      <span>MARTA Routes</span>
+    </label>
+    <label class="layerRow" id="row-martaStops">
+      <input type="checkbox" data-layer="martaStops" />
+      <span class="dot" style="background:var(--marta-stops);box-shadow:0 0 5px var(--marta-stops)"></span>
+      <span>MARTA Stops</span>
+    </label>
+    <label class="layerRow" id="row-transitRoutes">
+      <input type="checkbox" data-layer="transitRoutes" />
+      <span class="dot line" style="background:var(--transit-routes);box-shadow:0 0 5px var(--transit-routes)"></span>
+      <span>Transit Routes</span>
+    </label>
+
+    <!-- Map 4: Food Assistance Demand -->
+    <div class="groupTitle" id="grpAssistance">4 · Food Assistance Demand</div>
+    <label class="layerRow" id="row-map4Assistance">
+      <input type="checkbox" data-layer="map4Assistance" />
+      <span class="dot poly" style="background:var(--convenience);box-shadow:0 0 5px var(--convenience)"></span>
+      <span>Assistance Demand Score</span>
+    </label>
+    <label class="layerRow" id="row-foodPantries">
+      <input type="checkbox" data-layer="foodPantries" />
+      <span class="dot" style="background:#1565c0;box-shadow:0 0 5px #1565c0"></span>
+      <span>📦 Food Pantries (15)</span>
+    </label>
+    <label class="layerRow" id="row-churchPantries">
+      <input type="checkbox" data-layer="churchPantries" />
+      <span class="dot" style="background:#6a1b9a;box-shadow:0 0 5px #6a1b9a"></span>
+      <span>⛪ Church Pantries (24)</span>
+    </label>
+
+    </div><!-- /phase2CityGroups -->
+
+    <div id="campusLayerGroup">
+    <!-- GT Campus layers -->
+    <div class="groupTitle" id="grpCampus">GT Campus Layers (I2CE)</div>
+    <label class="layerRow" id="row-gtDining">
+      <input type="checkbox" data-layer="gtDining" checked />
+      <span class="dot" style="background:var(--gt-dining);box-shadow:0 0 5px var(--gt-dining)"></span>
+      <span>Campus Dining</span>
+    </label>
+    <label class="layerRow" id="row-gtCompost">
+      <input type="checkbox" data-layer="gtCompost" checked />
+      <span class="dot" style="background:var(--gt-compost);box-shadow:0 0 5px var(--gt-compost)"></span>
+      <span>Compost Locations</span>
+    </label>
+    <label class="layerRow" id="row-gtVending">
+      <input type="checkbox" data-layer="gtVending" checked />
+      <span class="dot" style="background:var(--gt-vending);box-shadow:0 0 5px var(--gt-vending)"></span>
+      <span>Vending Machines</span>
+    </label>
+    <label class="layerRow" id="row-gtRecycling">
+      <input type="checkbox" data-layer="gtRecycling" checked />
+      <span class="dot" style="background:var(--gt-recycling);box-shadow:0 0 5px var(--gt-recycling)"></span>
+      <span>Recycling / Trash Cans</span>
+    </label>
+
+    <!-- GT Base (auto) -->
+    <div class="groupTitle">GT Base Map (auto in GT mode)</div>
+    <div class="layerStatic">
+      <span class="dot poly" style="background:var(--gt-buildings);box-shadow:0 0 5px var(--gt-buildings)"></span>
+      <span>Buildings</span>
+    </div>
+    <div class="layerStatic">
+      <span class="dot line" style="background:var(--gt-sidewalks);box-shadow:0 0 5px var(--gt-sidewalks)"></span>
+      <span>Sidewalks</span>
+    </div>
+    </div>
+  </aside>
+
+  <!-- ═══ PARTNER BAR ═══ -->
+  <div id="partnerBar">
+    <span class="partnerLabel">Network Partners</span>
+    <div class="partnerLogos" id="partnerLogos"></div>
+  </div>
+
+  <!-- ═══ DOCK ═══ -->
+  <nav id="dock"></nav>
+
+
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   CONSTANTS
+   ════════════════════════════════════════════════════════════ */
+const GEOJSON_BASE = `${window.location.origin}/geojson`;
+
+const CITY_VIEW   = { center: [-84.388, 33.749], zoom: 11, pitch: 45, bearing: 0 };
+const CAMPUS_VIEW = { center: [-84.3963, 33.7756], zoom: 15.2, pitch: 30, bearing: -12 };
+
+const STATS = [
+  { label: "Food Diverted (lbs/wk)", value: 42500 },
+  { label: "Active Sources",          value: 18 },
+  { label: "Redistribution Nodes",    value: 15 },
+  { label: "People Served",           value: 3200 },
+  { label: "CO₂ Saved (kg/wk)",       value: 8900 },
+];
+
+/* Fallback public key — overridden by /api/config when dev server is running */
+const MAPBOX_PUBLIC_FALLBACK = '';
+
+/* ════════════════════════════════════════════════════════════
+   LAYER CONFIG
+   Each entry describes one logical layer and all its Mapbox layer IDs.
+   ════════════════════════════════════════════════════════════ */
+const LAYER_CFG = {
+  /* ── Atlanta Network ── */
+  foodRecovery: {
+    file: 'food_recovery_sources.geojson', color: '#ff6b6b',
+    type: 'circle', size: 6, cluster: true,
+    mode: 'city', defaultVisible: true,
+    popupField: 'display_name',
+  },
+  redistribution: {
+    file: 'redistribution_nodes.geojson',  color: '#00d2ff',
+    type: 'circle', size: 7, cluster: true,
+    mode: 'city', defaultVisible: true,
+    popupField: 'display_name',
+  },
+  beneficiary: {
+    file: 'beneficiary_access_points.geojson', color: '#38ef7d',
+    type: 'circle', size: 8, cluster: false,
+    mode: 'city', defaultVisible: false,
+    popupField: 'display_name',
+  },
+  circular: {
+    file: 'circular_economy.geojson',  color: '#f2994a',
+    type: 'circle', size: 7, cluster: true,
+    mode: 'city', defaultVisible: true,
+    popupField: 'display_name',
+  },
+  foodDeserts: {
+    file: 'map2_food_access_distance.geojson',
+    type: 'fill',
+    fillColor: ['case',
+      ['>', ['coalesce', ['get', 'nearest_grocery_miles'], 0], 1], 'rgba(255,99,72,0.22)',
+      'rgba(200,200,200,0.03)'],
+    outlineColor: ['case',
+      ['>', ['coalesce', ['get', 'nearest_grocery_miles'], 0], 1], 'rgba(255,99,72,0.45)',
+      'rgba(150,150,150,0.10)'],
+    outlineWidth: 1,
+    mode: 'city', defaultVisible: false,
+    popupField: 'tract_name',
+    popupFn: function(p) {
+      var d = p.nearest_grocery_miles || 0;
+      var cls = d > 5 ? 'color:#b71c1c;font-weight:bold' : d > 1 ? 'color:#ef5350' : 'color:#66bb6a';
+      return '<div class="popup-title">' + (p.tract_name || 'Tract') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted)">Nearest Grocery</td><td>' + (p.nearest_grocery_name || 'N/A') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Distance</td><td style="' + cls + '">' + d + ' mi</td></tr>' +
+        '<tr><td style="color:var(--muted)">Low Access (1mi)</td><td>' + (String(p.low_access_1mi) === 'True' ? 'Yes' : 'No') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Poverty Rate</td><td>' + (p.poverty_rate || 'N/A') + '%</td></tr>' +
+        '</table></div>';
+    },
+  },
+  foodInsecurity: {
+    /* Fetched live from ArcGIS REST as GeoJSON (public service, no key needed) */
+    url: 'https://services3.arcgis.com/ZvidGQkLaDJxRSJ2/arcgis/rest/services/PLACES_LocalData_for_BetterHealth/FeatureServer/3/query?where=StateAbbr+%3D+%27GA%27+AND+(CountyName+%3D+%27Fulton%27+OR+CountyName+%3D+%27DeKalb%27)&f=geojson&outFields=FOODINSECU_CrudePrev,CountyName,TotalPopulation,TractFIPS&resultRecordCount=3000',
+    type: 'fill',
+    fillColor: [
+      'interpolate', ['linear'], ['coalesce', ['get', 'FOODINSECU_CrudePrev'], 0],
+      0,  'rgba(197,108,240,0.03)',
+      15, 'rgba(197,108,240,0.12)',
+      25, 'rgba(197,108,240,0.25)',
+    ],
+    outlineColor: 'rgba(197,108,240,0.18)',
+    outlineWidth: 0.8,
+    mode: 'city', defaultVisible: false,
+    popupField: 'TractFIPS',
+  },
+
+  /* ══════════════════════════════════════════════════════
+     PHASE 2 — ANALYTICAL FRAMEWORK MAPS
+     Each map has: 1 computed choropleth + point/line overlays
+     ══════════════════════════════════════════════════════ */
+
+  /* ── Map 1: Food Retail Environment (CDC mRFEI + LILA + Income) ── */
+  map1Retail: {
+    file: 'map1_food_retail_mrfei.geojson',
+    type: 'fill',
+    fillColor: [
+      'interpolate', ['linear'], ['coalesce', ['get', 'food_access_gap'], 0],
+      10, 'rgba(76,175,80,0.06)',
+      30, 'rgba(255,193,7,0.14)',
+      50, 'rgba(255,152,0,0.22)',
+      70, 'rgba(239,83,80,0.30)',
+      90, 'rgba(183,28,28,0.38)',
+    ],
+    outlineColor: ['interpolate', ['linear'], ['coalesce', ['get', 'food_access_gap'], 0],
+      10, 'rgba(76,175,80,0.12)', 50, 'rgba(255,152,0,0.25)', 90, 'rgba(183,28,28,0.4)'],
+    outlineWidth: 0.8,
+    mode: 'city', defaultVisible: false,
+    popupField: 'tract_name',
+    popupFn: function(p) {
+      /* ── mRFEI + LILA header ── */
+      var m = p.mrfei;
+      var mLabel = m === null || m === undefined ? 'No Retailers' : m < 10 ? 'Food Swamp' : m < 30 ? 'Unhealthy' : m < 50 ? 'Imbalanced' : m < 70 ? 'Mixed' : 'Healthy';
+      var mCls = m === null || m < 10 ? 'color:#b71c1c;font-weight:bold' : m < 30 ? 'color:#ef5350;font-weight:bold' : m < 50 ? 'color:#ff9800' : m < 70 ? 'color:#ffc107' : 'color:#66bb6a';
+      var lila = String(p.is_lila) === 'True';
+      var gap = p.food_access_gap || 0;
+      var gapCls = gap >= 70 ? 'color:#b71c1c;font-weight:bold' : gap >= 50 ? 'color:#ef5350;font-weight:bold' : gap >= 30 ? 'color:#ffc107' : 'color:#66bb6a';
+
+      /* ── Income pie chart (SVG donut) ── */
+      var slices = [
+        { pct: p.pct_under_25k || 0, color: '#ef5350', label: '<$25k' },
+        { pct: p.pct_25k_50k || 0,   color: '#ff9800', label: '$25-50k' },
+        { pct: p.pct_50k_75k || 0,   color: '#ffc107', label: '$50-75k' },
+        { pct: p.pct_75k_100k || 0,  color: '#66bb6a', label: '$75-100k' },
+        { pct: p.pct_100k_150k || 0, color: '#4fc3f7', label: '$100-150k' },
+        { pct: p.pct_150k_plus || 0, color: '#ab47bc', label: '$150k+' },
+      ];
+      var r = 54, cx = 60, cy = 60, ir = 32;
+      var svg = '<svg width="120" height="120" viewBox="0 0 120 120">';
+      var angle = -90;
+      slices.forEach(function(s) {
+        if (s.pct <= 0) return;
+        var a1 = angle * Math.PI / 180;
+        var sweep = s.pct / 100 * 360;
+        var a2 = (angle + sweep) * Math.PI / 180;
+        var large = sweep > 180 ? 1 : 0;
+        var x1o = cx + r * Math.cos(a1), y1o = cy + r * Math.sin(a1);
+        var x2o = cx + r * Math.cos(a2), y2o = cy + r * Math.sin(a2);
+        var x1i = cx + ir * Math.cos(a2), y1i = cy + ir * Math.sin(a2);
+        var x2i = cx + ir * Math.cos(a1), y2i = cy + ir * Math.sin(a1);
+        svg += '<path d="M' + x1o + ',' + y1o + ' A' + r + ',' + r + ' 0 ' + large + ' 1 ' + x2o + ',' + y2o +
+               ' L' + x1i + ',' + y1i + ' A' + ir + ',' + ir + ' 0 ' + large + ' 0 ' + x2i + ',' + y2i + ' Z" fill="' + s.color + '" opacity="0.85"/>';
+        angle += sweep;
+      });
+      svg += '</svg>';
+
+      var legend = slices.map(function(s) {
+        return s.pct > 0 ? '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:6px;font-size:10px">' +
+          '<span style="width:8px;height:8px;border-radius:50%;background:' + s.color + ';display:inline-block"></span>' +
+          s.label + ' ' + s.pct + '%</span>' : '';
+      }).join('');
+
+      return '<div class="popup-title">' + (p.tract_name || 'Tract') + '</div>' +
+        '<div class="popup-body">' +
+        '<table style="margin-bottom:8px">' +
+        '<tr><td style="color:var(--muted)">Food Access Gap</td><td style="' + gapCls + '">' + (p.gap_label || '') + ' (' + gap + ')</td></tr>' +
+        '<tr><td style="color:var(--muted)">mRFEI Score</td><td style="' + mCls + '">' + mLabel + ' (' + (m !== null && m !== undefined ? m : 'N/A') + '/100)</td></tr>' +
+        '<tr><td style="color:var(--muted)">Food Desert (LILA)</td><td>' + (lila ? '<b style="color:#ef5350">Yes</b>' : 'No') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Healthy Retailers</td><td style="color:#66bb6a">' + (p.healthy_count || 0) + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Unhealthy Retailers</td><td style="color:#ef5350">' + (p.unhealthy_count || 0) + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Nearest Grocery</td><td>' + (p.nearest_healthy_miles || '?') + ' mi</td></tr>' +
+        '<tr><td style="color:var(--muted)">Poverty Rate</td><td>' + (p.poverty_rate || 'N/A') + '%</td></tr>' +
+        '</table>' +
+        '<div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px">INCOME DISTRIBUTION</div>' +
+        '<div style="display:flex;align-items:center;gap:8px">' + svg +
+        '<div style="line-height:1.5">' + legend + '</div></div>' +
+        '</div>';
+    },
+  },
+  /* Point overlays for Map 1 */
+  pkgGrocery: {
+    file: 'pkg_atlanta_grocery_stores.geojson', color: '#4fc3f7',
+    type: 'icon', icon: 'icon-grocery', size: 0.7, cluster: true,
+    mode: 'city', defaultVisible: false,
+    popupField: 'Store_Name',
+  },
+  pkgSupermarkets: {
+    file: 'pkg_supermarkets_metroatl.geojson', color: '#ab47bc',
+    type: 'icon', icon: 'icon-supermarket', size: 0.7, cluster: true,
+    mode: 'city', defaultVisible: false,
+    popupField: 'Company',
+  },
+  convenienceStores: {
+    file: 'convenience_stores_atl.geojson', color: '#ffab40',
+    type: 'icon', icon: 'icon-convenience', size: 0.6, cluster: true,
+    mode: 'city', defaultVisible: false,
+    popupField: 'name',
+  },
+  pkgFastFood: {
+    file: 'pkg_all_fast_food_locations_in_metro_atlanta.geojson', color: '#ef5350',
+    type: 'icon', icon: 'icon-fastfood', size: 0.6, cluster: true,
+    mode: 'city', defaultVisible: false,
+    popupField: 'name',
+  },
+  pkgFarmersMarkets: {
+    file: 'pkg_atlanta_metro_area_farmers_markets.geojson', color: '#66bb6a',
+    type: 'icon', icon: 'icon-farmersmarket', size: 0.9, cluster: false,
+    mode: 'city', defaultVisible: false,
+    popupField: 'USER_Market_Name',
+  },
+
+  /* ── Map 2: Food Access Distance ── */
+  /* 1-mile coverage radius around healthy retailers */
+  healthyCoverage: {
+    file: 'healthy_food_1mile_coverage.geojson',
+    type: 'fill',
+    fillColor: 'rgba(76,175,80,0.12)',
+    outlineColor: 'rgba(76,175,80,0.35)',
+    outlineWidth: 1.5,
+    mode: 'city', defaultVisible: false,
+    popupField: 'type',
+    popupFn: function(p) {
+      return '<div class="popup-title">Healthy Food Coverage Zone</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted)">Radius</td><td>1 mile (USDA urban threshold)</td></tr>' +
+        '<tr><td style="color:var(--muted)">Retailers</td><td>330 supermarkets + farmers markets</td></tr>' +
+        '<tr><td style="color:var(--muted)">Coverage</td><td>57% of tracts (302/530)</td></tr>' +
+        '<tr><td style="color:var(--muted)">Gap</td><td style="color:#ef5350;font-weight:bold">228 tracts outside coverage (43%)</td></tr>' +
+        '</table></div>';
+    },
+  },
+  /* Choropleth: nearest_grocery_miles (green=close, red=far) */
+  map2Access: {
+    file: 'map2_food_access_distance.geojson',
+    type: 'fill',
+    fillColor: [
+      'interpolate', ['linear'], ['coalesce', ['get', 'nearest_grocery_miles'], 0],
+      0,   'rgba(76,175,80,0.05)',
+      0.5, 'rgba(139,195,74,0.10)',
+      1.0, 'rgba(255,193,7,0.16)',
+      2.0, 'rgba(255,152,0,0.22)',
+      5.0, 'rgba(239,83,80,0.30)',
+      10,  'rgba(183,28,28,0.38)',
+    ],
+    outlineColor: ['interpolate', ['linear'], ['coalesce', ['get', 'nearest_grocery_miles'], 0],
+      0, 'rgba(76,175,80,0.12)', 1.0, 'rgba(255,193,7,0.25)', 5.0, 'rgba(239,83,80,0.40)', 10, 'rgba(183,28,28,0.5)'],
+    outlineWidth: 0.8,
+    mode: 'city', defaultVisible: false,
+    popupField: 'tract_name',
+    popupFn: function(p) {
+      var d = p.nearest_grocery_miles || 0;
+      var cls = d > 5 ? 'color:#b71c1c;font-weight:bold' : d > 1 ? 'color:#ef5350;font-weight:bold' : d > 0.5 ? 'color:#ffc107' : 'color:#66bb6a';
+      return '<div class="popup-title">' + (p.tract_name || 'Tract') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted)">Nearest Grocery</td><td>' + (p.nearest_grocery_name || 'N/A') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Distance</td><td style="' + cls + '">' + d + ' mi</td></tr>' +
+        '<tr><td style="color:var(--muted)">Low Access (1mi)</td><td>' + (String(p.low_access_1mi) === 'True' ? 'Yes' : 'No') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Low Access (5mi)</td><td>' + (String(p.low_access_5mi) === 'True' ? '<b style=color:#ef5350>Yes</b>' : 'No') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Poverty Rate</td><td>' + (p.poverty_rate || 'N/A') + '%</td></tr>' +
+        '<tr><td style="color:var(--muted)">No Vehicle</td><td>' + (p.pct_no_vehicle || 'N/A') + '%</td></tr>' +
+        '<tr><td style="color:var(--muted)">Population</td><td>' + Number(p.population || 0).toLocaleString() + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+
+  /* ── Map 3: Transportation Accessibility ── */
+  /* Choropleth: % zero-vehicle households (blue ramp) */
+  map3Transport: {
+    file: 'map3_transport_accessibility.geojson',
+    type: 'fill',
+    fillColor: [
+      'interpolate', ['linear'], ['coalesce', ['get', 'pct_no_vehicle'], 0],
+      0,  'rgba(41,121,255,0.04)',
+      10, 'rgba(41,121,255,0.12)',
+      25, 'rgba(41,121,255,0.22)',
+      50, 'rgba(41,121,255,0.32)',
+    ],
+    outlineColor: ['interpolate', ['linear'], ['coalesce', ['get', 'pct_no_vehicle'], 0],
+      0, 'rgba(41,121,255,0.10)', 25, 'rgba(41,121,255,0.25)', 50, 'rgba(41,121,255,0.4)'],
+    outlineWidth: 0.8,
+    mode: 'city', defaultVisible: false,
+    popupField: 'tract_name',
+    popupFn: function(p) {
+      var v = p.pct_no_vehicle || 0;
+      var cls = v > 25 ? 'color:#ef5350;font-weight:bold' : v > 10 ? 'color:#ffc107' : 'color:#66bb6a';
+      return '<div class="popup-title">' + (p.tract_name || 'Tract') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted)">No Vehicle HH</td><td style="' + cls + '">' + v + '%</td></tr>' +
+        '<tr><td style="color:var(--muted)">Nearest Grocery</td><td>' + (p.nearest_grocery_miles || 'N/A') + ' mi</td></tr>' +
+        '<tr><td style="color:var(--muted)">Unemployment</td><td>' + (p.unemployment_rate || 'N/A') + '%</td></tr>' +
+        '<tr><td style="color:var(--muted)">Median Income</td><td>$' + Number(p.median_income || 0).toLocaleString() + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Population</td><td>' + Number(p.population || 0).toLocaleString() + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+  /* Line/point overlays for Map 3 */
+  martaRoutes: {
+    file: 'marta_routes_atl.geojson',
+    type: 'line', color: '#2979ff', lineWidth: 1.5,
+    lineColorExpr: ['match', ['get', 'route_colo'],
+      'FF0000','#FF0000', '0101DF','#0101DF', 'FFBF00','#FFBF00', '04B404','#04B404', '819FF7','#819FF7',
+      '#2979ff'],
+    lineWidthExpr: ['match', ['get', 'route_colo'],
+      'FF0000',4, '0101DF',4, 'FFBF00',4, '04B404',4,
+      1.5],
+    mode: 'city', defaultVisible: false,
+    popupField: 'route_long',
+    popupFn: function(p) {
+      return '<div class="popup-title">' + (p.route_long || 'Route ' + (p.route_shor || '')) + '</div>' +
+        '<div class="popup-body"><div>Route ' + (p.route_shor || 'N/A') + '</div></div>';
+    },
+  },
+  martaStops: {
+    file: 'marta_stops_atl.geojson', color: '#80d8ff',
+    type: 'circle', size: 5, cluster: true,
+    mode: 'city', defaultVisible: false,
+    popupField: 'stop_name',
+  },
+  transitRoutes: {
+    file: 'transit_routes_atl.geojson',
+    type: 'line', color: '#ff8a65', lineWidth: 1.8,
+    tolerance: 0.375,
+    mode: 'city', defaultVisible: false,
+    popupField: 'long_name',
+  },
+
+  /* ── Map 4: Food Assistance Demand ── */
+  /* Choropleth: food_assistance_demand score (SNAP + poverty) */
+  map4Assistance: {
+    file: 'map4_food_assistance_demand.geojson',
+    type: 'fill',
+    fillColor: [
+      'interpolate', ['linear'], ['coalesce', ['get', 'food_assistance_demand'], 0],
+      10, 'rgba(255,183,77,0.06)',
+      30, 'rgba(255,152,0,0.14)',
+      60, 'rgba(245,124,0,0.24)',
+      90, 'rgba(230,81,0,0.34)',
+    ],
+    outlineColor: ['interpolate', ['linear'], ['coalesce', ['get', 'food_assistance_demand'], 0],
+      10, 'rgba(255,183,77,0.12)', 60, 'rgba(245,124,0,0.3)', 90, 'rgba(230,81,0,0.45)'],
+    outlineWidth: 0.8,
+    mode: 'city', defaultVisible: false,
+    popupField: 'tract_name',
+    popupFn: function(p) {
+      var s = p.food_assistance_demand || 0;
+      var cls = s > 60 ? 'color:#ef5350;font-weight:bold' : s > 30 ? 'color:#ffc107' : 'color:#66bb6a';
+      return '<div class="popup-title">' + (p.tract_name || 'Tract') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted)">Demand Score</td><td style="' + cls + '">' + s + '/100</td></tr>' +
+        '<tr><td style="color:var(--muted)">SNAP Rate</td><td>' + (p.snap_rate || 'N/A') + '%</td></tr>' +
+        '<tr><td style="color:var(--muted)">Poverty Rate</td><td>' + (p.poverty_rate || 'N/A') + '%</td></tr>' +
+        '<tr><td style="color:var(--muted)">Pantries Nearby</td><td>' + (p.pantry_count || 0) + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Churches</td><td>' + (p.religious_count || 0) + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Median Income</td><td>$' + Number(p.median_income || 0).toLocaleString() + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+
+  /* Point overlays for Map 4 */
+  foodPantries: {
+    file: 'food_pantries_atl.geojson', color: '#1565c0',
+    type: 'icon', icon: 'icon-pantry', size: 0.8, cluster: false,
+    mode: 'city', defaultVisible: false,
+    popupField: 'name',
+    popupFn: function(p) {
+      return '<div class="popup-title">' + (p.name || 'Food Pantry') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted)">Type</td><td style="color:#4fc3f7;font-weight:700">' + (p.site_type || 'Pantry') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Address</td><td>' + (p.address || 'N/A') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Phone</td><td>' + (p.phone || 'N/A') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Neighborhood</td><td>' + (p.neighborhood || 'N/A') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">County</td><td>' + (p.county || '') + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+  churchPantries: {
+    file: 'church_pantries_atl.geojson', color: '#6a1b9a',
+    type: 'icon', icon: 'icon-church', size: 0.8, cluster: false,
+    mode: 'city', defaultVisible: false,
+    popupField: 'name',
+    popupFn: function(p) {
+      return '<div class="popup-title">' + (p.name || 'Church Pantry') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted)">Type</td><td style="color:#ce93d8;font-weight:700">' + (p.site_type || 'Church Pantry') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Address</td><td>' + (p.address || 'N/A') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Phone</td><td>' + (p.phone || 'N/A') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Neighborhood</td><td>' + (p.neighborhood || 'N/A') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">County</td><td>' + (p.county || '') + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+
+  /* ── GT Campus ── */
+  gtDining: {
+    file: 'campus_dining.geojson', color: '#f4d35e',
+    type: 'circle', size: 9, cluster: false,
+    mode: 'campus', defaultVisible: true,
+    popupField: 'Restaurant',
+  },
+  gtCompost: {
+    file: 'compost_locations.geojson', color: '#66bb6a',
+    type: 'circle', size: 8, cluster: false,
+    mode: 'campus', defaultVisible: true,
+    popupField: 'Name',
+  },
+  gtVending: {
+    file: 'vending_machines.geojson', color: '#ffa502',
+    type: 'circle', size: 8, cluster: false,
+    mode: 'campus', defaultVisible: true,
+    popupField: 'Name',
+  },
+  gtRecycling: {
+    file: 'recycling_trash_cans.geojson', color: '#45aaf2',
+    type: 'circle', size: 8, cluster: false,
+    mode: 'campus', defaultVisible: true,
+    popupField: 'Name',
+  },
+
+  /* ── GT Base (auto-toggled with mode, not in tab system) ── */
+  gtBuildings: {
+    file: 'buildings.geojson',
+    type: 'fill',
+    fillColor: 'rgba(212,201,168,0.28)',
+    outlineColor: 'rgba(179,163,105,0.35)',
+    outlineWidth: 0.8,
+    mode: 'campus', alwaysOn: true, defaultVisible: false,
+    popupField: 'Name',
+  },
+  gtSidewalks: {
+    file: 'sidewalks.geojson',
+    type: 'line', color: 'rgba(179,163,105,0.55)', lineWidth: 1.2,
+    mode: 'campus', alwaysOn: true, defaultVisible: false,
+  },
+};
+
+/* Tab definitions */
+const CITY_TABS = [
+  { id: 'cityFoodRecovery',    label: 'Food Recovery Sources',    layers: ['foodRecovery'] },
+  { id: 'cityRedistribution',  label: 'Redistribution Nodes',     layers: ['redistribution'] },
+  { id: 'cityBeneficiary',     label: 'Beneficiary Access',        layers: ['beneficiary','foodInsecurity'] },
+  { id: 'cityCircular',        label: 'Circular/Compost Network', layers: ['circular'] },
+  /* Phase 2 — Analytical Framework Maps */
+  { id: 'cityFoodRetail',      label: 'Food Retail',              layers: ['map1Retail','pkgGrocery','pkgSupermarkets','pkgFarmersMarkets','pkgFastFood','convenienceStores'] },
+  { id: 'cityFoodAccess',      label: 'Food Access',              layers: ['healthyCoverage','map2Access','pkgGrocery'] },
+  { id: 'cityTransport',       label: 'Transportation',           layers: ['map3Transport','martaRoutes','pkgGrocery'] },
+  { id: 'cityAssistance',      label: 'Assistance Demand',        layers: ['map4Assistance','foodPantries','churchPantries','redistribution'] },
+];
+const CAMPUS_TABS = [
+  { id: 'campusDining',    label: 'Campus Dining',  layers: ['gtDining'] },
+  { id: 'campusCompost',   label: 'Compost',        layers: ['gtCompost'] },
+  { id: 'campusVending',   label: 'Vending',        layers: ['gtVending'] },
+  { id: 'campusTrash',     label: 'Trash Cans',     layers: ['gtRecycling'] },
+  { id: 'campusAll',       label: 'Campus All',     layers: ['gtDining','gtCompost','gtVending','gtRecycling'] },
+];
+
+/* ════════════════════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════════════════════ */
+let map;
+let mapReady = false;
+let mode = 'city';
+let activeCityTab   = 'cityFoodRecovery';
+let activeCampusTab = 'campusDining';
+
+/* ════════════════════════════════════════════════════════════
+   STATS RAIL
+   ════════════════════════════════════════════════════════════ */
+(function buildStats() {
+  const rail = document.getElementById('statsRail');
+  STATS.forEach(s => {
+    const card = document.createElement('article');
+    card.className = 'statCard';
+    card.innerHTML = `<div class="statLabel">${s.label}</div><div class="statValue">${Number(s.value).toLocaleString()}</div>`;
+    rail.appendChild(card);
+  });
+})();
+
+/* ════════════════════════════════════════════════════════════
+   API KEY FETCH
+   ════════════════════════════════════════════════════════════ */
+let tomtomApiKey = '';
+async function getMapboxToken() {
+  try {
+    const res = await fetch('/api/config');
+    if (res.ok) {
+      const cfg = await res.json();
+      tomtomApiKey = cfg.tomtomApiKey || '';
+      if (cfg.mapboxPublicKey) return cfg.mapboxPublicKey;
+    }
+  } catch (_) {}
+  return MAPBOX_PUBLIC_FALLBACK;
+}
+
+/* ════════════════════════════════════════════════════════════
+   MAPBOX INIT
+   ════════════════════════════════════════════════════════════ */
+function initMap(token) {
+  mapboxgl.accessToken = token;
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/dark-v11',
+    center: CITY_VIEW.center,
+    zoom:   CITY_VIEW.zoom,
+    pitch:  CITY_VIEW.pitch,
+    bearing: CITY_VIEW.bearing,
+    antialias: true,
+    preserveDrawingBuffer: true,
+  });
+
+  map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
+  map.addControl(new mapboxgl.ScaleControl({ unit: 'imperial' }), 'bottom-left');
+
+  map.on('style.load', () => {
+    add3DBuildings();
+
+    addAllLayers();
+    bindPopups();
+
+    // Subtle fog
+    map.setFog({
+      color: '#07090f', 'high-color': '#0a1525',
+      'horizon-blend': 0.06, 'space-color': '#07090f', 'star-intensity': 0.1,
+    });
+
+    mapReady = true;
+
+    // Geocoder — search Atlanta
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl: mapboxgl,
+      bbox: [-84.55, 33.65, -84.25, 33.90],
+      placeholder: 'Search Atlanta…',
+      marker: { color: '#b3a369' },
+    });
+    map.addControl(geocoder, 'top-left');
+
+    applyActiveTabSelection();
+    applyVisibility();
+    updateLayerPanelGroups();
+    renderDock();
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   3D BUILDINGS (ATL mode)
+   ════════════════════════════════════════════════════════════ */
+function add3DBuildings() {
+  try {
+    const layers = map.getStyle().layers;
+    const labelLayerId = layers.find(l => l.type === 'symbol' && l.layout?.['text-field'])?.id;
+
+    map.addLayer({
+      id: '3d-buildings',
+      source: 'composite',
+      'source-layer': 'building',
+      filter: ['==', 'extrude', 'true'],
+      type: 'fill-extrusion',
+      minzoom: 12,
+      layout: { visibility: 'visible' },
+      paint: {
+        'fill-extrusion-color': [
+          'interpolate', ['linear'], ['get', 'height'],
+          0, '#0d1520', 20, '#15202f', 50, '#1b2c42',
+        ],
+        'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 15, ['get', 'height']],
+        'fill-extrusion-base':   ['interpolate', ['linear'], ['zoom'], 14, 0, 15, ['get', 'min_height']],
+        'fill-extrusion-opacity': 0.85,
+      },
+    }, labelLayerId);
+  } catch (e) {
+    console.warn('add3DBuildings failed:', e);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   ADD ALL GEOJSON LAYERS
+   ════════════════════════════════════════════════════════════ */
+/* Generate a retail icon as a canvas image for Mapbox */
+function makeRetailIcon(emoji, bgColor, sz) {
+  sz = sz || 32;
+  var c = document.createElement('canvas');
+  c.width = sz; c.height = sz;
+  var ctx = c.getContext('2d');
+  // Background circle
+  ctx.beginPath();
+  ctx.arc(sz/2, sz/2, sz/2 - 1, 0, Math.PI * 2);
+  ctx.fillStyle = bgColor;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // Emoji
+  ctx.font = (sz * 0.5) + 'px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, sz/2, sz/2 + 1);
+  return ctx.getImageData(0, 0, sz, sz);
+}
+
+function registerRetailIcons() {
+  var icons = {
+    /* HEALTHY (green backgrounds) */
+    'icon-grocery':       { emoji: '\uD83D\uDED2', color: '#2e7d32' },    // shopping cart - GREEN
+    'icon-supermarket':   { emoji: '\uD83C\uDFEA', color: '#1b5e20' },    // store - DARK GREEN
+    'icon-farmersmarket': { emoji: '\uD83E\uDD6C', color: '#388e3c' },    // leafy green - GREEN
+    /* UNHEALTHY (red/orange backgrounds) */
+    'icon-fastfood':      { emoji: '\uD83C\uDF54', color: '#b71c1c' },    // hamburger - RED
+    'icon-convenience':   { emoji: '\uD83C\uDFE0', color: '#d84315' },    // small store - DARK ORANGE
+    /* ASSISTANCE (blue/purple backgrounds) */
+    'icon-pantry':        { emoji: '\uD83D\uDCE6', color: '#1565c0' },    // package/box - BLUE
+    'icon-church':        { emoji: '\u26EA',        color: '#6a1b9a' },    // church - PURPLE
+  };
+  Object.entries(icons).forEach(function(entry) {
+    var name = entry[0], cfg = entry[1];
+    if (!map.hasImage(name)) {
+      map.addImage(name, makeRetailIcon(cfg.emoji, cfg.color, 32));
+    }
+  });
+}
+
+function addAllLayers() {
+  registerRetailIcons();
+  for (const [logicalId, cfg] of Object.entries(LAYER_CFG)) {
+    const dataUrl  = cfg.url || `${GEOJSON_BASE}/${cfg.file}`;
+    const initVis  = cfg.defaultVisible ? 'visible' : 'none';
+
+    // Source
+    const srcConfig = { type: 'geojson', data: dataUrl };
+    if (cfg.cluster) {
+      srcConfig.cluster = true;
+      srcConfig.clusterMaxZoom = 13;
+      srcConfig.clusterRadius  = 52;
+    }
+    if (cfg.tolerance) srcConfig.tolerance = cfg.tolerance;
+    map.addSource(logicalId, srcConfig);
+
+    // Layers
+    if (cfg.type === 'circle') {
+      if (cfg.cluster) {
+        // Cluster circles
+        map.addLayer({
+          id: `${logicalId}-clusters`,
+          type: 'circle',
+          source: logicalId,
+          filter: ['has', 'point_count'],
+          layout: { visibility: initVis },
+          paint: {
+            'circle-color': cfg.color,
+            'circle-opacity': 0.82,
+            'circle-radius': ['step', ['get', 'point_count'], 16, 10, 22, 100, 30],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': cfg.color,
+            'circle-stroke-opacity': 0.25,
+          },
+        });
+        // Cluster count labels
+        map.addLayer({
+          id: `${logicalId}-cluster-count`,
+          type: 'symbol',
+          source: logicalId,
+          filter: ['has', 'point_count'],
+          layout: {
+            visibility: initVis,
+            'text-field': '{point_count_abbreviated}',
+            'text-size': 11,
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          },
+          paint: { 'text-color': '#ffffff' },
+        });
+      }
+      // Individual points
+      map.addLayer({
+        id: `${logicalId}-points`,
+        type: 'circle',
+        source: logicalId,
+        filter: cfg.cluster ? ['!', ['has', 'point_count']] : ['==', '$type', 'Point'],
+        layout: { visibility: initVis },
+        paint: {
+          'circle-radius': cfg.size,
+          'circle-color': cfg.color,
+          'circle-opacity': 0.9,
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': cfg.color,
+          'circle-stroke-opacity': 0.4,
+        },
+      });
+
+    } else if (cfg.type === 'fill') {
+      map.addLayer({
+        id: `${logicalId}-fill`,
+        type: 'fill',
+        source: logicalId,
+        filter: ['==', '$type', 'Polygon'],
+        layout: { visibility: initVis },
+        paint: { 'fill-color': cfg.fillColor, 'fill-opacity': 1 },
+      });
+      map.addLayer({
+        id: `${logicalId}-outline`,
+        type: 'line',
+        source: logicalId,
+        filter: ['==', '$type', 'Polygon'],
+        layout: { visibility: initVis },
+        paint: { 'line-color': cfg.outlineColor, 'line-width': cfg.outlineWidth || 1.5 },
+      });
+
+    } else if (cfg.type === 'icon') {
+      if (cfg.cluster) {
+        map.addLayer({
+          id: `${logicalId}-clusters`, type: 'circle', source: logicalId,
+          filter: ['has', 'point_count'],
+          layout: { visibility: initVis },
+          paint: {
+            'circle-color': cfg.color, 'circle-opacity': 0.82,
+            'circle-radius': ['step', ['get', 'point_count'], 16, 10, 22, 100, 30],
+            'circle-stroke-width': 2, 'circle-stroke-color': cfg.color, 'circle-stroke-opacity': 0.25,
+          },
+        });
+        map.addLayer({
+          id: `${logicalId}-cluster-count`, type: 'symbol', source: logicalId,
+          filter: ['has', 'point_count'],
+          layout: { visibility: initVis, 'text-field': '{point_count_abbreviated}', 'text-size': 11,
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'] },
+          paint: { 'text-color': '#ffffff' },
+        });
+      }
+      map.addLayer({
+        id: `${logicalId}-points`, type: 'symbol', source: logicalId,
+        filter: cfg.cluster ? ['!', ['has', 'point_count']] : ['==', '$type', 'Point'],
+        layout: {
+          visibility: initVis,
+          'icon-image': cfg.icon,
+          'icon-size': cfg.size || 0.7,
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': false,
+        },
+      });
+
+    } else if (cfg.type === 'line') {
+      map.addLayer({
+        id: `${logicalId}-line`,
+        type: 'line',
+        source: logicalId,
+        layout: { visibility: initVis },
+        paint: { 'line-color': cfg.lineColorExpr || cfg.color, 'line-width': cfg.lineWidthExpr || cfg.lineWidth || 1.5 },
+      });
+    }
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   POPUPS
+   ════════════════════════════════════════════════════════════ */
+function bindPopups() {
+  const popup = new mapboxgl.Popup({ closeButton: true, closeOnClick: false, offset: 12, maxWidth: '300px' });
+
+  for (const [logicalId, cfg] of Object.entries(LAYER_CFG)) {
+    const clickLayerId = (cfg.type === 'circle' || cfg.type === 'icon') ? `${logicalId}-points`
+                       : cfg.type === 'fill'   ? `${logicalId}-fill`
+                       : cfg.type === 'line'   ? `${logicalId}-line`
+                       : null;
+    if (!clickLayerId) continue;
+
+    map.on('mouseenter', clickLayerId, () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', clickLayerId, () => { map.getCanvas().style.cursor = ''; });
+
+    map.on('click', clickLayerId, e => {
+      const props = e.features[0].properties;
+      let html;
+      if (cfg.popupFn) {
+        html = cfg.popupFn(props);
+      } else {
+        const title = props[cfg.popupField] || props.name || props.Name || logicalId;
+        const rows  = Object.entries(props)
+          .filter(([k]) => !['id','objectid','OBJECTID'].includes(k))
+          .slice(0, 6)
+          .map(([k, v]) => `<tr><td style="color:var(--muted);padding-right:8px">${k}</td><td>${v}</td></tr>`)
+          .join('');
+        html = `<div class="popup-title">${title}</div><div class="popup-body"><table>${rows}</table></div>`;
+      }
+      popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+    });
+
+    // Cluster expand on click
+    if (cfg.cluster) {
+      map.on('click', `${logicalId}-clusters`, e => {
+        const features = map.queryRenderedFeatures(e.point, { layers: [`${logicalId}-clusters`] });
+        const clusterId = features[0].properties.cluster_id;
+        map.getSource(logicalId).getClusterExpansionZoom(clusterId, (err, zoom) => {
+          if (!err) map.easeTo({ center: features[0].geometry.coordinates, zoom });
+        });
+      });
+      map.on('mouseenter', `${logicalId}-clusters`, () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', `${logicalId}-clusters`, () => { map.getCanvas().style.cursor = ''; });
+    }
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   LAYER VISIBILITY
+   ════════════════════════════════════════════════════════════ */
+function getMapboxIds(logicalId) {
+  const cfg = LAYER_CFG[logicalId];
+  const ids = [];
+  if (cfg.type === 'circle' || cfg.type === 'icon') {
+    if (cfg.cluster) ids.push(`${logicalId}-clusters`, `${logicalId}-cluster-count`);
+    ids.push(`${logicalId}-points`);
+  } else if (cfg.type === 'fill') {
+    ids.push(`${logicalId}-fill`, `${logicalId}-outline`);
+  } else if (cfg.type === 'line') {
+    ids.push(`${logicalId}-line`);
+  }
+  return ids;
+}
+
+function setLayerVis(logicalId, visible) {
+  if (!mapReady) return;
+  const v = visible ? 'visible' : 'none';
+  getMapboxIds(logicalId).forEach(id => {
+    if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', v);
+  });
+}
+
+function getCheckbox(layerId) { return document.querySelector(`input[data-layer="${layerId}"]`); }
+function isChecked(layerId)   { const b = getCheckbox(layerId); return b ? b.checked : false; }
+function setChecked(layerId, state) { const b = getCheckbox(layerId); if (b) b.checked = state; }
+
+/* ════════════════════════════════════════════════════════════
+   MODE / TAB / VISIBILITY LOGIC
+   ════════════════════════════════════════════════════════════ */
+const cityLayerIds   = [
+  'foodRecovery','redistribution','beneficiary','circular','foodDeserts','foodInsecurity',
+  'map1Retail','pkgGrocery','pkgSupermarkets','convenienceStores','pkgFastFood','pkgFarmersMarkets',
+  'healthyCoverage','map2Access',
+  'map3Transport','martaRoutes','martaStops','transitRoutes',
+  'map4Assistance','foodPantries','churchPantries',
+];
+const campusLayerIds = ['gtDining','gtCompost','gtVending','gtRecycling'];
+const campusBaseIds  = ['gtBuildings','gtSidewalks'];
+const allLogicalIds  = [...cityLayerIds, ...campusLayerIds, ...campusBaseIds];
+
+function tabDefsForMode()  { return mode === 'city' ? CITY_TABS : CAMPUS_TABS; }
+function activeTabId()     { return mode === 'city' ? activeCityTab : activeCampusTab; }
+function setActiveTabId(id){ if (mode === 'city') activeCityTab = id; else activeCampusTab = id; }
+
+function setModeLayerSelection(layerIds) {
+  const selected = new Set(layerIds);
+  const modeIds  = mode === 'city' ? cityLayerIds : campusLayerIds;
+  modeIds.forEach(id => setChecked(id, selected.has(id)));
+}
+
+function applyVisibility() {
+  if (!mapReady) return;
+
+  cityLayerIds.forEach(id => {
+    setLayerVis(id, mode === 'city' && isChecked(id));
+  });
+  campusLayerIds.forEach(id => {
+    setLayerVis(id, mode === 'campus' && isChecked(id));
+  });
+  campusBaseIds.forEach(id => {
+    setLayerVis(id, mode === 'campus');
+  });
+
+  // 3D buildings: ON in Atlanta mode, OFF in campus mode
+  if (map.getLayer('3d-buildings')) {
+    map.setLayoutProperty('3d-buildings', 'visibility', mode === 'city' ? 'visible' : 'none');
+  }
+}
+
+function updateLayerPanelGroups() {
+  const g = document.getElementById('campusLayerGroup');
+  if (g) g.style.display = mode === 'campus' ? 'block' : 'none';
+  const p2 = document.getElementById('phase2CityGroups');
+  if (p2) p2.style.display = mode === 'city' ? 'block' : 'none';
+}
+
+function applyActiveTabSelection() {
+  const defs   = tabDefsForMode();
+  const target = defs.find(d => d.id === activeTabId()) || defs[0];
+  setActiveTabId(target.id);
+  setModeLayerSelection(target.layers);
+}
+
+function renderDock() {
+  const dock   = document.getElementById('dock');
+  const defs   = tabDefsForMode();
+  const active = activeTabId();
+  dock.innerHTML = '';
+  defs.forEach(def => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.textContent = def.label;
+    btn.className = def.id === active ? 'active' : '';
+    btn.addEventListener('click', () => {
+      setActiveTabId(def.id);
+      setModeLayerSelection(def.layers);
+      applyVisibility();
+      renderDock();
+    });
+    dock.appendChild(btn);
+  });
+}
+
+function setModeButtons() {
+  document.getElementById('btnCity').classList.toggle('active',   mode === 'city');
+  document.getElementById('btnCampus').classList.toggle('active', mode === 'campus');
+}
+
+function switchToCity() {
+  mode = 'city';
+  setModeButtons();
+  applyActiveTabSelection();
+  applyVisibility();
+  renderDock();
+  map.flyTo({ ...CITY_VIEW, duration: 1200 });
+  updateLayerPanelGroups();
+}
+
+function switchToCampus() {
+  mode = 'campus';
+  setModeButtons();
+  applyActiveTabSelection();
+  applyVisibility();
+  renderDock();
+  map.flyTo({ ...CAMPUS_VIEW, duration: 1200 });
+  updateLayerPanelGroups();
+}
+
+/* ════════════════════════════════════════════════════════════
+   EVENT WIRING
+   ════════════════════════════════════════════════════════════ */
+const elBtnCity = document.getElementById('btnCity');
+if (elBtnCity) elBtnCity.addEventListener('click', switchToCity);
+const elBtnCampus = document.getElementById('btnCampus');
+if (elBtnCampus) elBtnCampus.addEventListener('click', switchToCampus);
+
+document.querySelectorAll('input[data-layer]').forEach(box => {
+  box.addEventListener('change', () => { setActiveTabId(''); applyVisibility(); renderDock(); });
+});
+
+const elShowAll = document.getElementById('showAll');
+if (elShowAll) elShowAll.addEventListener('click', () => {
+  (mode === 'city' ? cityLayerIds : campusLayerIds).forEach(id => setChecked(id, true));
+  setActiveTabId(''); applyVisibility(); renderDock();
+});
+const elHideAll = document.getElementById('hideAll');
+if (elHideAll) elHideAll.addEventListener('click', () => {
+  (mode === 'city' ? cityLayerIds : campusLayerIds).forEach(id => setChecked(id, false));
+  setActiveTabId(''); applyVisibility(); renderDock();
+});
+
+const elLayersToggle = document.getElementById('layersToggle');
+if (elLayersToggle) elLayersToggle.addEventListener('click', () => {
+  document.getElementById('layerPanel').classList.toggle('open');
+});
+
+/* ════════════════════════════════════════════════════════════
+   EXPORT MAP
+   ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   BOOTSTRAP
+   ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   PARTNER LOGOS
+   ════════════════════════════════════════════════════════════ */
+const PARTNERS = [
+  { name: 'Atlanta Community Food Bank', role: 'Regional Food Bank', logo: '../partner-logos/01_ACFB_logo.svg', url: 'https://www.acfb.org', lng: -84.5070, lat: 33.8012, addr: '3400 N Desert Dr, East Point, GA 30344' },
+  { name: 'Goodr', role: 'Food Rescue Tech Platform', logo: '../partner-logos/02_Goodr_logo.svg', url: 'https://goodr.co', lng: -84.3880, lat: 33.7490, addr: 'Atlanta, GA (HQ)' },
+  { name: 'Retaaza', role: 'Farm-to-Community Distributor', logo: '../partner-logos/04_Retaaza_logo.svg', url: 'https://retaaza.com', lng: -84.3513, lat: 33.7573, addr: 'Atlanta, GA' },
+  { name: 'Open Hand Atlanta', role: 'Nutrition & Meal Delivery', logo: '../partner-logos/05_OpenHand_logo.svg', url: 'https://www.openhandatlanta.org', lng: -84.4136, lat: 33.7697, addr: '181 Armour Dr NE, Atlanta, GA 30324' },
+  { name: 'North Fulton Community Charities', role: 'Direct Service Pantry', logo: '../partner-logos/07_NFCC_logo.png', url: 'https://nfcchelp.org', lng: -84.3040, lat: 34.0234, addr: '11270 Elkins Rd, Roswell, GA 30076' },
+  { name: 'FoodWell Alliance', role: 'Urban Agriculture Network', logo: '../partner-logos/08_FoodWell_logo.gif', url: 'https://foodwellalliance.org', lng: -84.3856, lat: 33.7628, addr: 'Atlanta, GA' },
+  { name: 'Concrete Jungle', role: 'Produce Rescue & Gleaning', logo: '../partner-logos/09_ConcreteJungle_icon.png', url: 'https://www.concrete-jungle.org', lng: -84.3478, lat: 33.7756, addr: '1080 Euclid Ave NE, Atlanta, GA 30307' },
+  { name: 'City of Atlanta', role: 'Government — Innovation & Planning', logo: '../partner-logos/cityofatlanta.png', url: 'https://www.atlantaga.gov', lng: -84.3880, lat: 33.7490, addr: '55 Trinity Ave SW, Atlanta, GA 30303', isCity: true },
+  { name: 'The Grocery Spot', role: 'Community Food Retail', logo: '../partner-logos/10_GrocerySpot_logo.png', url: 'https://thegroceryspot.com', lng: -84.4410, lat: 33.7140, addr: 'South Atlanta, GA' },
+  { name: 'Nourish + Bloom Market', role: 'Smart Autonomous Grocery', logo: '../partner-logos/11_NourishBloom_logo.png', url: 'https://nourishandbloom.com', lng: -84.2622, lat: 33.6510, addr: '6035 Old National Hwy, College Park, GA' },
+  { name: 'Community Foundation for Greater Atlanta', role: 'Regional Philanthropy', logo: '../partner-logos/12_CFGA_logo.png', url: 'https://cfgreateratlanta.org', lng: -84.3876, lat: 33.7836, addr: '191 Peachtree St NE #1000, Atlanta, GA 30303' },
+  { name: 'United Way of Greater Atlanta', role: 'Nonprofit Coalition', logo: '../partner-logos/14_UnitedWay_icon.png', url: 'https://unitedwayatlanta.org', lng: -84.3836, lat: 33.7816, addr: '40 Courtland St NE #300, Atlanta, GA 30303' },
+  { name: 'Second Helpings Atlanta', role: 'Food Rescue Logistics', logo: '../partner-logos/15_SecondHelpings_icon.ico', url: 'https://secondhelpingsatlanta.org', lng: -84.3650, lat: 33.7500, addr: 'Atlanta, GA' },
+];
+
+function renderPartnerBar() {
+  const container = document.getElementById('partnerLogos');
+  if (!container) return;
+  container.innerHTML = PARTNERS.map(function(p, i) {
+    var imgTag = '<img src="' + p.logo + '" alt="' + p.name + '" loading="lazy" />';
+    return '<a href="#" data-partner="' + i + '" title="' + p.name + ' — ' + p.role + '">' + imgTag + '</a>';
+  }).join('');
+
+  // Click: fly to location + show popup
+  container.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      var idx = parseInt(a.getAttribute('data-partner'));
+      var p = PARTNERS[idx];
+      if (!map || !p) return;
+      map.flyTo({ center: [p.lng, p.lat], zoom: 15, pitch: 45, duration: 1500 });
+      setTimeout(function() {
+        new mapboxgl.Popup({ closeButton: true, offset: 12, maxWidth: '320px' })
+          .setLngLat([p.lng, p.lat])
+          .setHTML(
+            '<div class="popup-title">' + p.name + '</div>' +
+            '<div class="popup-body">' +
+            '<div style="margin-bottom:6px;color:#00bfa5;font-weight:700">' + p.role + '</div>' +
+            '<table>' +
+            '<tr><td style="color:var(--muted)">Address</td><td>' + p.addr + '</td></tr>' +
+            '<tr><td style="color:var(--muted)">Website</td><td><a href="' + p.url + '" target="_blank" style="color:#4fc3f7">' + p.url.replace('https://','').replace('www.','') + '</a></td></tr>' +
+            '</table></div>'
+          )
+          .addTo(map);
+      }, 1600);
+    });
+  });
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   BOOTSTRAP
+   ════════════════════════════════════════════════════════════ */
+(async function init() {
+  renderPartnerBar();
+  const token = await getMapboxToken();
+  initMap(token);
+})();
+</script>
+
+<!-- ═══ EXPORT MAP MODAL ═══ -->
+<div id="exportModal">
+  <div id="exportModalInner">
+    <h3>Export Map Snapshot</h3>
+    <div class="export-row">
+      <label>Size</label>
+      <select id="exportSize">
+        <option value="1200x800">1200 x 800 (Standard)</option>
+        <option value="1920x1080">1920 x 1080 (Presentation)</option>
+        <option value="2048x1536">2048 x 1536 (High-Res)</option>
+      </select>
+    </div>
+    <div class="export-row">
+      <label>Include legend</label>
+      <input type="checkbox" id="exportLegend" checked />
+    </div>
+    <div id="exportStatus"></div>
+    <div class="export-actions">
+      <button id="exportCancel" type="button">Cancel</button>
+      <button id="exportConfirm" type="button">Download PNG</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   EXPORT MAP (deferred — modal DOM must exist first)
+   ════════════════════════════════════════════════════════════ */
+(function bindExport() {
+  const modal    = document.getElementById('exportModal');
+  const btnOpen  = document.getElementById('exportMapBtn');
+  const btnClose = document.getElementById('exportCancel');
+  const btnGo    = document.getElementById('exportConfirm');
+  if (!modal || !btnOpen || !btnClose || !btnGo) return;
+
+  btnOpen.addEventListener('click', () => { modal.classList.add('open'); document.getElementById('exportStatus').textContent = ''; });
+  btnClose.addEventListener('click', () => { modal.classList.remove('open'); });
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+
+  btnGo.addEventListener('click', async () => {
+    const statusEl = document.getElementById('exportStatus');
+    const sizeVal = document.getElementById('exportSize').value;
+    const withLegend = document.getElementById('exportLegend').checked;
+    const [w, h] = sizeVal.split('x').map(Number);
+
+    statusEl.textContent = 'Generating map snapshot...';
+
+    try {
+      let imgSrc;
+
+      if (typeof tomtomApiKey !== 'undefined' && tomtomApiKey) {
+        statusEl.textContent = 'Fetching TomTom static map...';
+        const c = map.getCenter();
+        const z = Math.round(map.getZoom());
+        const url = 'https://api.tomtom.com/map/1/staticimage?key=' + tomtomApiKey +
+          '&center=' + c.lng.toFixed(5) + ',' + c.lat.toFixed(5) +
+          '&zoom=' + z + '&width=' + Math.min(w, 2048) + '&height=' + Math.min(h, 2048) +
+          '&layer=basic&style=night&format=png';
+        try {
+          const res = await fetch(url);
+          if (res.ok) { const blob = await res.blob(); imgSrc = URL.createObjectURL(blob); }
+        } catch (_) { /* fall through to canvas */ }
+      }
+
+      if (!imgSrc) {
+        statusEl.textContent = 'Capturing map canvas...';
+        imgSrc = map.getCanvas().toDataURL('image/png');
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = imgSrc; });
+      ctx.drawImage(img, 0, 0, w, h);
+
+      if (withLegend) {
+        const pad = 14, lineH = 18, titleH = 22;
+        const legendItems = [];
+        const layerColors = {
+          'Food Recovery': '#ff6b6b', 'Redistribution': '#00d2ff', 'Beneficiary': '#38ef7d',
+          'Circular Economy': '#f2994a', 'Campus Dining': '#f4d35e', 'Food Deserts': '#ff6348'
+        };
+        Object.entries(layerColors).forEach(([name, color]) => legendItems.push({ name, color }));
+
+        const lw = 160, lh = titleH + legendItems.length * lineH + pad * 2;
+        const lx = pad, ly = h - lh - pad;
+
+        ctx.fillStyle = 'rgba(8,12,24,0.85)';
+        ctx.fillRect(lx, ly, lw, lh);
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.strokeRect(lx, ly, lw, lh);
+
+        ctx.font = 'bold 11px DM Sans, system-ui';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('AFCN Layers', lx + pad, ly + pad + 12);
+
+        legendItems.forEach((item, i) => {
+          const y = ly + titleH + pad + i * lineH;
+          ctx.fillStyle = item.color;
+          ctx.beginPath(); ctx.arc(lx + pad + 4, y + 4, 4, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#c8d0de';
+          ctx.font = '11px DM Sans, system-ui';
+          ctx.fillText(item.name, lx + pad + 14, y + 8);
+        });
+
+        ctx.font = '10px DM Sans, system-ui';
+        ctx.fillStyle = 'rgba(179,163,105,0.6)';
+        ctx.fillText('Atlanta Food Circular Network \u2014 GT I2CE Lab', pad + 2, h - 6);
+      }
+
+      const link = document.createElement('a');
+      const d = new Date().toISOString().slice(0, 10);
+      link.download = 'AFCN-map-' + d + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      if (imgSrc.startsWith('blob:')) URL.revokeObjectURL(imgSrc);
+      statusEl.textContent = 'Export complete!';
+      setTimeout(() => modal.classList.remove('open'), 1200);
+    } catch (e) {
+      console.error('Export failed', e);
+      statusEl.textContent = 'Export failed: ' + (e.message || 'unknown error');
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

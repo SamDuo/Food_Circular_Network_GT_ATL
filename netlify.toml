@@ -1,0 +1,19 @@
+[build]
+  command   = "python \"Python Script/publish_dashboards.py\" --out publish --clean"
+  publish   = "publish"
+  functions = "netlify/functions"
+
+[build.environment]
+  PYTHON_VERSION = "3.12"
+
+# Route /api/config to the serverless function (keeps API key secret)
+[[redirects]]
+  from   = "/api/config"
+  to     = "/.netlify/functions/config"
+  status = 200
+
+# SPA-friendly: serve index.html for unknown routes
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 404

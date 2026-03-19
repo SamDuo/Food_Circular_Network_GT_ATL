@@ -1,0 +1,16 @@
+{
+"type": "FeatureCollection",
+"name": "midtown_convenience_stores",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "StoreName": "Tech Stop & Run", "Address": null }, "geometry": { "type": "Point", "coordinates": [ -84.406370959317101, 33.774198971243074, 0.0 ] } },
+{ "type": "Feature", "properties": { "StoreName": "Go Puff", "Address": null }, "geometry": { "type": "Point", "coordinates": [ -84.40381611894334, 33.772325121832452, 0.0 ] } },
+{ "type": "Feature", "properties": { "StoreName": "Street Corner", "Address": null }, "geometry": { "type": "Point", "coordinates": [ -84.409151227586378, 33.777446880406821, 0.0 ] } },
+{ "type": "Feature", "properties": { "StoreName": "Quik Trip", "Address": null }, "geometry": { "type": "Point", "coordinates": [ -84.407902480721077, 33.781178225978742, 0.0 ] } },
+{ "type": "Feature", "properties": { "StoreName": "Luckie Street Grocery", "Address": null }, "geometry": { "type": "Point", "coordinates": [ -84.396309859961505, 33.764753826618495, 0.0 ] } },
+{ "type": "Feature", "properties": { "StoreName": "Exxon Food Mart", "Address": null }, "geometry": { "type": "Point", "coordinates": [ -84.40236541698421, 33.785921982039625, 0.0 ] } },
+{ "type": "Feature", "properties": { "StoreName": "Chevron Food Mart", "Address": null }, "geometry": { "type": "Point", "coordinates": [ -84.390146944445348, 33.781217262293197, 0.0 ] } },
+{ "type": "Feature", "properties": { "StoreName": "Ponce Mini Market", "Address": null }, "geometry": { "type": "Point", "coordinates": [ -84.384693502084161, 33.77153447944557, 0.0 ] } },
+{ "type": "Feature", "properties": { "StoreName": "Sunnys Co", "Address": null }, "geometry": { "type": "Point", "coordinates": [ -84.386850718911262, 33.772108304124153, 0.0 ] } }
+]
+}

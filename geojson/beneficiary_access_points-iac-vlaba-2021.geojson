@@ -1,0 +1,19 @@
+{
+"type": "FeatureCollection",
+"name": "beneficiary_access_points",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "display_name": "North Ave Dining Hall", "sub_type": "Dining Hall / Buffet", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.3918, 33.7716 ] } },
+{ "type": "Feature", "properties": { "display_name": "West Village Dining Commons", "sub_type": "Dining Hall / Buffet", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.4061, 33.7777 ] } },
+{ "type": "Feature", "properties": { "display_name": "Brittain Dining Hall", "sub_type": "Dining Hall / Buffet", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.3898, 33.7728 ] } },
+{ "type": "Feature", "properties": { "display_name": "John Lewis Student Center Food Court", "sub_type": "Multi-Concept Food Court", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.3987, 33.7745 ] } },
+{ "type": "Feature", "properties": { "display_name": "Nave Dining Concepts", "sub_type": "Grab-and-Go / Cafe", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.4004, 33.777 ] } },
+{ "type": "Feature", "properties": { "display_name": "Tech Square Dining Hub", "sub_type": "Fast Casual", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.3913, 33.7779 ] } },
+{ "type": "Feature", "properties": { "display_name": "Clough Commons Cafe", "sub_type": "Coffee / Bakery", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.3952, 33.7782 ] } },
+{ "type": "Feature", "properties": { "display_name": "Ferst District Cafe", "sub_type": "Cafe / Sandwiches", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.4037, 33.7763 ] } },
+{ "type": "Feature", "properties": { "display_name": "Klaus Bistro", "sub_type": "Quick Service", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.4011, 33.7733 ] } },
+{ "type": "Feature", "properties": { "display_name": "Exhibition Hall Express", "sub_type": "Fast Casual", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.3969, 33.7723 ] } },
+{ "type": "Feature", "properties": { "display_name": "Crosland Tower Coffee Bar", "sub_type": "Coffee / Snacks", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.3928, 33.7754 ] } },
+{ "type": "Feature", "properties": { "display_name": "CRC Fuel Zone", "sub_type": "Health / Smoothies", "address": "", "source_pkg": "beneficiary_access_points.geojson", "category": "Beneficiary Access Points" }, "geometry": { "type": "Point", "coordinates": [ -84.3989, 33.772 ] } }
+]
+}

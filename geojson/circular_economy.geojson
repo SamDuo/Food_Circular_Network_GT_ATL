@@ -1,0 +1,195 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.387,
+                                                              33.761
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "CompostNow Atlanta HQ",
+                                            "process_type":  "Compost",
+                                            "address":  "Downtown Operations Hub, Atlanta, GA",
+                                            "capacity_tons_month":  120.5,
+                                            "contact":  "ops@compostnow.org",
+                                            "status":  "Operational",
+                                            "accepts_from":  "Restaurant,Grocery,EventVenue,CollegePantry"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.342,
+                                                              33.694
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "City of Atlanta Compost - Constitution Road",
+                                            "process_type":  "Compost",
+                                            "address":  "Constitution Rd SE, Atlanta, GA 30316",
+                                            "capacity_tons_month":  210,
+                                            "contact":  "solidwaste@atlantaga.gov",
+                                            "status":  "Operational",
+                                            "accepts_from":  "FoodBank,School,Clinic,Restaurant"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3695,
+                                                              33.782
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Truly Living Well Urban Farm",
+                                            "process_type":  "UrbanFarm",
+                                            "address":  "324 Lawton St SW, Atlanta, GA 30310",
+                                            "capacity_tons_month":  42,
+                                            "contact":  "farm@trulylivingwell.com",
+                                            "status":  "Operational",
+                                            "accepts_from":  "Compost,FoodBank,CommunityFridge"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.402,
+                                                              33.799
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Concrete Jungle Urban Farm",
+                                            "process_type":  "UrbanFarm",
+                                            "address":  "970 Jefferson St NW, Atlanta, GA 30318",
+                                            "capacity_tons_month":  36.5,
+                                            "contact":  "info@concrete-jungle.org",
+                                            "status":  "Operational",
+                                            "accepts_from":  "Compost,MutualAid,School"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.445,
+                                                              33.725
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Eco-Cycle Solutions (Animal Feed)",
+                                            "process_type":  "AnimalFeed",
+                                            "address":  "Westside Industrial District, Atlanta, GA",
+                                            "capacity_tons_month":  85,
+                                            "contact":  "sourcing@ecocyclesolutions.com",
+                                            "status":  "Operational",
+                                            "accepts_from":  "Restaurant,Grocery,Corporate,EventVenue"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.46,
+                                                              33.71
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Atlanta BioGas (Anaerobic Digestion)",
+                                            "process_type":  "AnaerobicDigestion",
+                                            "address":  "Campbellton Rd SW Corridor, Atlanta, GA",
+                                            "capacity_tons_month":  300,
+                                            "contact":  "intake@atlantabiogas.com",
+                                            "status":  "In Development",
+                                            "accepts_from":  "FoodBank,Compost,AnimalFeed"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.327,
+                                                              33.684
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Browns Mill Urban Farm",
+                                            "process_type":  "UrbanFarm",
+                                            "address":  "510 Cleveland Ave SE, Atlanta, GA 30354",
+                                            "capacity_tons_month":  58,
+                                            "contact":  "programs@brownsmillfarm.org",
+                                            "status":  "Operational",
+                                            "accepts_from":  "Compost,School,Clinic"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3963,
+                                                              33.7756
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "GT Campus Compost Hub (GT-FCH)",
+                                            "process_type":  "Compost",
+                                            "address":  "North Ave NW, Atlanta, GA 30332",
+                                            "capacity_tons_month":  24,
+                                            "contact":  "sustainability@gatech.edu",
+                                            "status":  "Operational",
+                                            "accepts_from":  "CollegePantry,CampusDining,EventVenue"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.435,
+                                                              33.743
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "West Atlanta Watershed Alliance Garden",
+                                            "process_type":  "UrbanFarm",
+                                            "address":  "1442 Richland Rd SW, Atlanta, GA 30310",
+                                            "capacity_tons_month":  31.5,
+                                            "contact":  "garden@wawa-online.org",
+                                            "status":  "Seasonal",
+                                            "accepts_from":  "Compost,CommunityFridge,School"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3801,
+                                                              33.7556
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Good Samaritan Compost Drop",
+                                            "process_type":  "Compost",
+                                            "address":  "Downtown Collection Point, Atlanta, GA",
+                                            "capacity_tons_month":  18.5,
+                                            "contact":  "dropoff@goodsamaritanatl.org",
+                                            "status":  "Operational",
+                                            "accepts_from":  "Shelter,ChurchPantry,Clinic"
+                                        }
+                     }
+                 ]
+}

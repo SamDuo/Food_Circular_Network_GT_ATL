@@ -1,0 +1,18 @@
+{
+"type": "FeatureCollection",
+"name": "compost_locations",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Location_N": "Glenn, Towers, Cloudman, Harris", "Latitude": 33.773, "Longitude": -84.3916, "Max_Total_": 14, "Descriptio": "Pickup location for GT Housing (Genn (4), Towers (4), Cloudman (3), Harris (3)), at the dumpster site against the corner of Cloudman.", "Type": "Housing" }, "geometry": { "type": "Point", "coordinates": [ -84.391571045235622, 33.772964477284155 ] } },
+{ "type": "Feature", "properties": { "Location_N": "4th Street Apartments", "Latitude": 33.775, "Longitude": -84.3911, "Max_Total_": 4, "Descriptio": "Pickup location for 4th Street Housing (Hayes House, Gray House, Goldin House, Stein House), located at dumpster site near the glass recycling bin.", "Type": "Housing" }, "geometry": { "type": "Point", "coordinates": [ -84.39111328083483, 33.775001525730694 ] } },
+{ "type": "Feature", "properties": { "Location_N": "IBB", "Latitude": 33.7787, "Longitude": -84.3976, "Max_Total_": 2, "Descriptio": "Pickup in outside of IBB", "Type": "Dining" }, "geometry": { "type": "Point", "coordinates": [ -84.397630790884776, 33.778722947507717 ] } },
+{ "type": "Feature", "properties": { "Location_N": "Dancing Goats", "Latitude": 33.7736, "Longitude": -84.3986, "Max_Total_": 3, "Descriptio": "Pickup in back door from kitchen", "Type": "Dining" }, "geometry": { "type": "Point", "coordinates": [ -84.398605347085365, 33.773551940699711 ] } },
+{ "type": "Feature", "properties": { "Location_N": "Carnegie Kitchen", "Latitude": 33.773, "Longitude": -84.3949, "Max_Total_": 2, "Descriptio": "Pickup on loading dock", "Type": "Dining" }, "geometry": { "type": "Point", "coordinates": [ -84.394912719702063, 33.773040771306697 ] } },
+{ "type": "Feature", "properties": { "Location_N": "Kaldi's TS", "Latitude": 33.7775, "Longitude": -84.3883, "Max_Total_": 2, "Descriptio": "Pickup in recycling room, located to the back left of the loading dock room", "Type": "Dining" }, "geometry": { "type": "Point", "coordinates": [ -84.388267516829416, 33.777542114113317 ] } },
+{ "type": "Feature", "properties": { "Location_N": "Kaldi's Clough", "Latitude": 33.7749, "Longitude": -84.3961, "Max_Total_": 2, "Descriptio": "Pickup inside gated area to the back of the loading dock behind Clough", "Type": "Dining" }, "geometry": { "type": "Point", "coordinates": [ -84.396087646923419, 33.77493667595602 ] } },
+{ "type": "Feature", "properties": { "Location_N": "GLC Catering", "Latitude": 33.7759, "Longitude": -84.3902, "Max_Total_": 4, "Descriptio": "Pickup near the back wall of the loading dock", "Type": "Dining" }, "geometry": { "type": "Point", "coordinates": [ -84.39018249504646, 33.775947570597033 ] } },
+{ "type": "Feature", "properties": { "Location_N": "845 Marietta (Dining Office)", "Latitude": 33.7758, "Longitude": -84.4062, "Max_Total_": 1, "Descriptio": "Pickup in the refridgerator located in the kitchen (room 117), in the left hallway.", "Type": "Dining" }, "geometry": { "type": "Point", "coordinates": [ -84.406234741488348, 33.775802612185046 ] } },
+{ "type": "Feature", "properties": { "Location_N": "Compost", "Latitude": 33.7751, "Longitude": -84.4047, "Max_Total_": 0, "Descriptio": "Compost Location!", "Type": "OOS" }, "geometry": { "type": "Point", "coordinates": [ -84.404701232856723, 33.775108337192925 ] } },
+{ "type": "Feature", "properties": { "Location_N": "O'Keefe", "Latitude": 33.7786, "Longitude": -84.3924, "Max_Total_": 0, "Descriptio": "Start here!", "Type": "OOS" }, "geometry": { "type": "Point", "coordinates": [ -84.39241027832351, 33.778633117643423 ] } }
+]
+}

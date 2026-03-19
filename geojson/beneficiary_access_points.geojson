@@ -1,0 +1,290 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3885,
+                                                              33.7526
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "DFCS Fulton County - Downtown",
+                                            "access_type":  "SNAP",
+                                            "address":  "1249 Donald Lee Hollowell Pkwy NW, Atlanta, GA 30318",
+                                            "served_per_week":  700,
+                                            "hours":  "Mon-Fri 8:00-17:00",
+                                            "contact":  "fulton.dfcs@dhs.ga.gov",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.2939,
+                                                              33.7743
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "DFCS DeKalb County Office",
+                                            "access_type":  "SNAP",
+                                            "address":  "2300 Parklake Dr NE, Atlanta, GA 30345",
+                                            "served_per_week":  620,
+                                            "hours":  "Mon-Fri 8:00-17:00",
+                                            "contact":  "dekalb.dfcs@dhs.ga.gov",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3948,
+                                                              33.7742
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "GT Student Center Pantry (GT-FCH Hub)",
+                                            "access_type":  "CollegePantry",
+                                            "address":  "350 Ferst Dr NW, Atlanta, GA 30332",
+                                            "served_per_week":  260,
+                                            "hours":  "Mon-Fri 10:00-18:00",
+                                            "contact":  "fchub@gatech.edu",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3881,
+                                                              33.753
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "GSU Panther Pantry",
+                                            "access_type":  "CollegePantry",
+                                            "address":  "55 Gilmer St SE, Atlanta, GA 30303",
+                                            "served_per_week":  240,
+                                            "hours":  "Mon-Thu 10:00-16:00",
+                                            "contact":  "pantherpantry@gsu.edu",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4104,
+                                                              33.7492
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Spelman College Pantry",
+                                            "access_type":  "CollegePantry",
+                                            "address":  "350 Spelman Ln SW, Atlanta, GA 30314",
+                                            "served_per_week":  180,
+                                            "hours":  "Tue-Thu 11:00-15:00",
+                                            "contact":  "wellness@spelman.edu",
+                                            "status":  "Scheduled"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4125,
+                                                              33.7498
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Morehouse College Pantry",
+                                            "access_type":  "CollegePantry",
+                                            "address":  "830 Westview Dr SW, Atlanta, GA 30314",
+                                            "served_per_week":  190,
+                                            "hours":  "Tue-Fri 11:00-16:00",
+                                            "contact":  "care@morehouse.edu",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3801,
+                                                              33.7554
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Atlanta Public Schools - HQ",
+                                            "access_type":  "School",
+                                            "address":  "130 Trinity Ave SW, Atlanta, GA 30303",
+                                            "served_per_week":  420,
+                                            "hours":  "Mon-Fri 8:00-17:00",
+                                            "contact":  "nutrition@atlanta.k12.ga.us",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3829,
+                                                              33.7528
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Grady Memorial Hospital Clinic",
+                                            "access_type":  "Clinic",
+                                            "address":  "80 Jesse Hill Jr Dr SE, Atlanta, GA 30303",
+                                            "served_per_week":  280,
+                                            "hours":  "Mon-Sat 7:00-19:00",
+                                            "contact":  "communityhealth@gradyhealth.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3246,
+                                                              33.7946
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Emory Healthcare Food Pharmacy",
+                                            "access_type":  "Clinic",
+                                            "address":  "1364 Clifton Rd NE, Atlanta, GA 30322",
+                                            "served_per_week":  210,
+                                            "hours":  "Mon-Fri 9:00-17:00",
+                                            "contact":  "foodpharmacy@emoryhealthcare.org",
+                                            "status":  "Scheduled"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4,
+                                                              33.74
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "CHRIS 180 Mobile Food Truck",
+                                            "access_type":  "MobileTruck",
+                                            "address":  "Metro South Route, Atlanta, GA",
+                                            "served_per_week":  300,
+                                            "hours":  "Tue Thu 12:00-16:00",
+                                            "contact":  "mobile@chris180.org",
+                                            "status":  "Scheduled"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.391,
+                                                              33.748
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Atlanta Mission Mobile",
+                                            "access_type":  "MobileTruck",
+                                            "address":  "Downtown Service Route, Atlanta, GA",
+                                            "served_per_week":  340,
+                                            "hours":  "Mon Wed Fri 11:00-15:00",
+                                            "contact":  "mobile@atlantamission.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.394,
+                                                              33.7352
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "MLK Jr. Middle School",
+                                            "access_type":  "School",
+                                            "address":  "545 Hill St SE, Atlanta, GA 30312",
+                                            "served_per_week":  260,
+                                            "hours":  "Mon-Fri 7:30-15:30",
+                                            "contact":  "nutrition@apsk12.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4277,
+                                                              33.7536
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Frederick Douglass HS",
+                                            "access_type":  "School",
+                                            "address":  "225 Hamilton E Holmes Dr NW, Atlanta, GA 30318",
+                                            "served_per_week":  310,
+                                            "hours":  "Mon-Fri 7:30-16:00",
+                                            "contact":  "nutrition@apsk12.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3931,
+                                                              33.7146
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Southside Medical Center",
+                                            "access_type":  "Clinic",
+                                            "address":  "1046 Ridge Ave SW, Atlanta, GA 30315",
+                                            "served_per_week":  230,
+                                            "hours":  "Mon-Fri 8:00-17:00",
+                                            "contact":  "foodaccess@southsidemedical.net",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3501,
+                                                              33.7371
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Neighborhood Charter School Pantry",
+                                            "access_type":  "CollegePantry",
+                                            "address":  "688 Grant St SE, Atlanta, GA 30315",
+                                            "served_per_week":  160,
+                                            "hours":  "Wed 13:00-17:00",
+                                            "contact":  "familysupport@neighborhoodcharter.com",
+                                            "status":  "Scheduled"
+                                        }
+                     }
+                 ]
+}
