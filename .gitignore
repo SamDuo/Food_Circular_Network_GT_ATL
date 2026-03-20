@@ -47,6 +47,7 @@ _pdf_extracts/
 
 # Large asset bundles (too big for GitHub)
 resources/GT logo/
+!resources/GT logo/Primary Logos/Georgia Tech One Line/GTOneLine_White.svg
 AFCN_Partner_Logos.zip
 data/tl_2022_13_tract.zip
 
