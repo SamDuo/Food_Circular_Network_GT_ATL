@@ -1,0 +1,804 @@
+/* ─────────────────────────────────────────────────────────────
+   AFCN Transformation-Map style — heavily inspired by WEF
+   Strategic Intelligence (cream / light bg, dotted connections,
+   blue inner-ring halo, glass right panel, parent-topic pill).
+   ───────────────────────────────────────────────────────────── */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --sans:    "DM Sans", "Inter", system-ui, sans-serif;
+  --serif:   "Source Serif 4", Georgia, serif;
+  --bg:       #f5f4ee;
+  --surface:  #ffffff;
+  --ink:      #111418;
+  --dim:      #56606e;
+  --rule:     #d9d6c9;
+  --accent:   #b3603a;     /* warm Atlanta clay (matches story page) */
+  --accent-soft: #f3ddd0;
+  --gold:     #b3a369;
+  --inner-halo: #2a6cb6;   /* WEF blue inner ring */
+  --connection: rgba(33, 38, 46, 0.18);
+  --connection-hot: #111418;
+  --node-dim:    #ffffff;
+  --node-mid:    #c5c0b1;
+  --node-hot:    #111418;
+  --node-stroke: #4a4a4a;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ─── Topbar ─────────────────────────────────────────────── */
+#topbar {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+  z-index: 5;
+}
+
+#brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+#gtLogo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+#title h1 {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+}
+
+#title p {
+  font-size: 11px;
+  color: var(--dim);
+  font-weight: 500;
+  letter-spacing: 0.4px;
+}
+
+#topnav {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.navLink {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  white-space: nowrap;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  cursor: pointer;
+}
+
+.navLink:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.navLink.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+/* ─── Main stage ─────────────────────────────────────────── */
+#stage {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  height: calc(100vh - 60px - 28px);
+  background: var(--bg);
+}
+
+/* ─── Chart column ───────────────────────────────────────── */
+#chartCol {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 24px 12px;
+}
+
+#breadcrumbBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--dim);
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+#backBtn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  width: 26px; height: 26px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#backBtn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+#backBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+#breadcrumb {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+}
+
+#breadcrumb li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#breadcrumb li:not(:last-child)::after {
+  content: "›";
+  margin-left: 6px;
+  color: var(--rule);
+}
+
+#breadcrumb button {
+  background: transparent;
+  border: 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+#breadcrumb button:hover {
+  background: var(--accent-soft);
+}
+
+#breadcrumb li:last-child button {
+  color: var(--ink);
+  font-weight: 700;
+  cursor: default;
+}
+
+#breadcrumb li:last-child button:hover {
+  background: transparent;
+}
+
+#historyMenu {
+  position: relative;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+#historyMenu summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface);
+  user-select: none;
+}
+
+#historyMenu summary::-webkit-details-marker { display: none; }
+
+#historyList {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  list-style: none;
+  padding: 6px;
+  margin: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+#historyList li button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 8px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+#historyList li button:hover {
+  background: var(--accent-soft);
+}
+
+#chartWrap {
+  flex: 1 1 auto;
+  position: relative;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#chart {
+  width: 100%;
+  height: 100%;
+  display: block;
+  font-family: var(--sans);
+}
+
+#chartHint {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--dim);
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* ─── SVG node + connection styles ───────────────────────── */
+.connection {
+  fill: none;
+  stroke: var(--connection);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+  transition: stroke 0.18s ease, stroke-width 0.18s ease, stroke-dasharray 0.18s ease;
+}
+
+.connection.hot {
+  stroke: var(--connection-hot);
+  stroke-width: 1.6;
+  stroke-dasharray: 6 4;
+  /* Gently flow the dashes along the line when a node is hovered. */
+  animation: dashflow 1.2s linear infinite;
+}
+
+@keyframes dashflow {
+  to { stroke-dashoffset: -20; }
+}
+
+.inner-ring-circle {
+  fill: none;
+  stroke: var(--inner-halo);
+  stroke-width: 1.4;
+  pointer-events: none;
+}
+
+/* Soft grey concentric ring beneath the outer-ring nodes — the second
+   visible ring you see on WEF transformation maps. Kept low-contrast so it
+   reads as a guide, not a feature. */
+.outer-ring-circle {
+  fill: none;
+  stroke: rgba(33, 38, 46, 0.22);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.center-anchor {
+  fill: var(--ink);
+  cursor: default;
+}
+
+.center-anchor-clip image {
+  pointer-events: none;
+}
+
+/* Center label — sized to WEF spec (≈22px / weight 700 / tighter tracking).
+   The dark stroke is a subtle 2px rim so the white type stays legible no
+   matter what the underlying hero image looks like. */
+.center-anchor-label {
+  fill: #fff;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.4px;
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.55);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+}
+
+.center-anchor-sublabel {
+  fill: rgba(255, 255, 255, 0.85);
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.4);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+}
+
+.node {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease,
+              transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.node circle {
+  fill: var(--node-dim);
+  stroke: var(--node-stroke);
+  stroke-width: 1;
+  transition: fill 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease, r 0.25s ease;
+}
+
+/* Gentle scale-pop on hover. */
+.node:hover circle,
+.node.active circle {
+  stroke-width: 2;
+}
+.node:hover { filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.18)); }
+
+/* Subtle pulse on the actively-hovered inner-ring node. */
+.node.active circle {
+  animation: nodepulse 1.4s ease-in-out infinite;
+}
+@keyframes nodepulse {
+  0%, 100% { stroke-width: 2; }
+  50%      { stroke-width: 3.5; }
+}
+
+/* Connected outer nodes ride a softer pulse so they read as secondary. */
+.node.outer.connected circle {
+  animation: nodepulse-soft 1.6s ease-in-out infinite;
+}
+@keyframes nodepulse-soft {
+  0%, 100% { stroke-width: 1.5; }
+  50%      { stroke-width: 2.5; }
+}
+
+.node text {
+  fill: var(--ink);
+  font-family: var(--sans);
+  pointer-events: none;
+}
+
+.node.inner circle {
+  r: 9;
+}
+
+.node.inner text {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.node.outer circle {
+  r: 6.5;
+  stroke: #6c6c6c;
+}
+
+.node.outer text {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--ink);
+  letter-spacing: 0.1px;
+}
+
+.node:hover circle,
+.node.active circle {
+  fill: var(--node-hot);
+  stroke: var(--node-hot);
+}
+
+.node:hover text,
+.node.active text {
+  fill: var(--ink);
+  font-weight: 700;
+}
+
+.node.outer.connected circle {
+  fill: var(--node-hot);
+  stroke: var(--node-hot);
+}
+
+.node.outer.connected text {
+  fill: var(--ink);
+  font-weight: 600;
+}
+
+/* selected inner-ring leaf marker (dot at the same position, filled) */
+.inner-leaf-marker {
+  fill: var(--node-hot);
+  stroke: var(--node-hot);
+  pointer-events: none;
+}
+
+/* ─── Right panel ────────────────────────────────────────── */
+#panel {
+  background: var(--surface);
+  border-left: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+#panelHero {
+  position: relative;
+  height: 160px;
+  background: #1a1a1a;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+#panelImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.65;
+  transition: opacity 0.4s ease;
+}
+
+#panelHeroText {
+  position: absolute;
+  bottom: 16px;
+  left: 22px;
+  right: 22px;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+#panelTitle {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+#panelSubtitle {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 8px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+#panelBody {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 22px 26px 80px;
+  font-family: var(--serif);
+}
+
+#panelDek {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin-bottom: 18px;
+}
+
+#panelMeta {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  color: var(--dim);
+  margin-bottom: 18px;
+  line-height: 1.6;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 6px 10px;
+}
+
+#panelMeta strong { color: var(--ink); font-weight: 600; }
+
+/* ─── Org detail extras (tagline / chips / favicon / socials) ────── */
+.org-tagline {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  border-left: 3px solid var(--accent);
+  padding: 4px 0 4px 12px;
+  margin: 0 0 14px 0;
+}
+
+.org-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.chip {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  letter-spacing: 0.1px;
+}
+.chip-region   { background: #eef4fb; border-color: #cfddf0; color: #1f4f8a; }
+.chip-demo     { background: #fbeee8; border-color: #ecd0c2; color: #8a3f1f; }
+.chip-business { background: #f1f5ee; border-color: #d4dec5; color: #3a5026; }
+
+#panelMeta .with-fav {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.favicon {
+  border-radius: 3px;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.social-pill {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.social-pill:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#panelOrgsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 22px 0 8px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink);
+  border-top: 1px solid var(--rule);
+  padding-top: 18px;
+}
+
+#panelOrgsHeader strong { font-weight: 700; }
+
+#panelOrgsCount {
+  font-size: 11.5px;
+  color: var(--dim);
+  font-weight: 500;
+}
+
+#panelOrgs {
+  list-style: none;
+  font-family: var(--sans);
+}
+
+#panelOrgs li {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 0.12s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+#panelOrgs li:hover {
+  background: var(--accent-soft);
+}
+
+.org-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.org-meta {
+  font-size: 11.5px;
+  color: var(--dim);
+  font-weight: 500;
+}
+
+.org-detail {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin-top: 4px;
+  background: var(--bg);
+  border-left: 3px solid var(--accent);
+  padding: 12px 14px;
+  border-radius: 0 4px 4px 0;
+}
+
+.org-detail .org-row {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+}
+
+.org-detail .org-row b {
+  color: var(--ink);
+  font-weight: 600;
+  flex: 0 0 80px;
+}
+
+.org-detail a {
+  color: var(--accent);
+  border-bottom: 1px solid currentColor;
+}
+
+#panelParent {
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+
+.panel-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.parent-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.parent-pill:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.parent-pill::before {
+  content: "‹";
+  font-size: 16px;
+  color: var(--accent);
+}
+
+/* Floating Hide/Show panel toggle. Lives outside the panel so it stays
+   visible after the panel collapses. Sits in the bottom-right of the
+   stage (above the footer) and slides flush to the edge when the panel
+   is hidden. */
+#hidePanel {
+  position: fixed;
+  bottom: 44px;
+  right: 18px;
+  z-index: 20;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: background 0.15s, border-color 0.15s, right 0.15s;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+#hidePanel:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Panel-collapsed state — hide the panel, expand the chart, and re-label
+   the floating button so the user knows it brings the panel back. */
+body.panel-hidden #stage   { grid-template-columns: 1fr 0; }
+body.panel-hidden #panel   { display: none; }
+body.panel-hidden #hidePanel {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+body.panel-hidden #hidePanel:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+#footer {
+  height: 28px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-family: var(--sans);
+  font-size: 10.5px;
+  color: var(--dim);
+  background: var(--surface);
+}
+
+/* ─── Responsive ────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  #stage { grid-template-columns: 1fr 360px; }
+  #panel { font-size: 14px; }
+}
+
+@media (max-width: 800px) {
+  #stage { grid-template-columns: 1fr; grid-template-rows: 1fr 360px; height: calc(100vh - 60px - 28px); }
+  #panel { border-left: 0; border-top: 1px solid var(--rule); }
+}

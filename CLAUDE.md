@@ -162,13 +162,6 @@ cd "Python Script" && python serve.py
 7. **Capacity penalties at destination** — >90% full gets score penalty, not excluded
 8. **MOCK_SURPLUS is real LeanPath data** — replaced mock placeholders with actual GT campus waste data (Mar 2026)
 9. **MOCK_FLEET uses real LeanPath stats** — lbsWeekRecovered, donationRatePct, costAtRisk are real numbers
-10. **Cycling layer removed from all dashboards** — CyclOSM overlay not relevant to food network operations
-11. **Campus Hub surplus markers cluster by location** — aggregated weight pills ("336 lbs") instead of per-item circles; popup shows item breakdown
-12. **Stats rail positioned bottom-right** — moved from top-right to avoid map control overlap
-13. **Layer panel open by default** — layers visible immediately, toggle still available
-14. **GT Campus layers hidden in city mode** — layer panel dynamically shows/hides campus checkboxes based on mode
-15. **Fleet analytics: Mock mode removed from UI** — TomTom is primary; mock kept as silent fallback only; Traffic + 3D are the only toggle buttons
-16. **Campus Hub uses Eastern Time** — `isLocationOpen()` and `estimateWait()` convert to America/New_York timezone
 
 ---
 

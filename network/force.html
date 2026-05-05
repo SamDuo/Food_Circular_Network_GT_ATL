@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AFCN Force Graph · Atlanta Food Circular Network</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20260504a">
+  <link rel="stylesheet" href="force.css?v=20260504a">
+
+  <!-- vanilla force-graph (same engine as react-force-graph) -->
+  <script src="https://unpkg.com/force-graph@1.43.5/dist/force-graph.min.js"></script>
+</head>
+<body>
+
+  <header id="topbar">
+    <a href="../resources/Layers%20%26%20Packages/index.html" id="brand">
+      <img src="../resources/Layers & Packages/img/gt_logo.svg" alt="Georgia Tech" id="gtLogo">
+      <div id="title">
+        <h1>Atlanta Food Circular Network</h1>
+        <p>Georgia Tech I2CE Lab · Force-Directed View</p>
+      </div>
+    </a>
+
+    <nav id="topnav">
+      <a href="../story/index.html"                              class="navLink">Read the Story</a>
+      <a href="../resources/Layers%20%26%20Packages/index.html"  class="navLink">Map View →</a>
+      <a href="./index.html"                                     class="navLink">Radial View</a>
+      <span                                                       class="navLink active">Force Graph</span>
+    </nav>
+  </header>
+
+  <main id="forceStage">
+
+    <!-- Left toolbar: filter + legend -->
+    <aside id="forceTools">
+      <div class="tools-section">
+        <div class="tools-label">Show</div>
+        <label><input type="checkbox" id="showOrgs"        checked> Organizations <span id="cntOrgs" class="muted"></span></label>
+        <label><input type="checkbox" id="showTypes"       checked> Type categories <span id="cntTypes" class="muted"></span></label>
+        <label><input type="checkbox" id="showActivities"  checked> Activity tags <span id="cntActs" class="muted"></span></label>
+      </div>
+
+      <div class="tools-section">
+        <div class="tools-label">Filter by category</div>
+        <div id="typeFilter"></div>
+      </div>
+
+      <div class="tools-section">
+        <div class="tools-label">Physics</div>
+        <label class="slider">
+          <span>Repulsion</span>
+          <input type="range" id="chargeStrength" min="-400" max="-30" value="-120" step="5">
+        </label>
+        <label class="slider">
+          <span>Link length</span>
+          <input type="range" id="linkDistance" min="20" max="180" value="60" step="5">
+        </label>
+        <button id="reheat" type="button" class="navLink">↻ Reheat simulation</button>
+      </div>
+
+      <div class="tools-section legend">
+        <div class="tools-label">Legend</div>
+        <div id="legendList"></div>
+      </div>
+    </aside>
+
+    <!-- Canvas area -->
+    <section id="forceWrap">
+      <div id="graph"></div>
+      <div id="forceHint">Drag a node · scroll to zoom · click an org for details</div>
+      <div id="forceStats" class="muted"></div>
+    </section>
+
+    <!-- Detail panel (right) -->
+    <aside id="forcePanel">
+      <div id="forcePanelHero">
+        <div id="forcePanelTitle">Atlanta Food Circular Network</div>
+        <div id="forcePanelSubtitle">Force-directed network</div>
+      </div>
+      <div id="forcePanelBody">
+        <p id="forcePanelDek">Click any node to inspect. Drag nodes to rearrange the simulation. Scroll to zoom.</p>
+        <div id="forcePanelMeta"></div>
+      </div>
+    </aside>
+
+  </main>
+
+  <footer id="footer">
+    <span>Licensed for personal/academic use only. © 2026 Georgia Tech I2CE Lab.</span>
+    <span id="dataMeta">Loading data…</span>
+  </footer>
+
+  <script src="force.js?v=20260504a"></script>
+</body>
+</html>

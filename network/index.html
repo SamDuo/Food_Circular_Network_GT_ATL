@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AFCN Network · Atlanta Food Circular Network</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20260503f">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+  <!-- ─── Top bar ────────────────────────────────────────────── -->
+  <header id="topbar">
+    <a href="../resources/Layers%20%26%20Packages/index.html" id="brand">
+      <img src="../resources/Layers & Packages/img/gt_logo.svg" alt="Georgia Tech" id="gtLogo">
+      <div id="title">
+        <h1>Atlanta Food Circular Network</h1>
+        <p>Georgia Tech I2CE Lab · Network View</p>
+      </div>
+    </a>
+
+    <nav id="topnav">
+      <a href="../story/index.html"                              class="navLink">Read the Story</a>
+      <a href="../resources/Layers%20%26%20Packages/index.html"  class="navLink">Map View →</a>
+      <span                                                       class="navLink active">Radial View</span>
+      <a href="./force.html"                                     class="navLink">Force Graph</a>
+    </nav>
+  </header>
+
+  <!-- ─── Main two-column layout ─────────────────────────────── -->
+  <main id="stage">
+
+    <section id="chartCol">
+
+      <!-- breadcrumb / history -->
+      <div id="breadcrumbBar">
+        <button type="button" id="backBtn" aria-label="Up one level">‹</button>
+        <ol id="breadcrumb"></ol>
+        <details id="historyMenu">
+          <summary>History ⌄</summary>
+          <ol id="historyList"></ol>
+        </details>
+      </div>
+
+      <!-- the chart itself -->
+      <div id="chartWrap">
+        <svg id="chart" preserveAspectRatio="xMidYMid meet"></svg>
+        <div id="chartHint">
+          Click an inner-ring topic to drill in · Hover to see connections
+        </div>
+      </div>
+
+    </section>
+
+    <aside id="panel">
+      <div id="panelHero">
+        <img id="panelImage" alt="">
+        <div id="panelHeroText">
+          <div id="panelTitle">Atlanta Food Circular Network</div>
+          <div id="panelSubtitle">Curation: Georgia Tech I2CE Lab</div>
+        </div>
+      </div>
+
+      <div id="panelBody">
+        <p id="panelDek">Atlanta's food system is a 530-tract patchwork of farms, food-rescue groups, pantries, schools, and corner stores. This network view groups every mapped organization by role — click any inner-ring topic to drill into the orgs that play that role.</p>
+
+        <div id="panelMeta"></div>
+
+        <div id="panelOrgsHeader">
+          <strong>Organizations in this view</strong>
+          <span id="panelOrgsCount"></span>
+        </div>
+        <ul id="panelOrgs"></ul>
+
+        <div id="panelParent" hidden>
+          <div class="panel-label">Parent Topic</div>
+          <button type="button" class="parent-pill" id="parentPill"></button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Floating panel-toggle: lives outside #panel so it stays visible
+         when the panel is collapsed. -->
+    <button id="hidePanel" type="button" aria-label="Hide panel">
+      <span class="hidePanelLabel">Hide Panel →</span>
+    </button>
+
+  </main>
+
+  <footer id="footer">
+    <span>Licensed for personal/academic use only. © 2026 Georgia Tech I2CE Lab.</span>
+    <span id="dataMeta">Loading data…</span>
+  </footer>
+
+  <script src="script.js?v=20260503f"></script>
+</body>
+</html>

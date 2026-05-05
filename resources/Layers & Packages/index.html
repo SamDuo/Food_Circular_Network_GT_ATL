@@ -98,6 +98,22 @@
       padding: 7px 14px; border: 1px solid rgba(179,163,105,0.45); border-radius: 999px;
       white-space: nowrap; transition: background 0.2s, box-shadow 0.2s;
     }
+    .navLink.storyLink {
+      color: #fff; background: linear-gradient(180deg, #c87a4f, #a85a3a);
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 2px 10px rgba(168,90,58,0.35);
+    }
+    .navLink.storyLink:hover {
+      background: linear-gradient(180deg, #d68a5e, #b56b48);
+    }
+    .navLink.networkLink {
+      color: #fff; background: linear-gradient(180deg, #2a6cb6, #1d4f88);
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 2px 10px rgba(42,108,182,0.35);
+    }
+    .navLink.networkLink:hover {
+      background: linear-gradient(180deg, #3b7dc8, #2a6cb6);
+    }
     .navLink:hover { background: rgba(179,163,105,0.1); box-shadow: 0 0 10px rgba(179,163,105,0.15); }
 
     #modeToggle { display: inline-flex; border: 1px solid #3a4254; border-radius: 999px; overflow: hidden; }
@@ -245,6 +261,58 @@
       -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
     }
+
+    /* ─── Chapter banner (above dock, narrative intro) ─── */
+    #chapterBanner {
+      position: absolute; left: 50%; bottom: 70px; transform: translateX(-50%); z-index: 25;
+      display: flex; align-items: center; gap: 14px;
+      max-width: min(880px, calc(100vw - 32px));
+      padding: 10px 16px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(8,12,24,0.92), rgba(8,12,24,0.78));
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid rgba(179,163,105,0.22);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    #chapterBanner.fade { opacity: 0.0; transform: translateX(-50%) translateY(8px); }
+    #chapterBadge {
+      flex: 0 0 auto;
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      color: var(--gold); letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 6px 10px; border-radius: 999px;
+      background: rgba(179,163,105,0.10); border: 1px solid rgba(179,163,105,0.40);
+    }
+    #chapterText { flex: 1 1 auto; min-width: 0; }
+    #chapterTitle {
+      font-size: 15px; font-weight: 800; color: #fff; line-height: 1.25;
+      letter-spacing: -0.2px;
+    }
+    #chapterSubtitle {
+      font-size: 12px; font-weight: 400; color: var(--muted); line-height: 1.45;
+      margin-top: 2px;
+    }
+    #chapterNav { flex: 0 0 auto; display: flex; gap: 4px; }
+    #chapterNav button {
+      width: 30px; height: 30px; border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: var(--text); font-size: 16px; font-weight: 700; line-height: 1;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+      font-family: var(--font);
+    }
+    #chapterNav button:hover {
+      background: rgba(179,163,105,0.18); border-color: rgba(179,163,105,0.55);
+    }
+    #chapterNav button:disabled { opacity: 0.35; cursor: default; }
+    @media (max-width: 720px) {
+      #chapterBanner { bottom: 64px; padding: 8px 12px; gap: 10px; }
+      #chapterTitle { font-size: 13px; }
+      #chapterSubtitle { font-size: 11px; }
+      #chapterBadge { font-size: 10px; padding: 4px 8px; }
+    }
+    body.campus-mode #chapterBanner { display: none; }
     #dock::-webkit-scrollbar { display: none; }
     #dock button {
       border: 0; background: transparent; color: #d2d9e5;
@@ -355,6 +423,8 @@
       </div>
     </div>
     <div id="topbarRight">
+      <a href="../../story/index.html" class="navLink storyLink">Read the Story</a>
+      <a href="../../network/index.html" class="navLink networkLink">Network View</a>
       <a href="surplus-map.html"    class="navLink">Surplus Map</a>
       <a href="fleet-analytics.html" class="navLink">Fleet</a>
       <a href="gt-campus-hub.html"  class="navLink">Campus Hub</a>
@@ -373,13 +443,13 @@
   <div id="keyNotice">⚠ Mapbox key not found — map running in demo mode</div>
 
   <!-- ═══ STATS RAIL ═══ -->
-  <section id="statsRail"></section>
+  <section id="statsRail" style="display:none"></section>
 
   <!-- ═══ LAYER TOGGLE BUTTON ═══ -->
   <button id="layersToggle" type="button" title="Toggle layer panel">L</button>
 
   <!-- ═══ LAYER PANEL ═══ -->
-  <aside id="layerPanel" class="open">
+  <aside id="layerPanel">
     <div class="panelHeader">
       <h3>Layers</h3>
       <div class="panelBtns">
@@ -452,6 +522,68 @@
       <input type="checkbox" data-layer="pkgFastFood" />
       <span class="dot" style="background:#b71c1c;box-shadow:0 0 5px #b71c1c"></span>
       <span>🍔 Fast Food</span>
+    </label>
+    <div style="font-size:9px;color:#b3a369;font-weight:700;letter-spacing:0.05em;padding:6px 0 2px 8px">FROM ARCGIS PRO PROJECT</div>
+    <label class="layerRow" id="row-m2FastFoodATL">
+      <input type="checkbox" data-layer="m2FastFoodATL" />
+      <span class="dot" style="background:#f48fb1;box-shadow:0 0 5px #f48fb1"></span>
+      <span>Fast Food (Map2 · 1,487 pts)</span>
+    </label>
+    <label class="layerRow" id="row-proGroceryTiered">
+      <input type="checkbox" data-layer="proGroceryTiered" />
+      <span class="dot" style="background:linear-gradient(90deg,#43a047,#fb8c00,#fdd835,#e53935);box-shadow:0 0 5px #fb8c00"></span>
+      <span>Grocery — tiered (Pro · 300 pts)</span>
+    </label>
+    <label class="layerRow" id="row-proPublicSchools">
+      <input type="checkbox" data-layer="proPublicSchools" />
+      <span class="dot" style="background:#3949ab;box-shadow:0 0 5px #3949ab"></span>
+      <span>Public Schools (Pro · 129 pts)</span>
+    </label>
+    <label class="layerRow" id="row-proHospitalsV2">
+      <input type="checkbox" data-layer="proHospitalsV2" />
+      <span class="dot" style="background:#ad1457;box-shadow:0 0 5px #ad1457"></span>
+      <span>Hospitals & Clinics (Pro · 55 pts)</span>
+    </label>
+    <label class="layerRow" id="row-proMartaRoutes">
+      <input type="checkbox" data-layer="proMartaRoutes" />
+      <span class="dot" style="background:#ec407a;box-shadow:0 0 5px #ec407a"></span>
+      <span>MARTA Routes (Pro · 396 segs)</span>
+    </label>
+    <label class="layerRow" id="row-proMartaBusRoutes">
+      <input type="checkbox" data-layer="proMartaBusRoutes" />
+      <span class="dot" style="background:#7e57c2;box-shadow:0 0 5px #7e57c2"></span>
+      <span>MARTA Bus Routes (369 segs · type=3)</span>
+    </label>
+    <label class="layerRow" id="row-proMartaRail">
+      <input type="checkbox" data-layer="proMartaRail" />
+      <span class="dot line" style="background:linear-gradient(90deg,#e53935 0 25%,#fdd835 25% 50%,#1e88e5 50% 75%,#43a047 75% 100%);box-shadow:0 0 5px #1e88e5"></span>
+      <span>MARTA Heavy Rail (Red · Gold · Blue · Green · 20 segs)</span>
+    </label>
+    <label class="layerRow" id="row-proHealthRiskScore">
+      <input type="checkbox" data-layer="proHealthRiskScore" />
+      <span class="dot" style="background:linear-gradient(90deg,#4caf50,#fdd835,#ffa726,#e53935,#b71c1c);box-shadow:0 0 5px #e53935"></span>
+      <span>GA Health Risk Score (Pro · 1,405 tracts)</span>
+    </label>
+    <label class="layerRow" id="row-proFoodDesertsLILA">
+      <input type="checkbox" data-layer="proFoodDesertsLILA" />
+      <span class="dot" style="background:rgba(239,83,80,0.6);box-shadow:0 0 5px #ef5350"></span>
+      <span>USDA Food Deserts LILA (Pro · 74 tracts)</span>
+    </label>
+    <div style="font-size:9px;color:#b3a369;font-weight:700;letter-spacing:0.05em;padding:6px 0 2px 8px">FROM MAP2.PPKX (NATIONAL INFRA)</div>
+    <label class="layerRow" id="row-proRails">
+      <input type="checkbox" data-layer="proRails" />
+      <span class="dot" style="background:#8d6e63;box-shadow:0 0 5px #8d6e63"></span>
+      <span>Rail Lines (1,219 segs)</span>
+    </label>
+    <label class="layerRow" id="row-proFreeways">
+      <input type="checkbox" data-layer="proFreeways" />
+      <span class="dot" style="background:#fdd835;box-shadow:0 0 5px #fdd835"></span>
+      <span>US Freeways (11 segs)</span>
+    </label>
+    <label class="layerRow" id="row-proPorts">
+      <input type="checkbox" data-layer="proPorts" />
+      <span class="dot" style="background:rgba(38,166,154,0.6);box-shadow:0 0 5px #26a69a"></span>
+      <span>US Principal Ports (150)</span>
     </label>
     <label class="layerRow" id="row-convenienceStores">
       <input type="checkbox" data-layer="convenienceStores" />
@@ -556,6 +688,19 @@
   <div id="partnerBar">
     <span class="partnerLabel">Network Partners</span>
     <div class="partnerLogos" id="partnerLogos"></div>
+  </div>
+
+  <!-- ═══ CHAPTER INTRO BANNER (above dock) ═══ -->
+  <div id="chapterBanner" aria-live="polite">
+    <span id="chapterBadge">Ch. 1</span>
+    <div id="chapterText">
+      <div id="chapterTitle">The Big Picture</div>
+      <div id="chapterSubtitle">Atlanta’s food system at a glance — stores, gaps, and the people they serve.</div>
+    </div>
+    <div id="chapterNav">
+      <button type="button" id="chapterPrev" title="Previous chapter">‹</button>
+      <button type="button" id="chapterNext" title="Next chapter">›</button>
+    </div>
   </div>
 
   <!-- ═══ DOCK ═══ -->
@@ -766,6 +911,202 @@ const LAYER_CFG = {
     type: 'icon', icon: 'icon-farmersmarket', size: 0.9, cluster: false,
     mode: 'city', defaultVisible: false,
     popupField: 'USER_Market_Name',
+  },
+  /* === FROM ATLANTA_FULL_MAPV2.PPKX (ArcGIS Pro project bundle) === */
+  m2FastFoodATL: {
+    file: 'm2_atl_fastfood_all.geojson', color: '#f48fb1',
+    type: 'circle', size: 3, cluster: false,
+    mode: 'city', defaultVisible: false,
+    popupField: 'name',
+    popupFn: function(p) {
+      return '<div class="popup-title" style="color:#f48fb1">' + (p.name || 'Fast Food') + '</div>' +
+        '<div class="popup-body"><div>Source: Map2 ATL Metro · 1,487 pts</div></div>';
+    },
+  },
+  pkgHospitals: {
+    file: 'pkg_hospitals_and_health_clinics_atlanta.geojson', color: '#f8bbd0',
+    type: 'circle', size: 5, cluster: true,
+    mode: 'city', defaultVisible: false,
+    popupField: 'name',
+  },
+  proGroceryTiered: {
+    file: 'atl_grocery_stores_classified.geojson',
+    type: 'icon', cluster: false, size: 0.9, color: '#fb8c00',
+    icon: 'icon-grocery-default',
+    iconExpr: ['match', ['get', 'Tier'],
+      'Premium', 'icon-grocery-premium',
+      'Conventional', 'icon-grocery-conventional',
+      'Limited Selection', 'icon-grocery-limited',
+      'Discount', 'icon-grocery-discount',
+      'icon-grocery-default'],
+    mode: 'city', defaultVisible: false,
+    popupField: 'Company',
+    popupFn: function(p) {
+      var name = p.Company || 'Grocery Store';
+      var tier = p.Tier || 'Unclassified';
+      var tc = ({ 'Premium':'#43a047','Conventional':'#fb8c00','Limited Selection':'#fdd835','Discount':'#e53935' }[tier]) || '#9e9e9e';
+      return '<div class="popup-title" style="color:' + tc + '">' + name + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Tier</td><td style="color:' + tc + ';font-weight:bold">' + tier + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Address</td><td>' + (p.Address || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">City</td><td>' + (p.City || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">County</td><td>' + (p.County || '-') + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+  proMartaRoutes: {
+    file: 'atl_marta_routes_styled.geojson',
+    type: 'line', color: '#ec407a',
+    lineColorExpr: ['case', ['has', 'route_colo'], ['concat', '#', ['get', 'route_colo']], '#ec407a'],
+    lineWidth: 1.5,
+    mode: 'city', defaultVisible: false,
+    popupField: 'route_long',
+  },
+  proPublicSchools: {
+    file: 'atl_pro_public_schools.geojson', color: '#3949ab',
+    type: 'icon', icon: 'icon-school-x', size: 0.9, cluster: false,
+    mode: 'city', defaultVisible: false,
+    popupField: 'SchoolName',
+    popupFn: function(p) {
+      return '<div class="popup-title" style="color:#3949ab">' + (p.SchoolName || 'Public School') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Type</td><td>' + (p.Type || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Grades</td><td>' + (p.GradeRange || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Enrollment</td><td>' + (p.ENROLLMENT || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">District</td><td>' + (p.SystemName || '-') + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+  proHospitalsV2: {
+    file: 'atl_pro_hospitals.geojson', color: '#ad1457',
+    type: 'icon', icon: 'icon-hospital-plus', size: 0.95, cluster: false,
+    mode: 'city', defaultVisible: false,
+    popupField: 'Name',
+    popupFn: function(p) {
+      return '<div class="popup-title" style="color:#ad1457">+ ' + (p.Name || 'Hospital') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Type</td><td>' + (p.SearchTerm || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Address</td><td>' + (p.Address1 || '-') + ', ' + (p.City || '') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">County</td><td>' + (p.County || '-') + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+  proMartaBusRoutes: {
+    file: 'atl_pro_marta_bus_routes.geojson',
+    /* file is GTFS-mixed: 391 features include 20 heavy-rail (route_type=1).
+       Filter to bus only (route_type=3) so the legend label is honest. */
+    filter: ['==', ['to-number', ['get', 'route_type']], 3],
+    type: 'line', color: '#7e57c2', lineWidth: 1.2,
+    mode: 'city', defaultVisible: false,
+    popupField: 'route_long_name',
+  },
+  /* MARTA heavy rail (4 lines, ~20 segments) — same source file, complementary filter */
+  proMartaRail: {
+    file: 'atl_pro_marta_bus_routes.geojson',
+    filter: ['==', ['to-number', ['get', 'route_type']], 1],
+    type: 'line',
+    /* Colour by official line name */
+    lineColorExpr: ['match', ['get', 'route_short_name'],
+      'RED',   '#e53935',
+      'GOLD',  '#fdd835',
+      'BLUE',  '#1e88e5',
+      'GREEN', '#43a047',
+      '#1e88e5'],
+    color: '#1e88e5', lineWidth: 4,
+    mode: 'city', defaultVisible: false,
+    popupField: 'route_long_name',
+    popupFn: function(p) {
+      var clr = ({RED:'#e53935',GOLD:'#fdd835',BLUE:'#1e88e5',GREEN:'#43a047'})[p.route_short_name] || '#1e88e5';
+      return '<div class="popup-title" style="color:' + clr + '">' + (p.route_long_name || 'MARTA Rail') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted)">Line</td><td>' + (p.route_short_name || '—') + '</td></tr>' +
+        '<tr><td style="color:var(--muted)">Type</td><td>Heavy rail</td></tr>' +
+        '</table></div>';
+    },
+  },
+  proHealthRiskScore: {
+    file: 'atl_pro_health_risk_score.geojson',
+    type: 'fill',
+    fillColor: 'rgba(189, 189, 189, 0.15)',
+    fillColorExpr: ['match', ['get', 'HMM_Category'],
+      'Very Poor', 'rgba(183, 28, 28, 0.55)',
+      'Poor', 'rgba(229, 57, 53, 0.45)',
+      'Concern', 'rgba(255, 167, 38, 0.40)',
+      'Average', 'rgba(255, 235, 59, 0.15)',
+      'Good', 'rgba(76, 175, 80, 0.20)',
+      'rgba(189, 189, 189, 0.15)'],
+    outlineColor: 'rgba(255, 255, 255, 0.3)',
+    outlineWidth: 0.5,
+    mode: 'city', defaultVisible: false,
+    popupField: 'HMM_Category',
+    popupFn: function(p) {
+      var cat = p.HMM_Category || 'Unknown';
+      var c = ({ 'Very Poor':'#b71c1c','Poor':'#e53935','Concern':'#ffa726','Average':'#fdd835','Good':'#4caf50' }[cat]) || '#9e9e9e';
+      return '<div class="popup-title" style="color:' + c + '">Health Risk: ' + cat + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Tract</td><td>' + (p.TractFIPS || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">County</td><td>' + (p.CountyName || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Diabetes</td><td>' + (p.Diabetes_Score != null ? Number(p.Diabetes_Score).toFixed(1) : '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Obesity</td><td>' + (p.Obesity_Score != null ? Number(p.Obesity_Score).toFixed(1) : '-') + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+  proFoodDesertsLILA: {
+    file: 'atl_pro_food_deserts.geojson',
+    type: 'fill',
+    fillColor: 'rgba(239, 83, 80, 0.35)',
+    outlineColor: 'rgba(239, 83, 80, 0.7)',
+    outlineWidth: 1.0,
+    mode: 'city', defaultVisible: false,
+    popupField: 'NAME',
+  },
+  /* === FROM MAP2.PPKX (national infrastructure clipped to ATL metro) === */
+  proRails: {
+    file: 'atl_pro_rails.geojson',
+    type: 'line', color: '#8d6e63', lineWidth: 1.0,
+    mode: 'city', defaultVisible: false,
+    popupField: 'FULLNAME',
+    popupFn: function(p) {
+      return '<div class="popup-title" style="color:#8d6e63">Rail Line</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Name</td><td>' + (p.FULLNAME || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">ID</td><td>' + (p.LINEARID || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Source</td><td>Map2 ATL Metro - 1,219 segs</td></tr>' +
+        '</table></div>';
+    },
+  },
+  proFreeways: {
+    file: 'atl_pro_freeways.geojson',
+    type: 'line', color: '#fdd835', lineWidth: 2.5,
+    mode: 'city', defaultVisible: false,
+    popupField: 'ROUTE_NUM',
+    popupFn: function(p) {
+      return '<div class="popup-title" style="color:#fdd835">Freeway ' + (p.ROUTE_NUM || '') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Class</td><td>' + (p.CLASS || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Distance</td><td>' + (p.DIST_MILES != null ? Number(p.DIST_MILES).toFixed(1) + ' mi' : '-') + '</td></tr>' +
+        '</table></div>';
+    },
+  },
+  proPorts: {
+    file: 'atl_pro_ports.geojson',
+    type: 'fill',
+    fillColor: 'rgba(38, 166, 154, 0.45)',
+    outlineColor: 'rgba(38, 166, 154, 0.85)',
+    outlineWidth: 1.0,
+    mode: 'city', defaultVisible: false,
+    popupField: 'PORTNAME',
+    popupFn: function(p) {
+      return '<div class="popup-title" style="color:#26a69a">Port: ' + (p.PORTNAME || p.PORT || 'Port') + '</div>' +
+        '<div class="popup-body"><table>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Rank</td><td>' + (p.RANK || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Type</td><td>' + (p.TYPE || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Total</td><td>' + (p.TOTAL || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Domestic</td><td>' + (p.DOMESTIC || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Foreign</td><td>' + (p.FOREIGN_ || '-') + '</td></tr>' +
+        '<tr><td style="color:var(--muted);padding-right:8px">Imports</td><td>' + (p.IMPORTS || '-') + '</td></tr>' +
+        '</table></div>';
+    },
   },
 
   /* ── Map 2: Food Access Distance ── */
@@ -993,16 +1334,51 @@ const LAYER_CFG = {
 };
 
 /* Tab definitions */
+/* ──────────────────────────────────────────────────────────
+   STORY-CHAPTER TABS — narrative arc for general audience
+   Chapter 1: The Big Picture            → city-wide overview
+   Chapter 2: The Grocery Gap            → where stores are vs. 1-mile coverage
+   Chapter 3: Neighborhoods Left Behind  → food deserts + access gap score
+   Chapter 4: The Last-Mile Problem      → transit + vehicle access
+   Chapter 5: The Health Toll            → food insecurity + safety net
+   Each tab carries a storytelling title and a one-line hook (subtitle).
+   ────────────────────────────────────────────────────────── */
 const CITY_TABS = [
-  { id: 'cityFoodRecovery',    label: 'Food Recovery Sources',    layers: ['foodRecovery'] },
-  { id: 'cityRedistribution',  label: 'Redistribution Nodes',     layers: ['redistribution'] },
-  { id: 'cityBeneficiary',     label: 'Beneficiary Access',        layers: ['beneficiary','foodInsecurity'] },
-  { id: 'cityCircular',        label: 'Circular/Compost Network', layers: ['circular'] },
-  /* Phase 2 — Analytical Framework Maps */
-  { id: 'cityFoodRetail',      label: 'Food Retail',              layers: ['map1Retail','pkgGrocery','pkgSupermarkets','pkgFarmersMarkets','pkgFastFood','convenienceStores'] },
-  { id: 'cityFoodAccess',      label: 'Food Access',              layers: ['healthyCoverage','map2Access','pkgGrocery'] },
-  { id: 'cityTransport',       label: 'Transportation',           layers: ['map3Transport','martaRoutes','pkgGrocery'] },
-  { id: 'cityAssistance',      label: 'Assistance Demand',        layers: ['map4Assistance','foodPantries','churchPantries','redistribution'] },
+  {
+    id: 'cityProOverview',
+    label: 'The Big Picture',
+    chapter: 1,
+    subtitle: 'Atlanta’s food system at a glance — stores, gaps, and the people they serve.',
+    layers: ['proFoodDesertsLILA','proGroceryTiered','m2FastFoodATL','proHospitalsV2','proPublicSchools','proMartaBusRoutes']
+  },
+  {
+    id: 'cityFoodRetail',
+    label: 'The Grocery Gap',
+    chapter: 2,
+    subtitle: 'Where can Atlanta families actually buy fresh food? Green rings show 1-mile reach of supermarkets.',
+    layers: ['healthyCoverage','proGroceryTiered','pkgSupermarkets','pkgFarmersMarkets','pkgFastFood']
+  },
+  {
+    id: 'cityFoodAccess',
+    label: 'Neighborhoods Left Behind',
+    chapter: 3,
+    subtitle: 'USDA food deserts (red) overlaid on the Food Access Gap score — the higher the score, the harder it is to reach fresh food.',
+    layers: ['map1Retail','proFoodDesertsLILA','pkgGrocery']
+  },
+  {
+    id: 'cityTransport',
+    label: 'The Last-Mile Problem',
+    chapter: 4,
+    subtitle: 'For families without a car, “nearby” depends on the next bus. Transit access vs. food deserts.',
+    layers: ['map3Transport','proMartaBusRoutes','proMartaRail','proFoodDesertsLILA']
+  },
+  {
+    id: 'cityAssistance',
+    label: 'The Health Toll & Safety Net',
+    chapter: 5,
+    subtitle: 'Food insecurity (CDC), chronic-disease risk, and the pantry network filling the gap.',
+    layers: ['foodInsecurity','proHealthRiskScore','foodPantries','churchPantries','redistribution']
+  },
 ];
 const CAMPUS_TABS = [
   { id: 'campusDining',    label: 'Campus Dining',  layers: ['gtDining'] },
@@ -1018,7 +1394,7 @@ const CAMPUS_TABS = [
 let map;
 let mapReady = false;
 let mode = 'city';
-let activeCityTab   = 'cityFoodRecovery';
+let activeCityTab   = 'cityFoodRetail';
 let activeCampusTab = 'campusDining';
 
 /* ════════════════════════════════════════════════════════════
@@ -1175,6 +1551,50 @@ function registerRetailIcons() {
       map.addImage(name, makeRetailIcon(cfg.emoji, cfg.color, 32));
     }
   });
+  /* ArcGIS-Pro-style symbology icons */
+  if (!map.hasImage('icon-school-x')) map.addImage('icon-school-x', makeShapeIcon('x', '#3949ab', 18));
+  if (!map.hasImage('icon-hospital-plus')) map.addImage('icon-hospital-plus', makeShapeIcon('plus', '#ad1457', 18));
+  var tierColors = {
+    'icon-grocery-premium': '#43a047',
+    'icon-grocery-conventional': '#fb8c00',
+    'icon-grocery-limited': '#fdd835',
+    'icon-grocery-discount': '#e53935',
+    'icon-grocery-default': '#9e9e9e',
+  };
+  Object.entries(tierColors).forEach(function(e) {
+    if (!map.hasImage(e[0])) map.addImage(e[0], makeShapeIcon('square', e[1], 14));
+  });
+}
+
+/* Generic shape icon factory: 'x', 'plus', 'square' */
+function makeShapeIcon(shape, color, sz) {
+  sz = sz || 16;
+  var c = document.createElement('canvas');
+  c.width = sz; c.height = sz;
+  var ctx = c.getContext('2d');
+  ctx.lineWidth = Math.max(2, sz * 0.18);
+  ctx.lineCap = 'round';
+  if (shape === 'x') {
+    ctx.strokeStyle = color;
+    var pad = sz * 0.24;
+    ctx.beginPath();
+    ctx.moveTo(pad, pad); ctx.lineTo(sz - pad, sz - pad);
+    ctx.moveTo(sz - pad, pad); ctx.lineTo(pad, sz - pad);
+    ctx.stroke();
+  } else if (shape === 'plus') {
+    ctx.strokeStyle = color;
+    var pad2 = sz * 0.18;
+    ctx.beginPath();
+    ctx.moveTo(sz / 2, pad2); ctx.lineTo(sz / 2, sz - pad2);
+    ctx.moveTo(pad2, sz / 2); ctx.lineTo(sz - pad2, sz / 2);
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = color;
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillRect(1, 1, sz - 2, sz - 2);
+    ctx.strokeRect(1, 1, sz - 2, sz - 2);
+  }
+  return ctx.getImageData(0, 0, sz, sz);
 }
 
 function addAllLayers() {
@@ -1236,10 +1656,10 @@ function addAllLayers() {
         layout: { visibility: initVis },
         paint: {
           'circle-radius': cfg.size,
-          'circle-color': cfg.color,
+          'circle-color': cfg.colorExpr || cfg.color,
           'circle-opacity': 0.9,
           'circle-stroke-width': 1.5,
-          'circle-stroke-color': cfg.color,
+          'circle-stroke-color': cfg.colorExpr || cfg.color,
           'circle-stroke-opacity': 0.4,
         },
       });
@@ -1251,7 +1671,7 @@ function addAllLayers() {
         source: logicalId,
         filter: ['==', '$type', 'Polygon'],
         layout: { visibility: initVis },
-        paint: { 'fill-color': cfg.fillColor, 'fill-opacity': 1 },
+        paint: { 'fill-color': cfg.fillColorExpr || cfg.fillColor, 'fill-opacity': 1 },
       });
       map.addLayer({
         id: `${logicalId}-outline`,
@@ -1287,7 +1707,7 @@ function addAllLayers() {
         filter: cfg.cluster ? ['!', ['has', 'point_count']] : ['==', '$type', 'Point'],
         layout: {
           visibility: initVis,
-          'icon-image': cfg.icon,
+          'icon-image': cfg.iconExpr || cfg.icon,
           'icon-size': cfg.size || 0.7,
           'icon-allow-overlap': true,
           'icon-ignore-placement': false,
@@ -1295,13 +1715,15 @@ function addAllLayers() {
       });
 
     } else if (cfg.type === 'line') {
-      map.addLayer({
+      var _lineSpec = {
         id: `${logicalId}-line`,
         type: 'line',
         source: logicalId,
         layout: { visibility: initVis },
         paint: { 'line-color': cfg.lineColorExpr || cfg.color, 'line-width': cfg.lineWidthExpr || cfg.lineWidth || 1.5 },
-      });
+      };
+      if (cfg.filter) _lineSpec.filter = cfg.filter;
+      map.addLayer(_lineSpec);
     }
   }
 }
@@ -1388,7 +1810,7 @@ function setChecked(layerId, state) { const b = getCheckbox(layerId); if (b) b.c
    ════════════════════════════════════════════════════════════ */
 const cityLayerIds   = [
   'foodRecovery','redistribution','beneficiary','circular','foodDeserts','foodInsecurity',
-  'map1Retail','pkgGrocery','pkgSupermarkets','convenienceStores','pkgFastFood','pkgFarmersMarkets',
+  'map1Retail','pkgGrocery','pkgSupermarkets','convenienceStores','pkgFastFood','m2FastFoodATL','pkgFarmersMarkets','pkgHospitals','proGroceryTiered','proMartaRoutes','proPublicSchools','proHospitalsV2','proMartaBusRoutes','proMartaRail','proHealthRiskScore','proFoodDesertsLILA','proRails','proFreeways','proPorts',
   'healthyCoverage','map2Access',
   'map3Transport','martaRoutes','martaStops','transitRoutes',
   'map4Assistance','foodPantries','churchPantries',
@@ -1457,6 +1879,53 @@ function renderDock() {
     });
     dock.appendChild(btn);
   });
+  renderChapterBanner();
+}
+
+function renderChapterBanner() {
+  const banner   = document.getElementById('chapterBanner');
+  if (!banner) return;
+  if (mode !== 'city') {
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = 'flex';
+  const defs   = CITY_TABS;
+  const active = activeTabId();
+  const idx    = defs.findIndex(d => d.id === active);
+  const def    = idx >= 0 ? defs[idx] : defs[0];
+
+  const badge    = document.getElementById('chapterBadge');
+  const title    = document.getElementById('chapterTitle');
+  const subtitle = document.getElementById('chapterSubtitle');
+  const prev     = document.getElementById('chapterPrev');
+  const next     = document.getElementById('chapterNext');
+
+  // brief fade transition for narrative feel
+  banner.classList.add('fade');
+  setTimeout(() => {
+    if (def) {
+      if (badge)    badge.textContent    = `Ch. ${def.chapter || (idx + 1)}`;
+      if (title)    title.textContent    = def.label;
+      if (subtitle) subtitle.textContent = def.subtitle || '';
+    }
+    banner.classList.remove('fade');
+  }, 80);
+
+  if (prev) prev.disabled = idx <= 0;
+  if (next) next.disabled = idx >= defs.length - 1;
+}
+
+function jumpChapter(delta) {
+  if (mode !== 'city') return;
+  const defs   = CITY_TABS;
+  const idx    = defs.findIndex(d => d.id === activeTabId());
+  const target = defs[Math.max(0, Math.min(defs.length - 1, idx + delta))];
+  if (!target) return;
+  setActiveTabId(target.id);
+  setModeLayerSelection(target.layers);
+  applyVisibility();
+  renderDock();
 }
 
 function setModeButtons() {
@@ -1466,6 +1935,7 @@ function setModeButtons() {
 
 function switchToCity() {
   mode = 'city';
+  document.body.classList.remove('campus-mode');
   setModeButtons();
   applyActiveTabSelection();
   applyVisibility();
@@ -1476,6 +1946,7 @@ function switchToCity() {
 
 function switchToCampus() {
   mode = 'campus';
+  document.body.classList.add('campus-mode');
   setModeButtons();
   applyActiveTabSelection();
   applyVisibility();
@@ -1494,6 +1965,20 @@ if (elBtnCampus) elBtnCampus.addEventListener('click', switchToCampus);
 
 document.querySelectorAll('input[data-layer]').forEach(box => {
   box.addEventListener('change', () => { setActiveTabId(''); applyVisibility(); renderDock(); });
+});
+
+// Chapter navigation Prev/Next buttons
+const elChapterPrev = document.getElementById('chapterPrev');
+if (elChapterPrev) elChapterPrev.addEventListener('click', () => jumpChapter(-1));
+const elChapterNext = document.getElementById('chapterNext');
+if (elChapterNext) elChapterNext.addEventListener('click', () => jumpChapter(1));
+
+// Keyboard arrows for chapter navigation (left/right when not focused on input)
+document.addEventListener('keydown', e => {
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (e.key === 'ArrowRight') jumpChapter(1);
+  if (e.key === 'ArrowLeft')  jumpChapter(-1);
 });
 
 const elShowAll = document.getElementById('showAll');
