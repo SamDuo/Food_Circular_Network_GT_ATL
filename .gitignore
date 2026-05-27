@@ -45,6 +45,9 @@ _pdf_extracts/
 !resources/partner-logos/*.jpg
 !resources/partner-logos/*.png
 
+# Allow I2CE homepage editorial visuals (override *.png above)
+!assets/i2ce-homepage/**/*.png
+
 # Large asset bundles (too big for GitHub)
 resources/GT logo/
 !resources/GT logo/Primary Logos/Georgia Tech One Line/GTOneLine_White.svg
