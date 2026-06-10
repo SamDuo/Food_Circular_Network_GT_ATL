@@ -1,0 +1,15 @@
+{
+  "source": "derived from atl_demographics_acs + atl_health_places + atl_transit_access + atl_pro_food_deserts",
+  "method": "k-means k=5 on z-scored features ['income', 'density', 'vulnerability', 'transit', 'food_access']",
+  "seed": 4242,
+  "fetched_at": "2026-05-05T14:09:41Z",
+  "feature_count": 530,
+  "typology_distribution": {
+    "Industrial Logistics": 39,
+    "Affluent Suburban": 93,
+    "Disinvested Urban": 162,
+    "Emerging Mixed-use": 196,
+    "High-growth Core": 40
+  },
+  "script": "scripts/build_typology.py"
+}

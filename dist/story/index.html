@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Atlanta Food Story — A Scrollable Map of Access, Gaps, and the Network Filling Them</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=20260428c">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+</head>
+<body>
+    <article>
+
+        <!-- ═══ HERO ═══ -->
+        <header class="hero">
+            <p class="kicker">Atlanta Food Circular Network · Georgia Tech I2CE Lab</p>
+            <h1>The Shape of a Plate, In Atlanta</h1>
+            <p class="dek">A 10-minute drive across this city is the difference between a full grocery aisle and a gas-station shelf. Here is what 530 census tracts, 1.8 million people, and one map of fresh food look like, one chapter at a time.</p>
+            <p class="byline">Georgia Tech Circular Economy Lab — Quan Duong et al.</p>
+            <p class="cta-row">
+                <a href="../resources/Layers%20%26%20Packages/index.html" class="cta-link">Open the interactive dashboard →</a>
+            </p>
+        </header>
+
+        <!-- ═══ OPENING ═══ -->
+        <section class="prose">
+            <p class="lede">Half of Atlanta's neighborhoods have a Walmart or a Kroger within a mile. The other half have a Family Dollar and a McDonald's. The line between the two is not random — it tracks income, history, transit, and a half-century of supermarket retreat.</p>
+            <blockquote class="pullquote-text">Where you can buy a tomato should not be a privilege. In Atlanta, it often is.</blockquote>
+            <p>This story walks through five views of the city, in order. Each map is live — pan, zoom, and click any neighborhood to see its numbers. The narrative tells you what to look for; the map shows you why.</p>
+        </section>
+
+        <!-- ═══ PULL NUMBER 1 ═══ -->
+        <aside class="pullnumber">
+            <span class="pn-big">57 / 530</span>
+            <span class="pn-label">Census tracts that are<br>low-income <em>and</em> low-access (USDA LILA)</span>
+        </aside>
+
+        <!-- ═══ CHAPTER 1 ═══ -->
+        <section class="prose">
+            <p class="kicker chapter">Chapter One</p>
+            <h2>The Big Picture</h2>
+            <p>The first map shows Atlanta as a food system. Red polygons are USDA-designated food deserts — neighborhoods where the typical family is more than a mile from a full-service supermarket and earns below the regional median. Grocery stores, hospitals, schools, and MARTA bus routes overlay the same tracts.</p>
+            <p>Look at the red shape: it forms a crescent through southwest and west Atlanta — the same crescent civil-rights historians have called <em>the Black Belt of Atlanta</em>. Now look at where the green grocery dots cluster: north and east, almost mirror-imaged.</p>
+        </section>
+
+        <figure class="full" data-chapter="1">
+            <div class="map-container" data-map="big-picture">
+                <div class="map-loading">Loading the city…</div>
+            </div>
+            <div class="map-legend">
+                <span class="lg-item"><span class="lg-swatch" style="background:rgba(239,83,80,0.55)"></span>USDA food desert (LILA)</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:#4caf50;border-radius:50%"></span>Grocery store</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:#26a69a"></span>MARTA bus route</span>
+            </div>
+            <figcaption><strong>Fig. 1 —</strong> Food deserts (red) overlaid on Atlanta's grocery network and bus lines. The crescent of red on the western half of the city contains roughly 110,000 people. The interactive layer panel and full attribute popups live on the <a href="../resources/Layers%20%26%20Packages/index.html">main dashboard</a>.</figcaption>
+        </figure>
+
+        <section class="prose">
+            <p>The map answers a question that statistics alone cannot: <em>where</em>. A 16% food-desert rate is an abstraction; this crescent is a place. It is also the through-line of the next four chapters.</p>
+        </section>
+
+        <!-- ═══ CHAPTER 2 ═══ -->
+        <section class="prose">
+            <p class="kicker chapter">Chapter Two</p>
+            <h2>The Grocery Gap</h2>
+            <p>The USDA's working definition of "food access" in an urban area is one mile from a supermarket. Draw a one-mile circle around every supermarket and farmers market in metro Atlanta and you get the green halo below. Anything outside the green is, technically, a food desert candidate.</p>
+        </section>
+
+        <aside class="pullnumber">
+            <span class="pn-big">228 of 530</span>
+            <span class="pn-label">Tracts (43%) that fall <em>outside</em><br>the 1-mile fresh-food halo</span>
+        </aside>
+
+        <figure class="full" data-chapter="2">
+            <div class="map-container" data-map="grocery-gap">
+                <div class="map-loading">Loading…</div>
+            </div>
+            <div class="map-legend">
+                <span class="lg-item"><span class="lg-swatch" style="background:rgba(76,175,80,0.35)"></span>1-mile reach of a supermarket</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:#ab47bc;border-radius:50%"></span>Supermarket</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:#66bb6a;border-radius:50%"></span>Farmers market</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:#ef5350;border-radius:50%"></span>Fast food</span>
+            </div>
+            <figcaption><strong>Fig. 2 —</strong> Green = within a mile of a supermarket. White = outside. The negative space is the story: a clear hole in southwest Atlanta and a quieter one in southeast DeKalb. Fast food (red dots) fills a striking amount of that hole.</figcaption>
+        </figure>
+
+        <section class="prose">
+            <p>The Modified Retail Food Environment Index (mRFEI) measures the same imbalance numerically. It counts healthy retailers (supermarkets, farmers markets) as a fraction of all food retailers in a tract. A score below 10 is a "food swamp" — fast food and convenience stores dominate. The Atlanta region's <strong>average mRFEI is 38</strong>, and a sharper number tells the deeper story:</p>
+            <p class="stat-aside">
+                <span class="stat-num">30×</span>
+                <span class="stat-text">A non-LILA tract holds, on average, <strong>30 times more grocery stores</strong> than a LILA tract (0.60 vs 0.02 per tract). For supermarkets specifically, the ratio is 5×.</span>
+            </p>
+        </section>
+
+        <!-- ═══ CHAPTER 3 ═══ -->
+        <section class="prose">
+            <p class="kicker chapter">Chapter Three</p>
+            <h2>Neighborhoods Left Behind</h2>
+            <p>Distance to a grocery is one piece. Income is another. A composite "Food Access Gap Score" combines four factors — distance, mRFEI, vehicle access, and poverty — into a single 0-to-100 ramp. Darker red means a tighter gap.</p>
+            <p>This is the map that gets used in policy briefs. The dark-red tracts are where USDA food-desert status, low income, no-car households, and a missing supermarket all overlap. There are <strong>49 such tracts</strong> in the Severe or Critical band.</p>
+        </section>
+
+        <aside class="pullnumber">
+            <span class="pn-big">49</span>
+            <span class="pn-label">Tracts in the Severe or Critical<br>Food Access Gap band</span>
+        </aside>
+
+        <figure class="full" data-chapter="3">
+            <div class="map-container" data-map="left-behind">
+                <div class="map-loading">Loading…</div>
+            </div>
+            <div class="map-legend">
+                <span class="lg-item"><span class="lg-swatch" style="background:rgba(76,175,80,0.45)"></span>Adequate</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:rgba(255,193,7,0.45)"></span>Moderate</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:rgba(239,83,80,0.55)"></span>Severe</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:rgba(183,28,28,0.65)"></span>Critical</span>
+            </div>
+            <figcaption><strong>Fig. 3 —</strong> The Food Access Gap Score, ramped on the four-factor composite. Critical (deepest red) tracts cluster in West End, Bankhead, English Avenue, and parts of South DeKalb — the same neighborhoods that lost their last full-service supermarkets between 1995 and 2015.</figcaption>
+        </figure>
+
+        <section class="prose">
+            <p>It is tempting to call this an income story. It is partly one — the gap score correlates with poverty rate at <strong>r = 0.38</strong> and with median income at <strong>r = −0.34</strong>. But the data also surfaces a less obvious pattern.</p>
+            <blockquote class="pullquote-text">It's not the fast food. It's the convenience stores.</blockquote>
+            <p>The popular narrative says food deserts get filled with fast-food restaurants. The Atlanta data tells a more nuanced story: LILA tracts actually have <em>fewer</em> fast-food locations than non-LILA tracts (0.63 vs 1.00 per tract). What they have <strong>1.6× more of</strong> is corner convenience and dollar stores — the everyday substitutes that take a tract's mRFEI from "imbalanced" to "swamp."</p>
+            <p class="stat-aside">
+                <span class="stat-num">+4.4</span>
+                <span class="stat-text">In an OLS regression, every additional <strong>convenience or dollar store</strong> in a tract is associated with a 4.4-point increase in the Food Access Gap Score. Each additional supermarket is worth a 9.7-point <em>decrease</em> (n = 519, R² = 0.31).</span>
+            </p>
+        </section>
+
+        <!-- ═══ CHAPTER 4 ═══ -->
+        <section class="prose">
+            <p class="kicker chapter">Chapter Four</p>
+            <h2>The Last-Mile Problem</h2>
+            <p>Roughly <strong>100,000 people in Fulton and DeKalb live in households with no car</strong>. For them, "the nearest supermarket is 1.4 miles away" is not a one-way Uber trip — it's a 30-minute walk each way with bags, or a bus transfer that may add 45 minutes.</p>
+        </section>
+
+        <aside class="pullnumber">
+            <span class="pn-big">100,265</span>
+            <span class="pn-label">People in metro Atlanta living<br>in households with no vehicle</span>
+        </aside>
+
+        <figure class="full" data-chapter="4">
+            <div class="map-container" data-map="last-mile">
+                <div class="map-loading">Loading…</div>
+            </div>
+            <div class="map-legend">
+                <span class="lg-item"><span class="lg-swatch" style="background:rgba(150,20,180,0.45)"></span>% of households with no vehicle</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:#26a69a"></span>MARTA bus (391 routes)</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:linear-gradient(90deg,#e53935 0 25%,#fdd835 25% 50%,#1e88e5 50% 75%,#43a047 75% 100%)"></span>MARTA heavy rail (Red · Gold · Blue · Green)</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:rgba(239,83,80,0.7);border:1px solid #ef5350"></span>Food desert outline</span>
+            </div>
+            <figcaption><strong>Fig. 4 —</strong> Vehicle-access barrier (purple) overlaid on transit lines and food deserts. Notice the alignment: the deepest purple lines up with the western food-desert crescent. Where MARTA bus coverage thins (south Fulton, far east DeKalb), the problem compounds.</figcaption>
+        </figure>
+
+        <section class="prose">
+            <p>The transit story has a workaround that planners increasingly favor: MARTA Markets, mobile pantries, and corner-store-conversion grants. The transit map shows you where to focus those interventions — exactly the bus stops that pass through deep-red tracts.</p>
+            <p class="stat-aside">
+                <span class="stat-num">r = 0.54</span>
+                <span class="stat-text">% of households with no vehicle correlates with the CDC food-insecurity rate at <strong>r = 0.54</strong> — one of the strongest single predictors at the tract level. ANOVA across the five gap-label groups confirms the effect is highly significant (F = 11.6, p &lt; 10⁻⁸).</span>
+            </p>
+        </section>
+
+        <!-- ═══ CHAPTER 5 ═══ -->
+        <section class="prose">
+            <p class="kicker chapter">Chapter Five</p>
+            <h2>The Health Toll &amp; the Network Already Here</h2>
+            <p>Food access is not just an inconvenience. It bends a city's health curve. The CDC's PLACES dataset estimates <strong>tract-level food insecurity rate</strong> directly from the Behavioral Risk Factor Surveillance System. Overlay it with chronic-disease prevalence and the lines converge.</p>
+            <p>But Atlanta is not waiting for federal action. A parallel food network — pantries, faith-based distributors, urban farms, and restaurants like <a href="https://www.goodratl.com/" target="_blank" rel="noopener">Goodr</a> — has stitched itself across the same crescent. The pin map below shows where it lives.</p>
+        </section>
+
+        <aside class="pullnumber">
+            <span class="pn-big">39</span>
+            <span class="pn-label">Active pantries &amp; faith-based<br>distributors mapped in the crescent</span>
+        </aside>
+
+        <figure class="full" data-chapter="5">
+            <div class="map-container" data-map="safety-net">
+                <div class="map-loading">Loading…</div>
+            </div>
+            <div class="map-legend">
+                <span class="lg-item"><span class="lg-swatch" style="background:rgba(197,108,240,0.45)"></span>CDC food insecurity rate</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:#f4a261;border-radius:50%"></span>Food pantry</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:#9c27b0;border-radius:50%"></span>Church-based pantry</span>
+                <span class="lg-item"><span class="lg-swatch" style="background:#00d2ff;border-radius:50%"></span>Redistribution node</span>
+            </div>
+            <figcaption><strong>Fig. 5 —</strong> Food insecurity (purple choropleth) with the active safety-net network overlaid. The pantry pins concentrate in exactly the deepest-purple tracts. The system works — the question is whether it can scale to meet the 49-tract Severe/Critical demand.</figcaption>
+        </figure>
+
+        <!-- ═══ CHAPTER 5.5 — GT CAMPUS CALLOUT ═══ -->
+        <section class="prose">
+            <p class="kicker chapter">Interlude</p>
+            <h2>The map points to its authors.</h2>
+            <p>This work is published by Georgia Tech's Circular Economy Lab. So it would be dishonest to skip the obvious question: <em>what does the map say about the tract our office sits in?</em></p>
+            <div class="gt-callout" id="gtCallout">
+                <div class="gt-head">
+                    <span class="gt-badge">Census Tract 10.02 · "Georgia Tech"</span>
+                    <span class="gt-pill" id="gt-pill-band">Severe gap band</span>
+                </div>
+                <div class="gt-body">
+                    <div class="gt-stat"><span class="gt-num" id="gt-gap">65</span><span class="gt-lbl">Food Access Gap Score (out of 100)</span></div>
+                    <div class="gt-stat"><span class="gt-num" id="gt-mrfei">0</span><span class="gt-lbl">mRFEI — defined "food swamp"</span></div>
+                    <div class="gt-stat"><span class="gt-num" id="gt-novehicle">26.3%</span><span class="gt-lbl">Households with no vehicle</span></div>
+                    <div class="gt-stat"><span class="gt-num" id="gt-poverty">32.5%</span><span class="gt-lbl">Poverty rate</span></div>
+                    <div class="gt-stat"><span class="gt-num" id="gt-supermarket">0</span><span class="gt-lbl">Supermarkets within the tract</span></div>
+                    <div class="gt-stat"><span class="gt-num" id="gt-near">0.55 mi</span><span class="gt-lbl">To the nearest healthy retailer</span></div>
+                </div>
+            </div>
+            <p>The campus tract reads as <strong>"Severe"</strong> on the access ramp despite a vibrant student-services food economy and a free pantry on Tech Parkway. Why? Because the indicator measures retail food access — supermarkets, farmers markets, and grocery distance — not whether undergraduates can swipe into a dining hall. The tract has no supermarket, two convenience stores, one fast-food location, and roughly 1 in 4 households without a car. By the same metric the rest of this essay uses, our home tract is in the bottom decile of metro Atlanta.</p>
+            <p>That's a feature, not an embarrassment. The shape of the gap is the same in our backyard as it is in West End, Bankhead, or southwest College Park: a missing supermarket, an overrepresentation of corner stores, and a transit-dependent population. The remedies are also the same. We work on a campus food map; we live inside its data.</p>
+        </section>
+
+        <!-- ═══ CHAPTER 6 — BY THE NUMBERS ═══ -->
+        <section class="prose">
+            <p class="kicker chapter">Chapter Six</p>
+            <h2>By the Numbers</h2>
+            <p>The five maps above are visual evidence. The numbers below are statistical evidence — Pearson correlations, one-way ANOVA, Welch t-tests, and OLS regression run across all 530 tracts in the study area. We use the same dataset that powers the maps, so every coefficient ties back to a polygon you can click.</p>
+            <p>Three findings stand out:</p>
+
+            <ol class="finding-list">
+                <li>
+                    <strong>Food insecurity is a chronic-disease story.</strong>
+                    Tract-level food-insecurity rate (CDC PLACES) correlates with obesity at <code>r = 0.92</code> and with diabetes at <code>r = 0.81</code>. Translation: an obesity-rate map of Atlanta and a food-insecurity map of Atlanta look almost identical. The exposure precedes the disease — and the disease compounds the exposure.
+                </li>
+                <li>
+                    <strong>The Food Access Gap Score has many small drivers, not one big one.</strong>
+                    Poverty (<code>r = 0.38</code>), obesity (<code>r = 0.37</code>), convenience-store count (<code>r = 0.37</code>), and median income (<code>r = -0.34</code>) all sit within a tight band — meaning a one-variable explanation is wrong. Our OLS model with five predictors lands at <code>R² = 0.31</code>; doubling the predictor list (adding chronic-disease covariates) pushes it to <code>0.50+</code>.
+                </li>
+                <li>
+                    <strong>LILA status is a 1.5-σ shift on chronic disease.</strong>
+                    Welch t-tests with Cohen's <em>d</em> as effect size yield <em>d</em> = 1.55 for obesity, 1.35 for diabetes, and 1.14 for food insecurity. These are not statistical curiosities — they are some of the largest sociospatial effect sizes you will see in public-health data.
+                </li>
+            </ol>
+        </section>
+
+        <figure class="full" data-chapter="6" id="findings-figure">
+            <div class="findings-chart" id="lilaChart"></div>
+            <figcaption><strong>Fig. 6 —</strong> Mean values for LILA vs non-LILA tracts. Bars show the absolute mean; the dashed pair below each shows Cohen's <em>d</em> (standardized effect size). Anything past <em>d</em> = 0.8 is a "large" effect by Cohen's convention. <a href="../data/analysis_findings.json">View the full findings JSON →</a></figcaption>
+        </figure>
+
+        <section class="prose">
+            <p>The regression result is the most actionable. If a planner wants to predict where the next gap will open, the variables that matter are: <strong>convenience-store concentration</strong>, <strong>supermarket retreat</strong>, and <strong>vehicle access</strong>. Income and unemployment matter too, but they are downstream — they tell you <em>who</em> is affected, not <em>where</em> the next gap is forming.</p>
+            <p class="stat-aside">
+                <span class="stat-num">R² = 0.61</span>
+                <span class="stat-text">For predicting <strong>food insecurity</strong>, a six-variable OLS model (gap score + four POI counts + transit + income) explains 61% of variance across 519 tracts. The single biggest coefficient is % no-vehicle (β = +0.36 per percentage point).</span>
+            </p>
+        </section>
+
+        <!-- ═══ NAMED EXTREMES TABLE ═══ -->
+        <section class="prose">
+            <h2 class="sub">Where the gap is widest — and narrowest</h2>
+            <p>The map invites readers to look at the city in aggregate. The table gives the city its names back. The five widest gaps and the five narrowest, ranked.</p>
+        </section>
+
+        <figure class="full" data-chapter="6b" id="extremesFigure">
+            <div class="extremes-table" id="extremesTable">Loading neighborhood ranks…</div>
+            <figcaption><strong>Fig. 7 —</strong> Top and bottom five tracts on the Food Access Gap Score, with the closest-centroid neighborhood label, gap-band classification, and key contributing factors. Labels are derived from City of Atlanta Neighborhood Planning Unit centroids; "—" appears when a tract is far from any tracked neighborhood.</figcaption>
+        </figure>
+
+        <!-- ═══ CHAPTER 7 — WHERE YOU LIVE MATTERS ═══ -->
+        <section class="prose">
+            <p class="kicker chapter">Chapter Seven</p>
+            <h2>Where you live matters — beyond what you earn.</h2>
+            <p>The cleanest way to test "place vs. paycheck" is to do it directly. Fit a regression of food insecurity on income and poverty alone. Then add 40 neighborhood fixed-effects on top — one binary for every neighborhood with at least three tracts — and ask whether the model improves.</p>
+
+            <p class="stat-aside">
+                <span class="stat-num">+11.4 pts</span>
+                <span class="stat-text">Adding <strong>neighborhood fixed-effects</strong> raises explained variance in food insecurity from <code>R² = 0.69</code> to <code>R² = 0.80</code> — an 11.4-percentage-point gain over income and poverty alone (partial F = 7.06, p &lt; 0.001).</span>
+            </p>
+
+            <p>Translation: even after controlling for how much a household earns and how poor its block is, knowing <em>which neighborhood it sits in</em> still adds genuinely new predictive power. Place is not a proxy for pocketbook. It carries its own signal — built environment, retail history, transit catchment, redlining legacy.</p>
+
+            <p>The same conclusion shows up in spatial-statistics terms. Moran's I — the standard test for spatial clustering — is positive and highly significant for every key variable in this study:</p>
+
+            <ul class="morans-list" id="moransList"></ul>
+
+            <p>A Moran's I of 0.64 for food insecurity, in particular, is striking. It says food-insecure tracts are surrounded by other food-insecure tracts at a level far above chance. The condition spreads block by block, not house by house.</p>
+        </section>
+
+        <!-- ═══ TWIN TRACTS ═══ -->
+        <section class="prose">
+            <h2 class="sub">Two tracts, same income, different gap.</h2>
+            <p>The clearest demonstration that geography is more than economics: pairs of tracts with nearly identical median income but radically different access. The income band brackets each pair to ±$5,000.</p>
+        </section>
+
+        <figure class="full" data-chapter="7b" id="twinFigure">
+            <div class="twin-grid" id="twinGrid">Loading twin tracts…</div>
+            <figcaption><strong>Fig. 8 —</strong> Each pair shares an income band but diverges sharply on the Food Access Gap Score. The high-gap tract systematically has fewer supermarkets and more convenience stores — a pattern income alone cannot explain.</figcaption>
+        </figure>
+
+        <!-- ═══ MULTIVARIATE SMALL MULTIPLES ═══ -->
+        <section class="prose">
+            <h2 class="sub">Three lenses on the same crescent.</h2>
+            <p>The Food Access Gap Score is a composite. The three small maps below show its three biggest constituent layers, side by side, on the same projection. Read them left to right and the same neighborhoods light up — <strong>convenience-store density</strong> in the west, <strong>no-vehicle households</strong> in the southwest, <strong>poverty</strong> almost everywhere the others are lit. The Georgia Tech tract is marked on each panel for reference.</p>
+        </section>
+
+        <figure class="full" data-chapter="7c" id="smallMultFigure">
+            <div class="small-multiples" id="smallMultiples">Loading three-panel map…</div>
+            <figcaption><strong>Fig. 9 —</strong> Three predictors of the access gap, mapped at tract level on a shared projection. Highlighted tracts: 🟧 = Georgia Tech, 🔴 = top-three worst on Food Access Gap. The pattern is co-located — these are not independent stories layered on the same city; they are three measurements of the same city.</figcaption>
+        </figure>
+
+        <!-- ═══ CLOSING ═══ -->
+        <section class="prose closing">
+            <h2>What this map is for</h2>
+            <p>The five chapters above are summaries. The interactive dashboard behind them carries the full layer set — 30+ GeoJSON layers, tract-level popups, and a real-time surplus-rescue routing engine for Georgia Tech's campus dining.</p>
+            <p>If you're a city planner, focus on Chapter Three. If you're a transit advocate, Chapter Four. If you're running a pantry or a food-recovery operation, Chapter Five and our <a href="../resources/Layers%20%26%20Packages/surplus-map.html">live surplus map</a> are built for you.</p>
+            <p>If you're a Georgia Tech researcher, every dataset on this page is downloadable from the project repository. We update LeanPath surplus data weekly and CDC PLACES annually.</p>
+            <p class="cta-row">
+                <a href="../resources/Layers%20%26%20Packages/index.html" class="cta-link primary">Explore the interactive dashboard →</a>
+                <a href="../resources/Layers%20%26%20Packages/surplus-map.html" class="cta-link">Open the live surplus map →</a>
+            </p>
+        </section>
+
+        <footer>
+            <p><strong>Data sources:</strong> USDA Food Access Research Atlas (LILA tracts), CDC PLACES 2024 (Local Data for Better Health), American Community Survey 2018-2022 5-yr (vehicle access, poverty, demographics), Atlanta Regional Commission (MARTA routes), Esri ArcGIS Online (grocery + fast-food point data), Atlanta Community Food Bank &amp; Goodr (pantry network).</p>
+            <p><strong>Methodology:</strong> All correlations and regressions in Chapter Six were computed with <code>scipy.stats</code> over the 530 census tracts in Fulton + DeKalb counties. ANOVA partitions tracts into the five gap-label groups; Welch t-tests compare LILA vs non-LILA tracts on each predictor; OLS uses <code>numpy.linalg.lstsq</code>. Reproduce by running <code>python scripts/spatial_analysis.py</code> — output lands in <code>data/analysis_findings.json</code> and <code>data/analysis_summary.md</code>.</p>
+            <p>This page is part of the <strong>Atlanta Food Circular Network (AFCN)</strong> — a Georgia Tech I2CE Lab platform combining citywide food access mapping with real-time campus surplus rescue. The dashboards are open-source and dataset attribution is preserved on every popup.</p>
+            <p>Built with Mapbox GL JS v3, hand-rolled SVG charts, no frameworks. Source: <code>./story/</code> in the project repository.</p>
+        </footer>
+
+    </article>
+
+    <div id="tooltip"></div>
+
+    <script src="script.js?v=20260428c"></script>
+</body>
+</html>

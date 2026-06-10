@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AFCN Workshop — Geolocation of Participating Organizations (April 15, 2026)</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: "Inter", system-ui, sans-serif; background: #1a1f25; color: #d2dadf; }
+  #header { padding: 18px 28px 14px; background: #2a363c; border-bottom: 1px solid #393f44; }
+  #header h1 { font-family: "Source Serif 4", Georgia, serif; font-size: 22px; font-weight: 700; letter-spacing: -0.2px; color: #d2dadf; }
+  #header .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: #7d9caf; margin-bottom: 4px; }
+  #header .meta { font-size: 12px; color: #a4b1bc; margin-top: 4px; }
+  #stage { display: grid; grid-template-columns: 1fr 360px; height: calc(100vh - 80px); }
+  #map { background: #1a1f25; }
+  #sidebar { background: #2a363c; border-left: 1px solid #393f44; overflow-y: auto; padding: 18px 22px; font-size: 13px; }
+  #sidebar h2 { font-family: "Source Serif 4", Georgia, serif; font-size: 16px; margin-bottom: 12px; color: #d2dadf; }
+  .org-row { padding: 9px 0; border-bottom: 1px solid #393f44; cursor: pointer; transition: background .15s; }
+  .org-row:hover { background: rgba(125,156,175,0.08); }
+  .org-row.active { background: rgba(28,92,132,0.20); border-left: 3px solid #7d9caf; padding-left: 8px; margin-left: -8px; }
+  .org-name { font-weight: 600; color: #d2dadf; }
+  .org-meta { font-size: 11px; color: #a4b1bc; margin-top: 2px; }
+  .pin-label { background: #2a363c; border: 1px solid #7d9caf; color: #d2dadf; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+  .leaflet-container { background: #1a1f25 !important; }
+  .leaflet-tile-pane { filter: invert(0.92) hue-rotate(180deg) brightness(0.85); }
+  .footer { padding: 8px 28px; background: #2a363c; border-top: 1px solid #393f44; font-size: 10.5px; color: #a4b1bc; text-align: right; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="eyebrow">AFCN · Workshop Geolocation</div>
+  <h1>Atlanta Food Network — 14 Participating Organizations</h1>
+  <div class="meta">Stakeholder Workshop · April 15, 2026 · Georgia Tech I2CE Lab · ARCH 4017</div>
+</div>
+
+<div id="stage">
+  <div id="map"></div>
+  <aside id="sidebar">
+    <h2>Click an org to fly to its location</h2>
+    <div id="orgList"></div>
+  </aside>
+</div>
+
+<div class="footer">
+  Coordinates approximate to public-facing service address per org. Coverage area self-reported at workshop. AFCN · I2CE Lab April 2026.
+</div>
+
+<script>
+  const map = L.map('map', { zoomControl: true }).setView([33.78, -84.40], 11);
+
+  // CartoDB Dark Matter — neutral dark basemap that pairs with the Farbton palette
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap, &copy; CARTO',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // Inline GeoJSON — keeps this file standalone (works without a server)
+  const FC = {"type": "FeatureCollection", "comment": "Geolocations of the 14 partner organizations that participated in the AFCN Participatory Workshop on Information Sharing for Food Rescue & Redistribution (April 15, 2026). Coordinates anchored to each org's primary public-facing service address from the I2CE Lab participant matrix (03_12_2026). Coverage_area = workshop-self-reported service area.", "features": [{"type": "Feature", "properties": {"org_id": 1, "name": "Atlanta Community Food Bank", "short": "ACFB", "rep": "Michele Chivore", "role": "Core pilot partner; baseline metrics steward", "coverage": "Citywide / metro", "color": "#1c5c84"}, "geometry": {"type": "Point", "coordinates": [-84.4549, 33.7888]}}, {"type": "Feature", "properties": {"org_id": 2, "name": "Atlanta Braves Foundation", "short": "Braves", "rep": "Cameron Wilson", "role": "Strategic stakeholder; place-based investment", "coverage": "North + Citywide", "color": "#a4b1bc"}, "geometry": {"type": "Point", "coordinates": [-84.4677, 33.8908]}}, {"type": "Feature", "properties": {"org_id": 3, "name": "City of Atlanta (multi-office)", "short": "CityATL", "rep": "Khadejah Scott-Price; Jennifer Thompson (S&R); Christina Chu (Intl)", "role": "Core city sponsor; policy, funding, resilience", "coverage": "Citywide", "color": "#5b7282"}, "geometry": {"type": "Point", "coordinates": [-84.3902, 33.749]}}, {"type": "Feature", "properties": {"org_id": 4, "name": "Community Foundation for Greater Atlanta", "short": "CommFdn", "rep": "Amy Clarke", "role": "Strategic stakeholder; funding and convening", "coverage": "Metro region", "color": "#5b7282"}, "geometry": {"type": "Point", "coordinates": [-84.3863, 33.7677]}}, {"type": "Feature", "properties": {"org_id": 5, "name": "Concrete Jungle", "short": "ConcreteJungle", "rep": "Virginia Ruiz Lawley & Miriam Song", "role": "Core pilot partner; fresh produce / volunteer coordination", "coverage": "Westside + Eastside", "color": "#7a958c"}, "geometry": {"type": "Point", "coordinates": [-84.4495, 33.6804]}}, {"type": "Feature", "properties": {"org_id": 6, "name": "Goodr", "short": "Goodr", "rep": "Grayson Stuart", "role": "Core pilot partner; recovery infrastructure & policy voice", "coverage": "Citywide (commercial)", "color": "#3a4f5e"}, "geometry": {"type": "Point", "coordinates": [-84.4146, 33.7895]}}, {"type": "Feature", "properties": {"org_id": 7, "name": "The Grocery Spot ATL", "short": "GrocerySpot", "rep": "Heavonly Boykin", "role": "Secondary participant; volunteer demand & access points", "coverage": "Westside", "color": "#7d9caf"}, "geometry": {"type": "Point", "coordinates": [-84.4296, 33.7813]}}, {"type": "Feature", "properties": {"org_id": 8, "name": "Metro Atlanta Food Consortium", "short": "MetroConsort", "rep": "Enid Draluck", "role": "Secondary participant; coalition alignment", "coverage": "Metro region", "color": "#1c5c84"}, "geometry": {"type": "Point", "coordinates": [-84.388, 33.77]}}, {"type": "Feature", "properties": {"org_id": 9, "name": "North Fulton Community Charities", "short": "NFCC", "rep": "Sylvia Cardona & Riho Tokito", "role": "Core pilot partner; inventory & service demand", "coverage": "North Fulton (Roswell)", "color": "#7d9caf"}, "geometry": {"type": "Point", "coordinates": [-84.3567, 34.0532]}}, {"type": "Feature", "properties": {"org_id": 10, "name": "Nourish + Bloom", "short": "NourishBloom", "rep": "Jilea Hemmings", "role": "Secondary participant; private-sector integration & APIs", "coverage": "Cascade Rd", "color": "#7a958c"}, "geometry": {"type": "Point", "coordinates": [-84.4736, 33.7244]}}, {"type": "Feature", "properties": {"org_id": 11, "name": "Open Hand Atlanta", "short": "OpenHand", "rep": "Mike Gerber", "role": "Secondary participant; waste & meal operations", "coverage": "Citywide (delivery)", "color": "#7d9caf"}, "geometry": {"type": "Point", "coordinates": [-84.4146, 33.7858]}}, {"type": "Feature", "properties": {"org_id": 12, "name": "Retaaza", "short": "Retazza", "rep": "Moriah Freed & Kashi Sehgal", "role": "Core pilot partner; farm surplus & partner-mapping lens", "coverage": "Piedmont Rd (Buckhead-area HQ)", "color": "#6f8688"}, "geometry": {"type": "Point", "coordinates": [-84.3729, 33.8366]}}, {"type": "Feature", "properties": {"org_id": 13, "name": "Second Helpings Atlanta", "short": "SecondHelpings", "rep": "Paul Clements", "role": "Core pilot partner; food-flow logistics data lead", "coverage": "Citywide", "color": "#7a958c"}, "geometry": {"type": "Point", "coordinates": [-84.4128, 33.778]}}, {"type": "Feature", "properties": {"org_id": 14, "name": "Umi Feeds", "short": "Umi", "rep": "Erica Clahar", "role": "Secondary participant; food-as-medicine perspective", "coverage": "Loganville HQ / metro ops", "color": "#1c5c84"}, "geometry": {"type": "Point", "coordinates": [-83.9035, 33.8389]}}, {"type": "Feature", "properties": {"org_id": 99, "name": "Georgia Tech I2CE Lab (host)", "short": "GT", "rep": "Quan Duong + faculty PI", "role": "Host - research, dashboard, framework", "coverage": "GT Campus", "color": "#c62828"}, "geometry": {"type": "Point", "coordinates": [-84.3963, 33.7756]}}]};
+
+  const orgList = document.getElementById('orgList');
+  const markers = {};
+
+  FC.features.forEach(f => {
+    const p = f.properties;
+    const [lng, lat] = f.geometry.coordinates;
+
+    const marker = L.circleMarker([lat, lng], {
+      radius: p.org_id === 99 ? 10 : 8,
+      fillColor: p.color,
+      color: '#ffffff',
+      weight: 1.4,
+      opacity: 1,
+      fillOpacity: 0.95,
+    }).addTo(map);
+
+    marker.bindPopup(`
+      <div style="font-family:Inter,sans-serif;font-size:12px;color:#1a1f25;line-height:1.5">
+        <strong style="font-size:13px">${p.name}</strong><br>
+        <span style="color:#1c5c84">${p.rep || ''}</span><br>
+        <span style="color:#5b7282">${p.role}</span><br>
+        <em style="color:#7d9caf">Coverage: ${p.coverage}</em>
+      </div>
+    `);
+
+    markers[p.org_id] = { marker, lat, lng };
+
+    const row = document.createElement('div');
+    row.className = 'org-row';
+    row.dataset.orgId = p.org_id;
+    row.innerHTML = `
+      <div class="org-name">${p.org_id === 99 ? '★ ' : ''}${p.name}</div>
+      <div class="org-meta" style="color:#7d9caf">${p.rep || ''}</div>
+      <div class="org-meta">${p.role} · ${p.coverage}</div>
+    `;
+    row.addEventListener('click', () => {
+      document.querySelectorAll('.org-row').forEach(r => r.classList.remove('active'));
+      row.classList.add('active');
+      map.flyTo([lat, lng], 14, { duration: 0.7 });
+      marker.openPopup();
+    });
+    orgList.appendChild(row);
+  });
+
+  // Auto-fit to all
+  const group = L.featureGroup(Object.values(markers).map(m => m.marker));
+  map.fitBounds(group.getBounds().pad(0.18));
+</script>
+</body>
+</html>

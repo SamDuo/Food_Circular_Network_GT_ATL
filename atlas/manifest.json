@@ -1,0 +1,121 @@
+{
+  "_comment": "AFCN Atlas data registry — single source of truth for the 42-cell matrix. Each entry maps a (category, layer) cell to a GeoJSON file in /geojson plus a render hint (field, mode, lens). The atlas page renders this as a scrollable left rail; clicking L or R on any card loads the layer into the corresponding map panel.",
+  "categories": [
+    {
+      "id": "demographics",
+      "label": "Demographics",
+      "subtitle": "Who lives in Atlanta · ACS 2022",
+      "layers": [
+        { "label": "Median household income",        "lens": "equity",        "layer": "atl_demographics_acs", "field": "median_income" },
+        { "label": "Population density",             "lens": "density",       "layer": "atl_demographics_acs", "field": "pop_density" },
+        { "label": "% Black population",             "lens": "base",          "layer": "atl_demographics_acs", "field": "pct_black" },
+        { "label": "% White population",             "lens": "base",          "layer": "atl_demographics_acs", "field": "pct_white" },
+        { "label": "% Hispanic / Latino",            "lens": "base",          "layer": "atl_demographics_acs", "field": "pct_hispanic" },
+        { "label": "% Bachelor's degree or higher",  "lens": "equity",        "layer": "atl_demographics_acs", "field": "pct_bachelor_or_higher" },
+        { "label": "% Unemployed",                   "lens": "equity",        "layer": "atl_demographics_acs", "field": "pct_unemployed" },
+        { "label": "% Public-transit commute",       "lens": "flow",          "layer": "atl_demographics_acs", "field": "pct_public_transit" },
+        { "label": "% Broadband at home",            "lens": "equity",        "layer": "atl_demographics_acs", "field": "pct_broadband" },
+        { "label": "% No internet access",           "lens": "equity",        "layer": "atl_demographics_acs", "field": "pct_no_internet" }
+      ]
+    },
+    {
+      "id": "food",
+      "label": "Food System",
+      "subtitle": "9 categories · 802 mapped orgs",
+      "layers": [
+        { "label": "All food orgs (AFCN directory)", "lens": "base",          "layer": "afcn_directory" },
+        { "label": "Grocery stores",                 "lens": "base",          "layer": "pkg_atlanta_grocery_stores" },
+        { "label": "Grocery density (heatmap)",      "lens": "density",       "layer": "pkg_atlanta_grocery_stores", "mode": "heatmap" },
+        { "label": "Fast food",                      "lens": "base",          "layer": "pkg_atlanta_fast_food_restaurants" },
+        { "label": "Fast-food density (heatmap)",    "lens": "density",       "layer": "m2_atl_fastfood_all", "mode": "heatmap" },
+        { "label": "Convenience stores",             "lens": "base",          "layer": "convenience_stores_atl" },
+        { "label": "Food pantries",                  "lens": "base",          "layer": "all_food_pantries_atl" },
+        { "label": "Food deserts (LILA tracts)",     "lens": "equity",        "layer": "atl_pro_food_deserts" },
+        { "label": "Farms & community gardens",      "lens": "base",          "layer": "pkg_gardens_farms_and_orchards_atlanta" },
+        { "label": "Farmers markets",                "lens": "base",          "layer": "pkg_atlanta_metro_area_farmers_markets" },
+        { "label": "Food processors",                "lens": "base",          "layer": "pkg_food_processing_facilities_in_the_southeast" },
+        { "label": "Food recovery sources",          "lens": "flow",          "layer": "food_recovery_sources" },
+        { "label": "Redistribution nodes",           "lens": "flow",          "layer": "redistribution_nodes" }
+      ]
+    },
+    {
+      "id": "transportation",
+      "label": "Transportation",
+      "subtitle": "Mobility infrastructure · MARTA + roads + bike",
+      "layers": [
+        { "label": "MARTA rail",                     "lens": "base",          "layer": "atl_pro_rails" },
+        { "label": "MARTA bus routes",               "lens": "base",          "layer": "atl_pro_marta_bus_routes" },
+        { "label": "MARTA stops",                    "lens": "base",          "layer": "marta_stops_atl" },
+        { "label": "Transit accessibility score",    "lens": "accessibility", "layer": "atl_transit_access", "field": "access_score" },
+        { "label": "Freeways (Interstates / SR)",    "lens": "base",          "layer": "atl_pro_freeways" },
+        { "label": "Street centerlines",             "lens": "base",          "layer": "street_centerlines" },
+        { "label": "Sidewalks",                      "lens": "base",          "layer": "sidewalks" },
+        { "label": "Bike infrastructure",            "lens": "base",          "layer": "atl_bike_infrastructure" },
+        { "label": "Airports (Hartsfield-Jackson +)","lens": "base",          "layer": "atl_airports" }
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "label": "Infrastructure",
+      "subtitle": "Utilities · waste · environment",
+      "layers": [
+        { "label": "Electric transmission lines",    "lens": "base",          "layer": "atl_electric_transmission" },
+        { "label": "Recycling bins",                 "lens": "base",          "layer": "recycling_trash_cans" },
+        { "label": "Compost locations (Fulton)",     "lens": "base",          "layer": "compost_locations" },
+        { "label": "Trash / recycling (campus)",     "lens": "base",          "layer": "trash_recycling_indoor" }
+      ]
+    },
+    {
+      "id": "health",
+      "label": "Health",
+      "subtitle": "CDC PLACES 2024 · 13 measures × 528 tracts",
+      "layers": [
+        { "label": "Adult obesity prevalence",       "lens": "equity",        "layer": "atl_health_places", "field": "OBESITY_CrudePrev" },
+        { "label": "Diabetes prevalence",            "lens": "equity",        "layer": "atl_health_places", "field": "DIABETES_CrudePrev" },
+        { "label": "Diagnosed depression",           "lens": "equity",        "layer": "atl_health_places", "field": "DEPRESSION_CrudePrev" },
+        { "label": "Poor mental health (≥14 d/mo)",  "lens": "equity",        "layer": "atl_health_places", "field": "MHLTH_CrudePrev" },
+        { "label": "Poor physical health (≥14 d/mo)","lens": "equity",        "layer": "atl_health_places", "field": "PHLTH_CrudePrev" },
+        { "label": "Lack of health insurance",       "lens": "equity",        "layer": "atl_health_places", "field": "ACCESS2_CrudePrev" },
+        { "label": "Coronary heart disease",         "lens": "equity",        "layer": "atl_health_places", "field": "CHD_CrudePrev" },
+        { "label": "High blood pressure",            "lens": "equity",        "layer": "atl_health_places", "field": "BPHIGH_CrudePrev" },
+        { "label": "Hospitals & clinics",            "lens": "base",          "layer": "pkg_hospitals_and_health_clinics_atlanta" },
+        { "label": "Food insecurity prevalence",     "lens": "equity",        "layer": "atl_health_places", "field": "FOODINSECU_CrudePrev" },
+        { "label": "Composite health-risk score",    "lens": "equity",        "layer": "atl_pro_health_risk_score", "field": "HMM_Score" },
+        { "label": "Bivariate · obesity × LILA",     "lens": "synthesis",     "layer": "bivariate_obesity_lila",  "field": "bivar_class" }
+      ]
+    },
+    {
+      "id": "landuse",
+      "label": "Land Use",
+      "subtitle": "City of Atlanta DPCD zoning + districts",
+      "layers": [
+        { "label": "Zoning class (categorical)",     "lens": "base",          "layer": "atl_zoning", "field": "ZONECLASS" },
+        { "label": "Zoning overlays",                "lens": "base",          "layer": "atl_zoning_overlay" },
+        { "label": "Historic districts",             "lens": "base",          "layer": "atl_historic_districts" },
+        { "label": "Neighborhood plans",             "lens": "base",          "layer": "atl_neighborhood_plans" },
+        { "label": "BeltLine corridor",              "lens": "base",          "layer": "atl_beltline_corridor" },
+        { "label": "Buildings (footprint density)",  "lens": "density",       "layer": "buildings" }
+      ]
+    },
+    {
+      "id": "social",
+      "label": "Social Systems",
+      "subtitle": "Education · religion · digital · networks",
+      "layers": [
+        { "label": "K-12 public schools",            "lens": "base",          "layer": "atl_pro_public_schools" },
+        { "label": "Colleges & universities",        "lens": "base",          "layer": "atl_universities" },
+        { "label": "Religious institutions",         "lens": "base",          "layer": "pkg_religious_institutions_metro_atlanta" },
+        { "label": "AFCN advocacy network",          "lens": "flow",          "layer": "afcn_directory" },
+        { "label": "Community-based orgs",           "lens": "base",          "layer": "pkg_community_based_organizations_atlanta" }
+      ]
+    },
+    {
+      "id": "typology",
+      "label": "Typology — Synthesis",
+      "subtitle": "k-means classifier · 5 urban typologies · capstone",
+      "layers": [
+        { "label": "Tract-level typology",           "lens": "synthesis",     "layer": "atl_typology_classified", "field": "typology_label" }
+      ]
+    }
+  ]
+}

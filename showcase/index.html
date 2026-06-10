@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AFCN Showcase — Atlanta Food Circular Network</title>
+
+  <!-- Esri ArcGIS Maps SDK 4.30 — light theme to match editorial cream design -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.30/"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="showcase.css?v=20260507a">
+</head>
+<body>
+
+  <!-- Two synced map panels -->
+  <main id="stage">
+    <section class="panel" id="leftPanel">
+      <div class="panel-label">
+        <span class="panel-label-eyebrow">LEFT</span>
+        <span class="panel-label-title" id="leftTitle">—</span>
+      </div>
+      <div class="map-container" id="leftMap"></div>
+      <div class="panel-legend legend-hidden" id="leftLegend"></div>
+    </section>
+
+    <section class="panel" id="rightPanel">
+      <div class="panel-label">
+        <span class="panel-label-eyebrow">RIGHT</span>
+        <span class="panel-label-title" id="rightTitle">—</span>
+      </div>
+      <div class="map-container" id="rightMap"></div>
+      <div class="panel-legend legend-hidden" id="rightLegend"></div>
+    </section>
+  </main>
+
+  <!-- Header bar — title + scene name + step counter -->
+  <header id="topbar">
+    <div id="brand">
+      <img src="../resources/GT logo/Primary Logos/Georgia Tech One Line/GTOneLine_RGB.svg" alt="Georgia Tech" id="gtLogo">
+      <div id="brandText">
+        <div id="brandTitle">Atlanta Food Circular Network</div>
+        <div id="brandSubtitle">Georgia Tech I2CE Lab · Final Showcase</div>
+      </div>
+    </div>
+    <nav id="showcaseNav">
+      <a href="../resources/Layers%20%26%20Packages/index.html" class="navLink" title="Map View dashboard">Map View</a>
+      <a href="../atlas/index.html#grid" class="navLink" title="Atlas — Matrix Grid">Atlas</a>
+      <a href="../network/index.html"    class="navLink" title="Network view">Network</a>
+    </nav>
+    <div id="sceneMeta">
+      <div id="sceneStep"><span id="sceneIdx">1</span> <span class="of">/</span> <span id="sceneTotal">8</span></div>
+      <div id="sceneTitle">Loading scene…</div>
+    </div>
+  </header>
+
+  <!-- Caption strip — the analytical takeaway for this scene -->
+  <aside id="captionBar">
+    <p id="captionText">—</p>
+    <div id="captionMeta">
+      <span id="captionLayers"></span>
+      <span id="captionInsight"></span>
+    </div>
+  </aside>
+
+  <!-- Presenter controls — hidden by default, M to toggle -->
+  <nav id="presenter" class="presenter-hidden">
+    <button id="prevBtn"      title="Previous scene (←)"     >‹</button>
+    <button id="playBtn"      title="Play / Pause (Space)"    >▶</button>
+    <button id="nextBtn"      title="Next scene (→)"          >›</button>
+    <span class="presenter-divider"></span>
+    <button id="syncBtn"      title="Toggle pan/zoom sync (S)" class="active">SYNC</button>
+    <button id="fullBtn"      title="Toggle fullscreen (F)"    >⛶</button>
+    <button id="hideBtn"      title="Hide controls (M)"        >×</button>
+  </nav>
+
+  <!-- Help overlay — H toggles -->
+  <div id="helpOverlay" class="help-hidden">
+    <div class="help-card">
+      <h2>Keyboard shortcuts</h2>
+      <dl>
+        <dt>← / →</dt>     <dd>Previous / Next scene</dd>
+        <dt>Space</dt>     <dd>Play / Pause autoplay</dd>
+        <dt>S</dt>         <dd>Toggle pan/zoom sync between panels</dd>
+        <dt>M</dt>         <dd>Show / Hide presenter bar</dd>
+        <dt>F</dt>         <dd>Fullscreen</dd>
+        <dt>H</dt>         <dd>Show / Hide this help</dd>
+        <dt>Esc</dt>       <dd>Exit fullscreen / hide help</dd>
+        <dt>1–9</dt>       <dd>Jump to scene N</dd>
+      </dl>
+      <p class="help-foot">Press <kbd>H</kbd> any time to bring this back.</p>
+    </div>
+  </div>
+
+  <!-- Progress indicator at bottom -->
+  <div id="progress"><div id="progressFill"></div></div>
+
+  <script src="showcase.js?v=20260507a"></script>
+</body>
+</html>

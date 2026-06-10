@@ -1,0 +1,15 @@
+{
+  "source": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/ArcGIS/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0",
+  "bbox": {
+    "xmin": -84.75,
+    "ymin": 33.45,
+    "xmax": -84.0,
+    "ymax": 34.1,
+    "spatialReference": {
+      "wkid": 4326
+    }
+  },
+  "fetched_at": "2026-05-05T14:02:12Z",
+  "feature_count": 559,
+  "script": "scripts/fetch_hifld_utilities.py"
+}

@@ -1,0 +1,8 @@
+{
+  "source": "OpenStreetMap (Overpass API)",
+  "bbox": "33.45,-84.75,34.10,-84.00",
+  "fetched_at": "2026-05-05T14:03:10Z",
+  "feature_count": 57,
+  "size_bytes": 49569,
+  "script": "scripts/fetch_overpass.py"
+}

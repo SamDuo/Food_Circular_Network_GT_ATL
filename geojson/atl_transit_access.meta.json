@@ -1,0 +1,7 @@
+{
+  "source": "derived from marta_stops_atl.geojson + census_tracts_tiger.geojson",
+  "method": "haversine buffer; near=800m, far=1600m",
+  "fetched_at": "2026-05-05T14:02:12Z",
+  "feature_count": 530,
+  "script": "scripts/compute_transit_access.py"
+}
