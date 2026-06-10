@@ -1,0 +1,108 @@
+{
+  "_comment": "Showcase scene script. Each scene defines what the LEFT and RIGHT panels show, plus a caption that's the analytical takeaway. Layers reference GeoJSON files in geojson/ relative to the project root.",
+  "_camera_default": { "center": [-84.39, 33.749], "zoom": 11 },
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "The atlanta food system, in two lenses",
+      "caption": "",
+      "left":  { "title": "All food orgs (point distribution)",            "layers": ["afcn_directory"] },
+      "right": { "title": "Food deserts (LILA tracts)",                    "layers": ["atl_pro_food_deserts", "census_tracts_tiger"] },
+      "camera": { "center": [-84.39, 33.749], "zoom": 11 },
+      "insight": "802 orgs · 530 tracts · LILA = low-income / low-access",
+      "duration_sec": 30
+    },
+    {
+      "id": "demographics-equity",
+      "title": "Where you live decides what you eat",
+      "caption": "North Atlanta concentrates wealth, education, and grocery access. South & West Atlanta carries the opposite. The income gradient (left) maps cleanly onto the food-desert gradient (right) — segregation patterns from redlining still drive food access today.",
+      "left":  { "title": "Median household income",                       "layers": ["atl_demographics_acs"], "field": "median_income" },
+      "right": { "title": "Food desert classification",                    "layers": ["atl_pro_food_deserts"] },
+      "camera": { "center": [-84.39, 33.749], "zoom": 11 },
+      "insight": "ACS 2022 · USDA ERS LILA criteria",
+      "duration_sec": 35
+    },
+    {
+      "id": "food-density",
+      "title": "Two grocery atlantas",
+      "caption": "Grocery retail clusters in Buckhead and Midtown. Convenience stores and fast-food chains fill the void in South-side neighborhoods. The same surface, two food economies.",
+      "left":  { "title": "Grocery store density",                         "layers": ["pkg_atlanta_grocery_stores"], "mode": "heatmap" },
+      "right": { "title": "Fast food + convenience density",               "layers": ["m2_atl_fastfood_all"],         "mode": "heatmap" },
+      "camera": { "center": [-84.39, 33.749], "zoom": 11 },
+      "insight": "296 grocery · 600+ fast-food · MRFEI ratio",
+      "duration_sec": 30
+    },
+    {
+      "id": "transit-access",
+      "title": "Transit-served vs car-dependent",
+      "caption": "MARTA rail (left) is mostly North-South. Bus coverage exists but is infrequent, and roughly half of South Atlanta tracts sit beyond a 30-minute transit ride to a grocery store (right).",
+      "left":  { "title": "MARTA rail + bus network",                      "layers": ["atl_pro_rails", "atl_pro_marta_bus_routes", "marta_stops_atl"] },
+      "right": { "title": "Transit accessibility (stops within 800 m)",    "layers": ["atl_transit_access"], "field": "access_score" },
+      "camera": { "center": [-84.39, 33.749], "zoom": 11 },
+      "insight": "MARTA GTFS · OpenTripPlanner isochrones",
+      "duration_sec": 35
+    },
+    {
+      "id": "health-overlay",
+      "title": "The body keeps the score",
+      "caption": "Obesity prevalence (left, CDC PLACES) shadows lived food insecurity (right, CDC PLACES). Both indicators follow the same north-rich / south-poor gradient — the structural USDA food-desert flag is one explanation, but obesity and food insecurity track even tracts that LILA doesn't formally flag.",
+      "left":  { "title": "Obesity prevalence by tract",                   "layers": ["atl_health_places"], "field": "OBESITY_CrudePrev" },
+      "_left_field_doc": "OBESITY_CrudePrev = % adult obesity (BMI≥30), CDC PLACES 2024",
+      "right": { "title": "Food insecurity prevalence",                    "layers": ["atl_health_places"], "field": "FOODINSECU_CrudePrev" },
+      "_right_field_doc": "FOODINSECU_CrudePrev = % food-insecure adults, CDC PLACES 2024",
+      "camera": { "center": [-84.39, 33.749], "zoom": 11 },
+      "insight": "CDC PLACES 2024 · 528 tracts",
+      "duration_sec": 30
+    },
+    {
+      "id": "bivariate-obesity-lila",
+      "title": "Where the body and the map agree",
+      "caption": "Bivariate choropleth — obesity prevalence (3 tertiles) × USDA LILA-strictness (3 classes). Tracts in the deep-clay corner are simultaneously food-deserts AND high-obesity — the cluster where AFCN intervention should focus first. Method: Stevens (2015), 'Bivariate Choropleth Maps'. 528 tracts joined on GEOID; 20 fall into the high/strict cell.",
+      "left":  { "title": "Bivariate · obesity × LILA",                    "layers": ["bivariate_obesity_lila"], "field": "bivar_class" },
+      "right": { "title": "AFCN orgs on the bivariate base",               "layers": ["bivariate_obesity_lila", "afcn_directory"], "field": "bivar_class" },
+      "camera": { "center": [-84.39, 33.749], "zoom": 11 },
+      "insight": "528 tracts · 20 high-obesity × strict-LILA · capstone method",
+      "duration_sec": 35
+    },
+    {
+      "id": "afcn-network",
+      "title": "Who's already on the ground",
+      "caption": "AFCN's curated directory of 802 organizations. Left: physical points where work happens. Right: which categories of work concentrate where — pantries congregate in lower-income tracts, urban farms cluster in Westside neighborhoods.",
+      "left":  { "title": "AFCN organization directory",                   "layers": ["afcn_directory"] },
+      "right": { "title": "Recovery & Redistribution density",             "layers": ["redistribution_nodes", "all_food_pantries_atl"] },
+      "camera": { "center": [-84.39, 33.749], "zoom": 11 },
+      "insight": "802 orgs · 9 role types · 26 activity tags",
+      "duration_sec": 30
+    },
+    {
+      "id": "campus-zoom",
+      "title": "Georgia tech as a campus-to-community pump",
+      "caption": "Zooming to GT campus, dining halls in green produce 2,316 lbs of weekly surplus while neighboring food pantries (red points beyond campus) operate in deficit. The campus is the closest, fastest, freshest recovery source most pantries are not yet plugged into.",
+      "left":  { "title": "Campus dining + waste profile",                 "layers": ["campus_boundary", "campus_dining"] },
+      "right": { "title": "Pantries in 2-mile radius",                     "layers": ["all_food_pantries_atl", "campus_boundary"] },
+      "camera": { "center": [-84.395, 33.776], "zoom": 14 },
+      "insight": "LeanPath: 2,316 lbs/week · 80 lbs donated (3.5%)",
+      "duration_sec": 35
+    },
+    {
+      "id": "land-use-zoning",
+      "title": "How atlanta is zoned",
+      "caption": "City of Atlanta zoning across 2,967 polygons. Residential dominates the northside (warm tans), commercial corridors thread through Buckhead and Midtown (clay), industrial concentrates near the airport and rail (slate), and SPI overlays mark the BeltLine special-interest districts (deep clay).",
+      "left":  { "title": "Zoning class (City of Atlanta)",                "layers": ["atl_zoning"], "field": "ZONECLASS" },
+      "right": { "title": "BeltLine corridor + Historic districts",        "layers": ["atl_beltline_corridor", "atl_historic_districts", "atl_neighborhood_plans"] },
+      "camera": { "center": [-84.39, 33.749], "zoom": 11 },
+      "insight": "City of Atlanta DPCD · 2,967 zoning polygons",
+      "duration_sec": 35
+    },
+    {
+      "id": "typology-synthesis",
+      "title": "Five atlantas, one matrix",
+      "caption": "Synthesis: every tract classified into one of five urban typologies. High-growth Core (BeltLine), Affluent Suburban (North), Disinvested Urban (S/W), Industrial Logistics (near airport), Emerging Mixed-use (BeltLine edges). The matrix's punchline.",
+      "left":  { "title": "Tract-level typology",                          "layers": ["atl_typology_classified"], "field": "typology_label" },
+      "right": { "title": "AFCN orgs colored by typology served",          "layers": ["atl_typology_classified", "afcn_directory"], "field": "typology_label" },
+      "camera": { "center": [-84.39, 33.749], "zoom": 11 },
+      "insight": "k-means · 5 typologies · capstone synthesis",
+      "duration_sec": 40
+    }
+  ]
+}

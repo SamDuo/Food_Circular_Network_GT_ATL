@@ -1,0 +1,978 @@
+/* AFCN Atlas — strict Farbton palette family (Nr. 49–60).
+   All colors drawn ONLY from the German paint reference:
+     Nr. 49 #393f44  dunkelblau, schwarz       Nr. 55 #d2dadf  weiß+taubenblau
+     Nr. 50 #3a4f5e  Standard dunkelblau       Nr. 56 #7a8a92  grau+dunkelblau
+     Nr. 51 #1c5c84  Spinellblau (special)     Nr. 57 #7d9caf  weiß+dunkelblau
+     Nr. 52 #5b7282  taubenblau+dunkelblau     Nr. 58 #6f8688  Petrolblau
+     Nr. 53 #7e9099  Standard taubenblau       Nr. 59 #7a958c  Petrolgrün
+     Nr. 54 #a4b1bc  taubenblau+weiß           Nr. 60 #324049  dunkelblau+grün
+
+   4 palette variants (live-toggle in top nav):
+     hell         — light       (Nr. 55 bg, Nr. 49 ink)
+     taubenblau   — mid-light   (Nr. 54 bg, Nr. 51 accent)
+     spinellblau  — dark blue   (Nr. 60 bg, Nr. 51 accent)  ← default
+     petrol       — dark green  (Nr. 60 bg, Nr. 58/59 accents)
+
+   The topbar is FIXED-DARK across all palettes (Nr. 49 bg).
+   Dark-specific overrides apply via body[data-dark] (set by JS).
+   Scoped to /atlas/ only — does not touch showcase.css.            */
+
+/* ── HELL (light — Mischton 1:0.15 weiß/taubenblau base) ─── */
+:root,
+body[data-palette="hell"] {
+  --bg:          #d2dadf;          /* Nr. 55 */
+  --surface:     #ffffff;
+  --legend-bg:   #c8d1d8;
+  --rule:        #a4b1bc;          /* Nr. 54 */
+  --ink:         #393f44;          /* Nr. 49 */
+  --dim:         #5b7282;          /* Nr. 52 */
+  --accent:      #3a4f5e;          /* Nr. 50 — Standardfarbton dunkelblau */
+  --accent-soft: #d2dadf;          /* Nr. 55 */
+  --teal:        #6f8688;          /* Nr. 58 — Petrolblau */
+  --critical:    #c62828;
+  --gold:        #7a958c;          /* Nr. 59 — Petrolgrün */
+}
+
+/* ── TAUBENBLAU (mid-light — Standardfarbton taubenblau base) */
+body[data-palette="taubenblau"] {
+  --bg:          #a4b1bc;          /* Nr. 54 */
+  --surface:     #d2dadf;          /* Nr. 55 */
+  --legend-bg:   #b6c0c9;
+  --rule:        #7e9099;          /* Nr. 53 */
+  --ink:         #393f44;          /* Nr. 49 */
+  --dim:         #3a4f5e;          /* Nr. 50 */
+  --accent:      #1c5c84;          /* Nr. 51 — Spinellblau */
+  --accent-soft: rgba(28,92,132,0.16);
+  --teal:        #6f8688;          /* Nr. 58 */
+  --critical:    #b54848;
+  --gold:        #7a958c;          /* Nr. 59 */
+}
+
+/* ── SPINELLBLAU (dark — Mischton dunkelblau+grün base, default) */
+body[data-palette="spinellblau"] {
+  --bg:          #324049;          /* Nr. 60 */
+  --surface:     #3a4f5e;          /* Nr. 50 */
+  --legend-bg:   #2c3a44;
+  --rule:        #5b7282;          /* Nr. 52 */
+  --ink:         #d2dadf;          /* Nr. 55 */
+  --dim:         #a4b1bc;          /* Nr. 54 */
+  --accent:      #1c5c84;          /* Nr. 51 — Spinellblau */
+  --accent-soft: rgba(28,92,132,0.20);
+  --teal:        #7d9caf;          /* Nr. 57 */
+  --critical:    #e57373;
+  --gold:        #7a958c;          /* Nr. 59 */
+}
+
+/* ── PETROL (dark — Petrolblau/grün accents on Nr. 60 base) ── */
+body[data-palette="petrol"] {
+  --bg:          #2a363c;
+  --surface:     #324049;          /* Nr. 60 */
+  --legend-bg:   #2e3940;
+  --rule:        #5b7282;          /* Nr. 52 */
+  --ink:         #d2dadf;          /* Nr. 55 */
+  --dim:         #7e9099;          /* Nr. 53 */
+  --accent:      #6f8688;          /* Nr. 58 — Petrolblau */
+  --accent-soft: rgba(111,134,136,0.20);
+  --teal:        #7a958c;          /* Nr. 59 — Petrolgrün */
+  --critical:    #e57373;
+  --gold:        #7a958c;
+}
+
+/* ── Dark-mode overrides — Farbton Nr. 51 + Nr. 57 blues ─── */
+body[data-dark] .cell.empty {
+  background: repeating-linear-gradient(
+    45deg, transparent 0 6px, rgba(255,255,255,0.04) 6px 7px);
+}
+body[data-dark] .cell:hover {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+body[data-dark] .cell-thumb[data-lens="density"]::before,
+body[data-dark] .lens-thumb[data-lens="density"]::before {
+  background:
+    radial-gradient(ellipse at 35% 45%,
+      rgba(28,92,132,0.92)   0%,                 /* Nr. 51 spinellblau */
+      rgba(28,92,132,0.60)   20%,
+      rgba(125,156,175,0.30) 42%,                /* Nr. 57 */
+      rgba(164,177,188,0.12) 62%,                /* Nr. 54 */
+      transparent 80%),
+    radial-gradient(ellipse at 70% 65%,
+      rgba(28,92,132,0.50)   0%,
+      rgba(125,156,175,0.20) 32%,
+      transparent 58%);
+}
+body[data-dark] .cell-thumb[data-lens="equity"]::before,
+body[data-dark] .lens-thumb[data-lens="equity"]::before {
+  background: linear-gradient(135deg,
+    #324049 0%,   #324049 18%,                   /* Nr. 60 */
+    #3a4f5e 18%,  #3a4f5e 36%,                   /* Nr. 50 */
+    #1c5c84 36%,  #1c5c84 56%,                   /* Nr. 51 */
+    #7d9caf 56%,  #7d9caf 78%,                   /* Nr. 57 */
+    #a4b1bc 78%,  #a4b1bc 100%);                 /* Nr. 54 */
+}
+body[data-dark] .cell-thumb[data-lens="synthesis"]::before,
+body[data-dark] .lens-thumb[data-lens="synthesis"]::before {
+  background: linear-gradient(90deg,
+    #324049 0%,  #324049 20%,                    /* Nr. 60 */
+    #3a4f5e 20%, #3a4f5e 40%,                    /* Nr. 50 */
+    #1c5c84 40%, #1c5c84 60%,                    /* Nr. 51 */
+    #6f8688 60%, #6f8688 80%,                    /* Nr. 58 petrolblau */
+    #7a958c 80%, #7a958c 100%);                  /* Nr. 59 petrolgrün */
+}
+body[data-dark] .cell-thumb[data-lens="trend"]::before,
+body[data-dark] .lens-thumb[data-lens="trend"]::before {
+  background-image: repeating-linear-gradient(
+    to right, rgba(255,255,255,0.06) 0 1px, transparent 1px 24%);
+}
+body[data-dark] .layer-card.is-left  { background: rgba(28,92,132,0.14); }    /* Nr. 51 */
+body[data-dark] .layer-card.is-right { background: rgba(125,156,175,0.14); }  /* Nr. 57 */
+body[data-dark] .layer-card.is-left.is-right {
+  background: linear-gradient(90deg,
+                              rgba(28,92,132,0.14)  0%,
+                              rgba(125,156,175,0.14) 100%);
+}
+body[data-dark] .lens-badge[data-lens="density"]      { color: #7d9caf; border-color: rgba(125,156,175,0.45); }  /* Nr. 57 */
+body[data-dark] .lens-badge[data-lens="accessibility"]{ color: #1c5c84; border-color: rgba(28,92,132,0.55);  }   /* Nr. 51 */
+body[data-dark] .lens-badge[data-lens="equity"]       { color: #d2dadf; border-color: rgba(210,218,223,0.35); }  /* Nr. 55 */
+body[data-dark] .lens-badge[data-lens="trend"]        { color: #a4b1bc; border-color: rgba(164,177,188,0.40); }  /* Nr. 54 */
+body[data-dark] .lens-badge[data-lens="flow"]         { color: #1c5c84; border-color: rgba(28,92,132,0.55);  }   /* Nr. 51 */
+
+/* ──────────────────────────────────────────────────────────
+   FIXED-DARK TOPBAR — Farbton Nr. 49 across ALL palettes
+   ────────────────────────────────────────────────────────── */
+#topbar {
+  background: #393f44 !important;             /* Nr. 49 */
+  border-bottom: 1px solid #5b7282 !important; /* Nr. 52 */
+}
+#brandTitle    { color: #d2dadf !important; }  /* Nr. 55 */
+#brandSubtitle { color: #a4b1bc !important; }  /* Nr. 54 */
+#gtLogo        { filter: invert(1) brightness(1.05); }
+
+#atlasNav .navLink {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.18);
+  color: #d2dadf;                              /* Nr. 55 */
+}
+#atlasNav .navLink:hover {
+  background: rgba(28,92,132,0.32);            /* Nr. 51 wash */
+  border-color: #1c5c84;
+  color: #ffffff;
+}
+#atlasNav .navLink.active {
+  background: #1c5c84;                         /* Nr. 51 spinellblau */
+  border-color: #1c5c84;
+  color: #ffffff;
+}
+.nav-sep { background: rgba(255,255,255,0.18); }
+#paletteSwitch {
+  border-color: rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.04);
+}
+#paletteSwitch .palette-btn {
+  border-color: rgba(255,255,255,0.22);
+}
+#paletteSwitch .palette-btn.active {
+  box-shadow: 0 0 0 2px #1c5c84;               /* Nr. 51 */
+}
+
+/* ── Palette switcher buttons in top nav ─────────────────── */
+#paletteSwitch {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 6px;
+  padding: 3px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+}
+#paletteSwitch .palette-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+#paletteSwitch .palette-btn:hover { transform: scale(1.12); }
+#paletteSwitch .palette-btn.active {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+/* Farbton-strict pill previews */
+.palette-btn[data-palette="hell"]        { background: linear-gradient(135deg, #d2dadf 0%, #3a4f5e 100%); }
+.palette-btn[data-palette="taubenblau"]  { background: linear-gradient(135deg, #a4b1bc 0%, #1c5c84 100%); }
+.palette-btn[data-palette="spinellblau"] { background: linear-gradient(135deg, #324049 0%, #1c5c84 100%); }
+.palette-btn[data-palette="petrol"]      { background: linear-gradient(135deg, #2a363c 0%, #7a958c 100%); }
+
+/* Hairline separator between light & dark groups */
+.palette-sep {
+  display: inline-block;
+  width: 1px;
+  height: 18px;
+  background: var(--rule);
+  align-self: center;
+  margin: 0 4px;
+}
+
+/* ── View toggle in the top nav ───────────────────────────── */
+.view-toggle { cursor: pointer; }
+.nav-sep {
+  display: inline-block;
+  width: 1px; height: 22px;
+  background: var(--rule);
+  margin: 0 4px;
+}
+
+/* ── MATRIX GRID VIEW ─────────────────────────────────────── */
+#matrixGridStage {
+  position: fixed;
+  inset: 88px 0 32px 0;
+  overflow-y: auto;
+  background: var(--bg);
+  padding: 28px 48px 60px;
+}
+
+#matrixHeader {
+  max-width: 1320px;
+  margin: 0 auto 28px;
+}
+#matrixIntro {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+}
+#matrixIntro .kicker {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+#matrixIntro h1 {
+  font-family: var(--display);
+  font-size: clamp(28px, 3.5vw, 44px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+#matrixIntro .dek {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--dim);
+  max-width: 820px;
+}
+
+/* Lens column header strip — sits above the 6 columns */
+#matrixLensHeader {
+  display: grid;
+  grid-template-columns: 180px repeat(6, 1fr);
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 4px;
+  padding-left: 192px;            /* offset for row labels */
+}
+.lens-col-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--ink);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+}
+.lens-col-head .lens-thumb {
+  width: 56px; height: 36px;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+  background: var(--legend-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Matrix grid layout ──────────────────────────────────── */
+#matrixGrid {
+  display: grid;
+  grid-template-columns: 180px repeat(6, 1fr);
+  grid-auto-rows: minmax(140px, auto);
+  gap: 12px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+.row-head {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 8px 14px 4px;
+  border-right: 1px solid var(--rule);
+  font-family: var(--display);
+}
+.row-head-label {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+  margin-bottom: 4px;
+  line-height: 1.1;
+}
+.row-head-sub {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--dim);
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+}
+.row-head-count {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* ── Cell card ────────────────────────────────────────────── */
+.cell {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+}
+.cell:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 6px 18px rgba(17, 20, 24, 0.10);
+}
+.cell.empty {
+  background: repeating-linear-gradient(
+    45deg, transparent 0 6px, rgba(17,20,24,0.04) 6px 7px);
+  cursor: not-allowed;
+}
+.cell.empty:hover { transform: none; box-shadow: none; }
+.cell.empty .cell-thumb { opacity: 0.18; }
+
+.cell-thumb {
+  height: 70%;
+  position: relative;
+  overflow: hidden;
+  background: var(--legend-bg);
+}
+.cell-meta {
+  height: 30%;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-top: 1px solid var(--rule);
+}
+.cell-count {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+.cell-preview {
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── SVG thumbnail patterns per lens ─────────────────────── */
+/* Each lens has a distinct visual signature inspired by the
+   supervisor's reference images. All use the editorial cream
+   palette (clay accents on cream).                               */
+
+.lens-thumb {
+  background: var(--legend-bg);
+}
+
+/* Base — scattered points */
+.lens-thumb[data-lens="base"]::before,
+.cell-thumb[data-lens="base"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, var(--accent) 1.5px, transparent 2px),
+    radial-gradient(circle at 60% 25%, var(--accent) 1.5px, transparent 2px),
+    radial-gradient(circle at 85% 40%, var(--accent) 1.5px, transparent 2px),
+    radial-gradient(circle at 15% 60%, var(--accent) 1.5px, transparent 2px),
+    radial-gradient(circle at 50% 55%, var(--accent) 1.5px, transparent 2px),
+    radial-gradient(circle at 75% 70%, var(--accent) 1.5px, transparent 2px),
+    radial-gradient(circle at 30% 80%, var(--accent) 1.5px, transparent 2px),
+    radial-gradient(circle at 65% 85%, var(--accent) 1.5px, transparent 2px);
+}
+
+/* Density — radial heatmap bloom (deep navy → light slate) */
+.lens-thumb[data-lens="density"]::before,
+.cell-thumb[data-lens="density"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 35% 45%,
+      rgba(38,50,56,0.95)    0%,
+      rgba(69,90,100,0.72)   18%,
+      rgba(120,144,156,0.45) 36%,
+      rgba(207,216,220,0.2)  60%,
+      transparent 78%),
+    radial-gradient(ellipse at 70% 65%,
+      rgba(69,90,100,0.6)    0%,
+      rgba(176,190,197,0.3)  30%,
+      transparent 55%);
+}
+
+/* Accessibility — concentric isochrone rings (ocean blue) */
+.lens-thumb[data-lens="accessibility"]::before,
+.cell-thumb[data-lens="accessibility"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 55%, transparent 12px, rgba(31,79,138,0.55) 13px, transparent 14px),
+    radial-gradient(circle at 50% 55%, transparent 22px, rgba(31,79,138,0.42) 23px, transparent 25px),
+    radial-gradient(circle at 50% 55%, transparent 34px, rgba(31,79,138,0.32) 35px, transparent 37px),
+    radial-gradient(circle at 50% 55%, transparent 48px, rgba(31,79,138,0.22) 49px, transparent 51px),
+    radial-gradient(circle at 50% 55%, var(--accent) 4px, transparent 5px);
+}
+
+/* Equity — banded sequential ramp choropleth (light → dark blueGrey) */
+.lens-thumb[data-lens="equity"]::before,
+.cell-thumb[data-lens="equity"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    #eceff1 0%,    #eceff1 18%,
+    #b0bec5 18%,   #b0bec5 36%,
+    #78909c 36%,   #78909c 56%,
+    #455a64 56%,   #455a64 78%,
+    #263238 78%,   #263238 100%);
+}
+
+/* Trend — line graph rising */
+.lens-thumb[data-lens="trend"]::before,
+.cell-thumb[data-lens="trend"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(90deg, transparent 0%, transparent 100%),
+    /* dashed grid */
+    repeating-linear-gradient(
+      to right,
+      rgba(17,20,24,0.06) 0 1px, transparent 1px 24%);
+}
+.lens-thumb[data-lens="trend"]::after,
+.cell-thumb[data-lens="trend"]::after {
+  content: "";
+  position: absolute;
+  left: 8%; right: 8%; top: 18%; bottom: 18%;
+  background:
+    linear-gradient(45deg, transparent 47%, var(--accent) 47% 50%, transparent 50%),
+    linear-gradient(35deg, transparent 47%, var(--accent) 47% 50%, transparent 50%);
+  background-size: 35% 100%, 35% 100%;
+  background-position: 0 50%, 35% 50%;
+  background-repeat: no-repeat;
+}
+
+/* Flow — directional arrows */
+.lens-thumb[data-lens="flow"]::before,
+.cell-thumb[data-lens="flow"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(135deg, transparent 36%, rgba(31,79,138,0.55) 36% 42%, transparent 42%),
+    linear-gradient(135deg, transparent 36%, rgba(31,79,138,0.55) 36% 42%, transparent 42%),
+    linear-gradient(135deg, transparent 36%, rgba(31,79,138,0.55) 36% 42%, transparent 42%);
+  background-size: 30% 28%, 30% 28%, 30% 28%;
+  background-position: 10% 20%, 38% 50%, 65% 80%;
+  background-repeat: no-repeat;
+}
+
+/* Synthesis — typology palette stripe (kept in sync with TYPOLOGY_PALETTE in atlas.js / showcase.js) */
+.lens-thumb[data-lens="synthesis"]::before,
+.cell-thumb[data-lens="synthesis"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    #263238 0%, #263238 20%,
+    #455a64 20%, #455a64 40%,
+    #607d8b 40%, #607d8b 60%,
+    #90a4ae 60%, #90a4ae 80%,
+    #cfd8dc 80%, #cfd8dc 100%);
+}
+
+/* Lens column-header thumbnails are smaller */
+.lens-col-head .lens-thumb::before,
+.lens-col-head .lens-thumb::after { background-size: cover; }
+
+/* ── Layer drawer (slides in when a cell is clicked) ────── */
+#cellDrawer {
+  position: fixed;
+  top: 88px; right: 0; bottom: 32px;
+  width: 460px;
+  background: var(--surface);
+  border-left: 1px solid var(--rule);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -10px 0 30px rgba(17,20,24,0.08);
+}
+#cellDrawer.open { transform: translateX(0); }
+.drawer-head {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid var(--rule);
+  flex-shrink: 0;
+}
+.drawer-eyebrow {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.drawer-title {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.15;
+}
+.drawer-sub {
+  font-family: var(--serif);
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.4;
+}
+.drawer-close {
+  position: absolute;
+  top: 18px; right: 18px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  color: var(--dim);
+  cursor: pointer;
+  font-weight: 300;
+  line-height: 1;
+}
+.drawer-close:hover { color: var(--accent); }
+
+.drawer-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 18px 28px;
+}
+.drawer-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.drawer-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.drawer-card-label {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.drawer-card-source {
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.2px;
+}
+.drawer-card-buttons {
+  display: flex;
+  gap: 6px;
+}
+.drawer-card-buttons .lr-btn {
+  width: 36px; height: 32px;
+  font-size: 12px;
+}
+.drawer-foot {
+  padding: 14px 28px;
+  border-top: 1px solid var(--rule);
+  background: var(--legend-bg);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  color: var(--dim);
+}
+
+/* Hide browse stage by default; toggle via body class */
+body.view-grid #atlasStage { display: none; }
+body.view-browse #matrixGridStage { display: none; }
+
+/* Responsive tweaks */
+@media (max-width: 1280px) {
+  #matrixLensHeader,
+  #matrixGrid {
+    grid-template-columns: 140px repeat(6, 1fr);
+  }
+  #matrixLensHeader { padding-left: 152px; }
+}
+@media (max-width: 1100px) {
+  #matrixGridStage { padding: 22px 24px 60px; }
+}
+
+#atlasStage {
+  position: fixed;
+  inset: 88px 0 32px 0;
+  display: grid;
+  grid-template-columns: 360px 1fr 1fr;
+  gap: 1px;
+  background: var(--rule);
+}
+
+/* ── Layer rail ─────────────────────────────────────────── */
+#layerRail {
+  background: var(--bg);
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#railHeader {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+#railSearch {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+#railSearch:focus { border-color: var(--accent); }
+#railCount {
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--dim);
+  white-space: nowrap;
+  letter-spacing: 0.4px;
+}
+
+#railContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0 24px;
+}
+
+.category {
+  border-bottom: 1px solid var(--rule);
+}
+.category-head {
+  padding: 14px 18px 12px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  background: var(--bg);
+  transition: background 0.15s;
+}
+.category-head:hover { background: var(--legend-bg); }
+.category-label {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.category-chev {
+  margin-left: auto;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--dim);
+  transition: transform 0.2s;
+}
+.category.collapsed .category-chev { transform: rotate(-90deg); }
+.category-subtitle {
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.3px;
+  margin-top: 3px;
+}
+.category-count {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-left: 8px;
+  letter-spacing: 0.5px;
+}
+
+.category-body {
+  padding: 4px 12px 14px;
+  display: block;
+}
+.category.collapsed .category-body { display: none; }
+
+.layer-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 8px;
+  border-radius: 4px;
+  font-family: var(--sans);
+  cursor: default;
+  transition: background 0.12s;
+}
+.layer-card:hover { background: var(--legend-bg); }
+.layer-card.is-left  { background: rgba(55, 71, 79, 0.10); }
+.layer-card.is-right { background: rgba(31, 79, 138, 0.10); }
+.layer-card.is-left.is-right {
+  background: linear-gradient(90deg,
+                              rgba(55, 71, 79, 0.10) 0%,
+                              rgba(31, 79, 138, 0.10) 100%);
+}
+
+.layer-info {
+  flex: 1;
+  min-width: 0;
+}
+.layer-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.05px;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.layer-meta {
+  font-size: 10.5px;
+  color: var(--dim);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.lens-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  color: var(--accent);
+  background: var(--surface);
+}
+.lens-badge[data-lens="density"]      { color: #455a64; border-color: #90a4ae; }
+.lens-badge[data-lens="accessibility"]{ color: #1f4f8a; border-color: #b8c8e0; }
+.lens-badge[data-lens="equity"]       { color: #263238; border-color: #b0bec5; }
+.lens-badge[data-lens="trend"]        { color: #546e7a; border-color: #b0bec5; }
+.lens-badge[data-lens="flow"]         { color: #1565c0; border-color: #90caf9; }
+.lens-badge[data-lens="synthesis"]    { color: #fff;    background: var(--accent); border-color: var(--accent); }
+
+.layer-buttons {
+  display: flex;
+  gap: 4px;
+}
+.lr-btn {
+  width: 30px; height: 28px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 4px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.lr-btn:hover  { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.lr-btn.left.active  { background: var(--accent); border-color: var(--accent); color: #fff; }
+.lr-btn.right.active { background: var(--teal);  border-color: var(--teal);   color: #fff; }
+
+/* Footer rail actions */
+#railFoot {
+  padding: 12px 14px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.rail-action {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.rail-action:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.rail-action.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* Panel labels styled to match showcase but with empty-state hint */
+.panel-label-title.empty {
+  color: var(--dim);
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* ──────────────────────────────────────────────────────────
+   DARK-MODE TEXT CONTRAST — eyebrow labels were too dark
+   (Nr. 51 spinellblau on Nr. 60 grey-blue is unreadable).
+   Brighten them to Nr. 57 lichtblau on dark backgrounds.
+   ────────────────────────────────────────────────────────── */
+body[data-dark] .row-head-count,
+body[data-dark] .cell-count,
+body[data-dark] .legend-title,
+body[data-dark] .lens-label-eyebrow {
+  color: #7d9caf;                   /* Nr. 57 lichtblau */
+}
+body[data-dark] .cell-preview {
+  color: #d2dadf;                   /* Nr. 55 — slightly brighter than --ink */
+}
+body[data-dark] .row-head-label {
+  color: #d2dadf;                   /* Nr. 55 */
+}
+body[data-dark] .row-head-sub {
+  color: #a4b1bc;                   /* Nr. 54 */
+}
+
+/* ──────────────────────────────────────────────────────────
+   PANEL OVERLAYS on dark basemap — override showcase cream
+   ────────────────────────────────────────────────────────── */
+.panel-label {
+  background: rgba(57, 63, 68, 0.92);          /* Nr. 49 wash */
+  border: 1px solid #5b7282;                    /* Nr. 52 */
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  border-left-width: 4px;
+}
+#leftPanel  .panel-label { border-left-color: #1c5c84; }    /* Nr. 51 spinellblau */
+#rightPanel .panel-label { border-left-color: #6f8688; }    /* Nr. 58 petrolblau  */
+#leftPanel  .panel-label-eyebrow { color: #7d9caf; }        /* Nr. 57 */
+#rightPanel .panel-label-eyebrow { color: #7a958c; }        /* Nr. 59 petrolgrün */
+.panel-label-title { color: #d2dadf; }                       /* Nr. 55 */
+.panel-label-title.empty { color: #a4b1bc; }                 /* Nr. 54 */
+
+.panel-legend {
+  background: rgba(57, 63, 68, 0.92);
+  border: 1px solid #5b7282;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+.legend-title { color: #7d9caf; }                            /* Nr. 57 */
+.panel-legend .legend-row,
+.panel-legend .legend-row * { color: #d2dadf; }              /* Nr. 55 */
+
+/* Footer */
+#footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 32px;
+  background: var(--bg);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.3px;
+}
+
+/* Top nav for atlas */
+#atlasNav { display: flex; gap: 6px; }
+#atlasNav .navLink {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  letter-spacing: 0.3px;
+  transition: all 0.15s;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+#atlasNav button.navLink { line-height: normal; }
+#atlasNav .navLink:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+#atlasNav .navLink.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* Hide the showcase-inherited captionBar / progress / presenter chrome */
+#captionBar, #presenter, #progress, #helpOverlay { display: none !important; }
+
+/* Responsive */
+@media (max-width: 1280px) {
+  #atlasStage { grid-template-columns: 320px 1fr 1fr; }
+}
+@media (max-width: 1100px) {
+  #atlasStage { grid-template-columns: 280px 1fr 1fr; }
+  .layer-label { font-size: 12px; }
+}

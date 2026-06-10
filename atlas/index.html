@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AFCN Atlas — browse the matrix</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.30/"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../showcase/showcase.css?v=20260505m">
+  <link rel="stylesheet" href="atlas.css?v=20260507h">
+
+  <script>
+    // Farbton palette switcher (4 strict variants). Default = spinellblau.
+    (function(){
+      var LIGHT = ['hell','taubenblau'];
+      var DARK  = ['spinellblau','petrol'];
+      var ALL   = LIGHT.concat(DARK);
+      // Migrate old palette names → nearest Farbton equivalent
+      var MIGRATE = {
+        slate:'hell', bluegrey:'hell', dustyblue:'taubenblau', mist:'hell',
+        dustydark:'spinellblau', deepink:'spinellblau', midnight:'spinellblau',
+        graphite:'petrol', dark:'spinellblau', forest:'petrol', sage:'petrol'
+      };
+      function applyPalette(p){
+        document.body.setAttribute('data-palette', p);
+        if (DARK.indexOf(p) !== -1) document.body.setAttribute('data-dark','');
+        else                        document.body.removeAttribute('data-dark');
+        document.querySelectorAll('#paletteSwitch .palette-btn').forEach(function(b){
+          b.classList.toggle('active', b.dataset.palette === p);
+        });
+      }
+      try {
+        var p = localStorage.getItem('afcn-atlas-palette') || 'spinellblau';
+        if (MIGRATE[p]) p = MIGRATE[p];
+        if (ALL.indexOf(p) === -1) p = 'spinellblau';
+        document.addEventListener('DOMContentLoaded', function(){
+          applyPalette(p);
+          document.querySelectorAll('#paletteSwitch .palette-btn').forEach(function(btn){
+            btn.addEventListener('click', function(){
+              var np = btn.dataset.palette;
+              applyPalette(np);
+              localStorage.setItem('afcn-atlas-palette', np);
+            });
+          });
+        });
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <header id="topbar">
+    <div id="brand">
+      <img src="../resources/GT logo/Primary Logos/Georgia Tech One Line/GTOneLine_RGB.svg" alt="Georgia Tech" id="gtLogo">
+      <div id="brandText">
+        <div id="brandTitle">Atlanta Food Circular Network</div>
+        <div id="brandSubtitle">Atlas · browse the matrix</div>
+      </div>
+    </div>
+    <nav id="atlasNav">
+      <a href="../resources/Layers%20%26%20Packages/index.html" class="navLink">Map View</a>
+      <a href="../network/index.html"                          class="navLink">Network</a>
+      <a href="../showcase/index.html"                         class="navLink">Showcase</a>
+      <button id="atlasHomeBtn" class="navLink active" type="button" title="Return to matrix grid">Atlas</button>
+      <span class="nav-sep"></span>
+      <button id="viewGridBtn"   class="navLink view-toggle active" type="button">Matrix Grid</button>
+      <button id="viewBrowseBtn" class="navLink view-toggle"        type="button">Layer Browser</button>
+      <span class="nav-sep"></span>
+      <div id="paletteSwitch" role="group" aria-label="Farbton palette">
+        <button class="palette-btn" data-palette="hell"        type="button" title="Hell · Nr. 55 weiß+taubenblau"></button>
+        <button class="palette-btn" data-palette="taubenblau"  type="button" title="Taubenblau · Nr. 54 + Nr. 51 spinellblau accent"></button>
+        <span class="palette-sep" aria-hidden="true"></span>
+        <button class="palette-btn" data-palette="spinellblau" type="button" title="Spinellblau · Nr. 60 base + Nr. 51 accent"></button>
+        <button class="palette-btn" data-palette="petrol"      type="button" title="Petrol · Nr. 60 + Nr. 58/59 petrol accents"></button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Matrix-grid view (default landing): 8 subsystems × 6 lenses -->
+  <section id="matrixGridStage">
+    <div id="matrixHeader">
+      <div id="matrixIntro">
+        <div class="kicker">URBAN DESIGN SPATIAL ANALYSIS MATRIX</div>
+        <h1>Eight subsystems × six lenses</h1>
+        <p class="dek">Click any cell to load its layers into the dual-map viewer. Each cell's thumbnail signals its analytical lens: dotted = base distribution, blooms = density, rings = accessibility, banded = equity, dashes = trend, arrows = flow.</p>
+      </div>
+      <div id="matrixLensHeader">
+        <div class="lens-col-head" data-lens="base">           <span class="lens-thumb" data-lens="base"></span>          <span>Base</span></div>
+        <div class="lens-col-head" data-lens="density">        <span class="lens-thumb" data-lens="density"></span>       <span>Density</span></div>
+        <div class="lens-col-head" data-lens="accessibility">  <span class="lens-thumb" data-lens="accessibility"></span> <span>Accessibility</span></div>
+        <div class="lens-col-head" data-lens="equity">         <span class="lens-thumb" data-lens="equity"></span>        <span>Equity</span></div>
+        <div class="lens-col-head" data-lens="trend">          <span class="lens-thumb" data-lens="trend"></span>         <span>Trend</span></div>
+        <div class="lens-col-head" data-lens="flow">           <span class="lens-thumb" data-lens="flow"></span>          <span>Flow</span></div>
+      </div>
+    </div>
+    <div id="matrixGrid"></div>
+  </section>
+
+  <!-- Three-column stage: rail | left map | right map -->
+  <main id="atlasStage">
+
+    <!-- Layer rail -->
+    <aside id="layerRail">
+      <div id="railHeader">
+        <input id="railSearch" type="search" placeholder="Search layers…" autocomplete="off">
+        <span id="railCount" class="muted"></span>
+      </div>
+      <div id="railContent"></div>
+      <div id="railFoot">
+        <button id="clearLeftBtn"  class="rail-action">Clear LEFT</button>
+        <button id="clearRightBtn" class="rail-action">Clear RIGHT</button>
+        <button id="syncToggle"    class="rail-action active">SYNC ON</button>
+      </div>
+    </aside>
+
+    <!-- Left map panel -->
+    <section class="panel" id="leftPanel">
+      <div class="panel-label">
+        <span class="panel-label-eyebrow">LEFT</span>
+        <span class="panel-label-title" id="leftTitle">Pick a layer →</span>
+      </div>
+      <div class="map-container" id="leftMap"></div>
+      <div class="panel-legend legend-hidden" id="leftLegend"></div>
+    </section>
+
+    <!-- Right map panel -->
+    <section class="panel" id="rightPanel">
+      <div class="panel-label">
+        <span class="panel-label-eyebrow">RIGHT</span>
+        <span class="panel-label-title" id="rightTitle">Pick a layer →</span>
+      </div>
+      <div class="map-container" id="rightMap"></div>
+      <div class="panel-legend legend-hidden" id="rightLegend"></div>
+    </section>
+
+  </main>
+
+  <footer id="footer">
+    <span>Licensed for personal/academic use only. © 2026 Georgia Tech I2CE Lab.</span>
+    <span id="dataMeta">Loading manifest…</span>
+  </footer>
+
+  <script src="atlas.js?v=20260507b"></script>
+</body>
+</html>

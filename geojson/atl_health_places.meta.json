@@ -1,0 +1,23 @@
+{
+  "source": "https://chronicdata.cdc.gov/resource/cwsq-ngmh.json",
+  "dataset": "cwsq-ngmh",
+  "measures": [
+    "OBESITY",
+    "DIABETES",
+    "BPHIGH",
+    "CHD",
+    "STROKE",
+    "CASTHMA",
+    "MHLTH",
+    "PHLTH",
+    "DEPRESSION",
+    "ACCESS2",
+    "CHECKUP",
+    "COLON_SCREEN",
+    "FOODINSECU"
+  ],
+  "value_type": "CrudePrev (crude prevalence %)",
+  "fetched_at": "2026-05-05T13:41:26Z",
+  "feature_count": 528,
+  "script": "scripts/fetch_cdc_places.py"
+}

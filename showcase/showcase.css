@@ -1,0 +1,505 @@
+/* AFCN Showcase — editorial cream theme matching the Atlanta Story page.
+   Big-monitor kiosk. Designed for 1920×1080 minimum, comfortable to 4K.
+   Type-driven (Playfair Display headlines, Source Serif body).         */
+
+:root {
+  /* Farbton 1929 — Standardfarbtonkarte palette
+     Switched from warm cream/clay to the lichtgrau/blau-grau editorial system
+     so AFCN reads as one consistent color language across atlas/showcase/network. */
+  --bg:          #d2dadf;          /* Nr. 55 — lichtgrau */
+  --surface:     #e6ebee;          /* lifted card surface */
+  --legend-bg:   #c4cdd2;          /* slightly cooler than bg */
+  --rule:        #a4b1bc;          /* Nr. 54 — hairlines */
+  --ink:         #393f44;          /* Nr. 49 — primary text */
+  --dim:         #5b7282;          /* Nr. 52 — secondary text */
+  --accent:      #1c5c84;          /* Nr. 51 — spinellblau */
+  --accent-soft: rgba(28, 92, 132, 0.12);
+  --teal:        #7a958c;          /* Nr. 59 — petrolgrün */
+  --critical:    #c62828;          /* alert red — kept for clarity */
+  --gold:        #c4cdd2;          /* Nr. 56 — silbergrau (was warm gold) */
+  --display:     "Playfair Display", "Georgia", serif;
+  --serif:       "Source Serif 4", "Georgia", serif;
+  --sans:        "Inter", "DM Sans", system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--serif);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  cursor: default;
+}
+
+/* Hide cursor after idle — kiosk-friendly. */
+body.idle { cursor: none; }
+
+/* ── Layout ─────────────────────────────────────────────── */
+#stage {
+  position: fixed;
+  inset: 88px 0 112px 0;            /* leave room for topbar + caption */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--rule);          /* the 1px gap reads as a hairline divider */
+}
+
+.panel {
+  position: relative;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.map-container {
+  position: absolute;
+  inset: 0;
+}
+
+/* Per-panel label (top-left) — editorial ink-on-cream */
+.panel-label {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  z-index: 5;
+  background: rgba(230, 235, 238, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-radius: 4px;               /* sharper, more editorial than rounded */
+  padding: 12px 18px 13px;
+  pointer-events: none;
+  box-shadow: 0 1px 2px rgba(17, 20, 24, 0.04);
+}
+.panel-label-eyebrow {
+  display: block;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.panel-label-title {
+  display: block;
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.15;
+  color: var(--ink);
+  max-width: 480px;
+}
+
+/* ── Side-tinted panel labels — distinguishes left vs right pane ──
+   The basemap is dark; the cream wash above keeps text readable, and
+   the colored left edge stripe + matching eyebrow make pane identity
+   instantly visible without forcing the user to read coordinates. */
+.panel-label { border-left-width: 4px; }
+#leftPanel  .panel-label { border-left-color: #1c5c84; }   /* Nr. 51 spinellblau */
+#rightPanel .panel-label { border-left-color: #6f8688; }   /* Nr. 58 petrolblau  */
+#leftPanel  .panel-label-eyebrow { color: #1c5c84; }
+#rightPanel .panel-label-eyebrow { color: #4d6f8a; }       /* darker variant */
+
+/* ── Top bar — masthead style ────────────────────────────── */
+#topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 88px;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 36px;
+}
+
+#brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+#gtLogo {
+  /* GT One Line is a wide horizontal mark — let width auto-scale to keep aspect ratio */
+  width: auto;
+  height: 52px;
+  max-width: 240px;
+  object-fit: contain;
+  display: block;
+  /* keep original logo color (no invert) — works on cream bg */
+}
+#brandTitle {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+#brandSubtitle {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+
+#showcaseNav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 24px;
+}
+#showcaseNav .navLink {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+#showcaseNav .navLink:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#sceneMeta {
+  text-align: right;
+}
+#sceneStep {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+#sceneStep .of { color: var(--dim); margin: 0 6px; opacity: 0.6; }
+#sceneTitle {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  line-height: 1.15;
+}
+
+/* ── Caption bar — the analytical takeaway ───────────────── */
+#captionBar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 112px;
+  z-index: 10;
+  background: var(--legend-bg);
+  border-top: 1px solid var(--rule);
+  padding: 18px 40px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#captionText {
+  font-family: var(--serif);
+  font-size: 20px;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: 1500px;
+  margin-bottom: 10px;
+  /* Subtle drop-cap-ish first letter via inherited Source Serif — feels editorial */
+}
+#captionMeta {
+  display: flex;
+  gap: 22px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dim);
+  letter-spacing: 0.3px;
+}
+#captionMeta span::before {
+  content: "▪";
+  color: var(--accent);
+  margin-right: 7px;
+  font-weight: 700;
+}
+
+/* ── Presenter controls (hidden by default) ──────────────── */
+#presenter {
+  position: fixed;
+  bottom: 128px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 6px;
+  box-shadow: 0 2px 12px rgba(17, 20, 24, 0.08);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#presenter.presenter-hidden {
+  opacity: 0;
+  transform: translate(-50%, 12px);
+  pointer-events: none;
+}
+#presenter button {
+  background: transparent;
+  color: var(--ink);
+  border: none;
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+#presenter button:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+#presenter button.active {
+  background: var(--accent);
+  color: #fff;
+}
+#presenter button.active:hover {
+  background: #3a5a76;             /* Nr. 51 darkened — hover/active accent */
+  color: #fff;
+}
+#presenter .presenter-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--rule);
+  margin: 0 4px;
+}
+#presenter #syncBtn {
+  width: auto;
+  padding: 0 14px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+}
+
+/* ── Help overlay ─────────────────────────────────────────── */
+#helpOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(230, 235, 238, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+#helpOverlay.help-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.help-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 42px 52px;
+  max-width: 580px;
+  box-shadow: 0 8px 32px rgba(17, 20, 24, 0.10);
+}
+.help-card h2 {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 26px;
+  color: var(--ink);
+  letter-spacing: -0.4px;
+}
+.help-card dl {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 14px 20px;
+  font-family: var(--serif);
+  font-size: 16px;
+}
+.help-card dt {
+  font-family: var(--sans);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.2px;
+}
+.help-card dd { color: var(--ink); }
+.help-foot {
+  margin-top: 26px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--dim);
+}
+.help-foot kbd {
+  background: var(--legend-bg);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ── Progress bar ─────────────────────────────────────────── */
+#progress {
+  position: fixed;
+  bottom: 112px;                     /* sits flush above caption bar */
+  left: 0; right: 0;
+  height: 2px;
+  z-index: 8;
+  background: var(--rule);
+  pointer-events: none;
+}
+#progressFill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* ── Per-panel legend overlay ─────────────────────────────── */
+.panel-legend {
+  position: absolute;
+  bottom: 22px;
+  left: 22px;
+  z-index: 6;
+  background: rgba(230, 235, 238, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 12px 16px 12px;
+  max-width: 280px;
+  box-shadow: 0 1px 3px rgba(17, 20, 24, 0.06);
+  pointer-events: none;
+}
+.panel-legend.legend-hidden {
+  display: none;
+}
+.legend-title {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px 0;
+}
+.legend-swatch {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(17, 20, 24, 0.18);
+  flex-shrink: 0;
+}
+.legend-label {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.1px;
+  line-height: 1.3;
+}
+
+/* ── Bivariate 3×3 legend (Stevens 2015 layout) ───────────── */
+.legend-bivariate { font-family: var(--sans); }
+.legend-bivariate .legend-title { margin-bottom: 10px; }
+.bivar-axes {
+  display: grid;
+  grid-template-columns: 14px 84px;
+  grid-template-rows: 84px 16px 14px;
+  gap: 2px;
+  align-items: center;
+}
+.bivar-y-label {
+  grid-column: 1; grid-row: 1;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+}
+.bivar-grid {
+  grid-column: 2; grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 1px;
+  width: 84px; height: 84px;
+  /* CSS grid fills row-by-row; the renderer feeds palette[] in
+     bivar_class order (obesity*3 + lila), but visually we want
+     LOW obesity at the BOTTOM. Rotate display so row 0 is the bottom. */
+  transform: scaleY(-1);
+}
+.bivar-cell {
+  display: block;
+  border-radius: 1px;
+  /* Re-flip each cell so the fill colors stay upright after the parent flip. */
+  transform: scaleY(-1);
+}
+.bivar-x-label {
+  grid-column: 2; grid-row: 2;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+}
+.bivar-corner-low,
+.bivar-corner-high {
+  grid-column: 2; grid-row: 3;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--dim);
+}
+.bivar-corner-low  { justify-self: start; }
+.bivar-corner-high { justify-self: end; grid-row: 3; }
+
+/* ── Esri overrides — clean editorial look ────────────────── */
+.esri-attribution { display: none !important; }
+.esri-component.esri-zoom {
+  background: transparent;
+  box-shadow: none;
+}
+.esri-component.esri-zoom .esri-widget--button {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+.esri-component.esri-zoom .esri-widget--button:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}

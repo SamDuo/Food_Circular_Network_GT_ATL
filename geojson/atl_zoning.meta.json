@@ -1,0 +1,7 @@
+{
+  "source": "https://gis.atlantaga.gov/dpcd/rest/services/LandUsePlanning/LandUsePlanning/MapServer/0",
+  "fetched_at": "2026-05-05T13:41:18Z",
+  "feature_count": 2967,
+  "size_bytes": 5380793,
+  "script": "scripts/fetch_atlanta_landuse.py"
+}
