@@ -1,0 +1,20 @@
+# Exported / generated map dashboards (Folium, Leaflet, kepler.gl, Plotly).
+# These are OUTPUT, not hand-written code, so stop counting them as HTML.
+*.html linguist-generated
+
+# Minified / vendored third-party assets.
+*.min.js   linguist-vendored
+*.min.css  linguist-vendored
+vendor/**  linguist-vendored
+libs/**    linguist-vendored
+dist/**    linguist-generated
+build/**   linguist-generated
+
+# (Optional) If a real Python/notebook folder is being skipped, force it
+# to count by uncommenting and pointing at the folder:
+# notebooks/** linguist-detectable=true
+# src/**       linguist-detectable=true
+
+# NOTE: if you DO have a hand-written .html you want credited, add an
+# exception line above the  *.html  rule, e.g.:
+#   index.html linguist-generated=false
