@@ -1,0 +1,290 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4178,
+                                                              33.7559
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Atlanta Community Food Bank HQ",
+                                            "node_type":  "FoodBank",
+                                            "address":  "3400 N Desert Dr, Atlanta, GA 30344",
+                                            "capacity_lbs":  25000,
+                                            "hours":  "Mon-Fri 8:00-17:00",
+                                            "contact":  "info@acfb.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3694,
+                                                              33.7589
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Second Helpings Atlanta",
+                                            "node_type":  "FoodBank",
+                                            "address":  "970 Jefferson St NW, Atlanta, GA 30318",
+                                            "capacity_lbs":  12000,
+                                            "hours":  "Mon-Fri 8:00-16:00",
+                                            "contact":  "info@secondhelpingsatlanta.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4075,
+                                                              33.7628
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "St. Anthony of Padua Church Pantry",
+                                            "node_type":  "ChurchPantry",
+                                            "address":  "928 Gordon St SW, Atlanta, GA 30310",
+                                            "capacity_lbs":  3200,
+                                            "hours":  "Wed-Sat 10:00-15:00",
+                                            "contact":  "pantry@stanthonyatl.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3504,
+                                                              33.7648
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Clifton Sanctuary Ministries",
+                                            "node_type":  "Shelter",
+                                            "address":  "369 Connecticut Ave NE, Atlanta, GA 30307",
+                                            "capacity_lbs":  2800,
+                                            "hours":  "Daily 7:00-19:00",
+                                            "contact":  "services@csmatlanta.org",
+                                            "status":  "At Capacity"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4101,
+                                                              33.7401
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Community Fridge Atlanta - Mechanicsville",
+                                            "node_type":  "CommunityFridge",
+                                            "address":  "218 McDonough Blvd SE, Atlanta, GA 30315",
+                                            "capacity_lbs":  900,
+                                            "hours":  "24/7",
+                                            "contact":  "mechanicsville@communityfridgeatl.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.349,
+                                                              33.7368
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Community Fridge - East Atlanta",
+                                            "node_type":  "CommunityFridge",
+                                            "address":  "1275 Glenwood Ave SE, Atlanta, GA 30316",
+                                            "capacity_lbs":  950,
+                                            "hours":  "24/7",
+                                            "contact":  "eastatl@communityfridgeatl.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3816,
+                                                              33.7437
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Hosea Helps",
+                                            "node_type":  "MutualAid",
+                                            "address":  "4770 Covington Hwy, Decatur, GA 30035",
+                                            "capacity_lbs":  5000,
+                                            "hours":  "Mon-Fri 9:00-17:00",
+                                            "contact":  "help@hoseahelps.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3795,
+                                                              33.7408
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Open Door Community",
+                                            "node_type":  "Shelter",
+                                            "address":  "168 Moreland Ave SE, Atlanta, GA 30316",
+                                            "capacity_lbs":  2600,
+                                            "hours":  "Daily 8:00-18:00",
+                                            "contact":  "care@opendooratl.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4097,
+                                                              33.8037
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Latin American Association",
+                                            "node_type":  "SeniorCenter",
+                                            "address":  "2750 Buford Hwy NE, Atlanta, GA 30324",
+                                            "capacity_lbs":  2200,
+                                            "hours":  "Mon-Fri 9:00-17:00",
+                                            "contact":  "services@thelaa.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4013,
+                                                              33.7174
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Emmaus House",
+                                            "node_type":  "MutualAid",
+                                            "address":  "1017 Hank Aaron Dr SW, Atlanta, GA 30315",
+                                            "capacity_lbs":  1800,
+                                            "hours":  "Mon-Thu 9:00-16:00",
+                                            "contact":  "info@emmaushouseatlanta.org",
+                                            "status":  "Seasonal"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3893,
+                                                              33.7544
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Travelers Aid Atlanta",
+                                            "node_type":  "Shelter",
+                                            "address":  "75 Marietta St NW, Atlanta, GA 30303",
+                                            "capacity_lbs":  2400,
+                                            "hours":  "Daily 8:00-20:00",
+                                            "contact":  "services@travelersaidatlanta.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3601,
+                                                              33.8302
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Interfaith Food Pantry - Buckhead",
+                                            "node_type":  "ChurchPantry",
+                                            "address":  "2985 Piedmont Rd NE, Atlanta, GA 30305",
+                                            "capacity_lbs":  1700,
+                                            "hours":  "Tue-Thu 10:00-14:00",
+                                            "contact":  "buckheadpantry@interfaithatl.org",
+                                            "status":  "Seasonal"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.382,
+                                                              33.7793
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Midtown Assistance Center",
+                                            "node_type":  "FoodBank",
+                                            "address":  "30 Porter Pl NE, Atlanta, GA 30308",
+                                            "capacity_lbs":  3600,
+                                            "hours":  "Mon-Fri 9:00-16:00",
+                                            "contact":  "intake@midtownassistancecenter.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.4192,
+                                                              33.735
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Community Fridge - West End",
+                                            "node_type":  "CommunityFridge",
+                                            "address":  "1115 Ralph David Abernathy Blvd SW, Atlanta, GA 30310",
+                                            "capacity_lbs":  920,
+                                            "hours":  "24/7",
+                                            "contact":  "westend@communityfridgeatl.org",
+                                            "status":  "Active"
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -84.3615,
+                                                              33.8506
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "location_name":  "Jewish Family \u0026 Career Services",
+                                            "node_type":  "SeniorCenter",
+                                            "address":  "4549 Chamblee Dunwoody Rd, Atlanta, GA 30338",
+                                            "capacity_lbs":  2100,
+                                            "hours":  "Mon-Fri 9:00-17:00",
+                                            "contact":  "support@jfcsatl.org",
+                                            "status":  "Active"
+                                        }
+                     }
+                 ]
+}

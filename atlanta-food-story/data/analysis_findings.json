@@ -1,0 +1,1220 @@
+{
+  "generated_at": "2026-04-28T15:43:25",
+  "n_tracts_analyzed": 530,
+  "pullnumbers": {
+    "n_tracts": 530,
+    "n_lila": 57,
+    "lila_pct": 10.8,
+    "n_severe_crit": 49,
+    "pop_total": 1823153,
+    "no_vehicle_pop": 100265,
+    "avg_mrfei": 38.0,
+    "fastfood_lila_vs_nonlila": {
+      "lila_mean": 0.63,
+      "non_lila_mean": 1.0,
+      "ratio": 0.63
+    },
+    "convenience_lila_vs_nonlila": {
+      "lila_mean": 0.89,
+      "non_lila_mean": 0.55,
+      "ratio": 1.63
+    },
+    "supermarket_lila_vs_nonlila": {
+      "lila_mean": 0.05,
+      "non_lila_mean": 0.24
+    },
+    "no_vehicle_lila_vs_nonlila": {
+      "lila_mean_pct": 7.02,
+      "non_lila_mean_pct": 5.98,
+      "diff_pct_pts": 1.04
+    }
+  },
+  "georgia_tech_tract": {
+    "match": "containment",
+    "tract_name": "Census Tract 10.02",
+    "census_tract_id": "13121001002",
+    "neighborhood": "Georgia Tech",
+    "food_access_gap": 65,
+    "gap_label": "Severe",
+    "mrfei": 0.0,
+    "is_lila": false,
+    "median_income": 43938,
+    "poverty_rate": 32.5,
+    "pct_no_vehicle": 26.3,
+    "supermarket_count": 0,
+    "fastfood_count": 1,
+    "convenience_count": 2,
+    "nearest_healthy_miles": 0.55,
+    "food_insecurity_rate": 19.0
+  },
+  "named_extremes": {
+    "food_access_gap": {
+      "top": [
+        {
+          "census_tract_id": "13089021911",
+          "tract_name": "Census Tract 219.11",
+          "neighborhood": "Stone Mountain",
+          "food_access_gap": 80,
+          "gap_label": "Critical",
+          "is_lila": true,
+          "median_income": 43661.0,
+          "poverty_rate": 38.9,
+          "fastfood_count": 0,
+          "convenience_count": 1,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 12.1
+        },
+        {
+          "census_tract_id": "13121010604",
+          "tract_name": "Census Tract 106.04",
+          "neighborhood": "College Park",
+          "food_access_gap": 75,
+          "gap_label": "Critical",
+          "is_lila": true,
+          "median_income": 28239.0,
+          "poverty_rate": 33.0,
+          "fastfood_count": 0,
+          "convenience_count": 3,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 31.9
+        },
+        {
+          "census_tract_id": "13121008202",
+          "tract_name": "Census Tract 82.02",
+          "neighborhood": "Adamsville",
+          "food_access_gap": 70,
+          "gap_label": "Critical",
+          "is_lila": true,
+          "median_income": null,
+          "poverty_rate": 47.7,
+          "fastfood_count": 0,
+          "convenience_count": 1,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 18.8
+        },
+        {
+          "census_tract_id": "13121010537",
+          "tract_name": "Census Tract 105.37",
+          "neighborhood": "College Park",
+          "food_access_gap": 67,
+          "gap_label": "Severe",
+          "is_lila": true,
+          "median_income": 83291.0,
+          "poverty_rate": 23.3,
+          "fastfood_count": 1,
+          "convenience_count": 0,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 0.0
+        },
+        {
+          "census_tract_id": "13089023446",
+          "tract_name": "Census Tract 234.46",
+          "neighborhood": "Avondale Estates",
+          "food_access_gap": 67,
+          "gap_label": "Severe",
+          "is_lila": true,
+          "median_income": 39141.0,
+          "poverty_rate": 25.0,
+          "fastfood_count": 1,
+          "convenience_count": 2,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 1.0
+        }
+      ],
+      "bottom": [
+        {
+          "census_tract_id": "13121009504",
+          "tract_name": "Census Tract 95.04",
+          "neighborhood": "Buckhead",
+          "food_access_gap": 0,
+          "gap_label": "Adequate",
+          "is_lila": false,
+          "median_income": 92109.0,
+          "poverty_rate": 8.6,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 1,
+          "pct_no_vehicle": 1.8
+        },
+        {
+          "census_tract_id": "13089021225",
+          "tract_name": "Census Tract 212.25",
+          "neighborhood": "Chamblee",
+          "food_access_gap": 0,
+          "gap_label": "Adequate",
+          "is_lila": false,
+          "median_income": 66591.0,
+          "poverty_rate": 7.5,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 1,
+          "pct_no_vehicle": 1.5
+        },
+        {
+          "census_tract_id": "13089021213",
+          "tract_name": "Census Tract 212.13",
+          "neighborhood": "Chamblee",
+          "food_access_gap": 0,
+          "gap_label": "Adequate",
+          "is_lila": false,
+          "median_income": 220429.0,
+          "poverty_rate": 1.1,
+          "fastfood_count": 1,
+          "convenience_count": 0,
+          "supermarket_count": 1,
+          "pct_no_vehicle": 0.0
+        },
+        {
+          "census_tract_id": "13121001702",
+          "tract_name": "Census Tract 17.02",
+          "neighborhood": "Old Fourth Ward",
+          "food_access_gap": 0,
+          "gap_label": "Adequate",
+          "is_lila": false,
+          "median_income": 120304.0,
+          "poverty_rate": 8.1,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 1.2
+        },
+        {
+          "census_tract_id": "13121008801",
+          "tract_name": "Census Tract 88.01",
+          "neighborhood": "West Highlands",
+          "food_access_gap": 0,
+          "gap_label": "Adequate",
+          "is_lila": false,
+          "median_income": 111157.0,
+          "poverty_rate": 3.5,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 3.8
+        }
+      ]
+    },
+    "food_insecurity_rate": {
+      "top": [
+        {
+          "census_tract_id": "13121006802",
+          "tract_name": "Census Tract 68.02",
+          "neighborhood": "South Atlanta",
+          "food_insecurity_rate": 67.5,
+          "gap_label": "Moderate",
+          "is_lila": false,
+          "median_income": 16282.0,
+          "poverty_rate": 84.7,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 68.2
+        },
+        {
+          "census_tract_id": "13121007808",
+          "tract_name": "Census Tract 78.08",
+          "neighborhood": "Adamsville",
+          "food_insecurity_rate": 64.6,
+          "gap_label": "Severe",
+          "is_lila": false,
+          "median_income": 15625.0,
+          "poverty_rate": 62.3,
+          "fastfood_count": 2,
+          "convenience_count": 3,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 40.6
+        },
+        {
+          "census_tract_id": "13089021204",
+          "tract_name": "Census Tract 212.04",
+          "neighborhood": "Chamblee",
+          "food_insecurity_rate": 59.8,
+          "gap_label": "Moderate",
+          "is_lila": false,
+          "median_income": 35268.0,
+          "poverty_rate": 43.6,
+          "fastfood_count": 0,
+          "convenience_count": 1,
+          "supermarket_count": 1,
+          "pct_no_vehicle": 38.2
+        },
+        {
+          "census_tract_id": "13121007807",
+          "tract_name": "Census Tract 78.07",
+          "neighborhood": "Adamsville",
+          "food_insecurity_rate": 57.3,
+          "gap_label": "Low",
+          "is_lila": false,
+          "median_income": 39668.0,
+          "poverty_rate": 14.1,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 44.6
+        },
+        {
+          "census_tract_id": "13121006801",
+          "tract_name": "Census Tract 68.01",
+          "neighborhood": "South Atlanta",
+          "food_insecurity_rate": 54.9,
+          "gap_label": "Low",
+          "is_lila": false,
+          "median_income": null,
+          "poverty_rate": 50.0,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 0,
+          "pct_no_vehicle": null
+        }
+      ],
+      "bottom": [
+        {
+          "census_tract_id": "13121009804",
+          "tract_name": "Census Tract 98.04",
+          "neighborhood": "Buckhead",
+          "food_insecurity_rate": 3.0,
+          "gap_label": "Low",
+          "is_lila": false,
+          "median_income": 250001.0,
+          "poverty_rate": 0.0,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 0.0
+        },
+        {
+          "census_tract_id": "13121009105",
+          "tract_name": "Census Tract 91.05",
+          "neighborhood": "Ansley Park",
+          "food_insecurity_rate": 3.5,
+          "gap_label": "Moderate",
+          "is_lila": false,
+          "median_income": 250001.0,
+          "poverty_rate": 0.0,
+          "fastfood_count": 4,
+          "convenience_count": 0,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 0.0
+        },
+        {
+          "census_tract_id": "13121010222",
+          "tract_name": "Census Tract 102.22",
+          "neighborhood": "Buckhead",
+          "food_insecurity_rate": 3.6,
+          "gap_label": "Low",
+          "is_lila": false,
+          "median_income": 197250.0,
+          "poverty_rate": 4.1,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 0,
+          "pct_no_vehicle": 0.0
+        },
+        {
+          "census_tract_id": "13089021213",
+          "tract_name": "Census Tract 212.13",
+          "neighborhood": "Chamblee",
+          "food_insecurity_rate": 3.7,
+          "gap_label": "Adequate",
+          "is_lila": false,
+          "median_income": 220429.0,
+          "poverty_rate": 1.1,
+          "fastfood_count": 1,
+          "convenience_count": 0,
+          "supermarket_count": 1,
+          "pct_no_vehicle": 0.0
+        },
+        {
+          "census_tract_id": "13121009501",
+          "tract_name": "Census Tract 95.01",
+          "neighborhood": "Buckhead",
+          "food_insecurity_rate": 3.7,
+          "gap_label": "Adequate",
+          "is_lila": false,
+          "median_income": 151404.0,
+          "poverty_rate": 3.4,
+          "fastfood_count": 0,
+          "convenience_count": 0,
+          "supermarket_count": 1,
+          "pct_no_vehicle": 0.0
+        }
+      ]
+    }
+  },
+  "morans_i": {
+    "food_access_gap": {
+      "variable": "food_access_gap",
+      "n": 530,
+      "I": 0.226,
+      "expected_I": -0.002,
+      "p_value": 0.0,
+      "interpretation": "moderate clustering"
+    },
+    "mrfei": {
+      "variable": "mrfei",
+      "n": 363,
+      "I": 0.175,
+      "expected_I": -0.003,
+      "p_value": 0.0,
+      "interpretation": "moderate clustering"
+    },
+    "food_insecurity_rate": {
+      "variable": "food_insecurity_rate",
+      "n": 528,
+      "I": 0.639,
+      "expected_I": -0.002,
+      "p_value": 0.0,
+      "interpretation": "strong clustering"
+    },
+    "convenience_count": {
+      "variable": "convenience_count",
+      "n": 530,
+      "I": 0.16,
+      "expected_I": -0.002,
+      "p_value": 0.0,
+      "interpretation": "moderate clustering"
+    },
+    "pct_no_vehicle": {
+      "variable": "pct_no_vehicle",
+      "n": 526,
+      "I": 0.279,
+      "expected_I": -0.002,
+      "p_value": 0.0,
+      "interpretation": "moderate clustering"
+    }
+  },
+  "neighborhood_effect": {
+    "model_A_no_place": {
+      "R2": 0.689,
+      "predictors": [
+        "median_income",
+        "poverty_rate"
+      ]
+    },
+    "model_B_with_place": {
+      "R2": 0.803,
+      "predictors": [
+        "median_income",
+        "poverty_rate",
+        "neighborhood_FE"
+      ],
+      "n_neighborhood_groups": 40
+    },
+    "delta_R2": 0.114,
+    "partial_F": 7.06,
+    "partial_F_p_value": 0.0,
+    "interpretation": "Where you live still explains 11% of variance in food insecurity even after controlling for household income and poverty rate."
+  },
+  "twin_tracts": [
+    {
+      "income_band": "$40,000 \u2013 $49,999",
+      "high_gap": {
+        "neighborhood": "Stone Mountain",
+        "tract_name": "Census Tract 219.11",
+        "food_access_gap": 80,
+        "median_income": 43661,
+        "supermarket_count": 0,
+        "convenience_count": 1,
+        "is_lila": true
+      },
+      "low_gap": {
+        "neighborhood": "Lakewood Heights",
+        "tract_name": "Census Tract 73.01",
+        "food_access_gap": 5,
+        "median_income": 43631,
+        "supermarket_count": 0,
+        "convenience_count": 1,
+        "is_lila": false
+      },
+      "gap_difference": 75
+    },
+    {
+      "income_band": "$50,000 \u2013 $59,999",
+      "high_gap": {
+        "neighborhood": "College Park",
+        "tract_name": "Census Tract 104.01",
+        "food_access_gap": 65,
+        "median_income": 56883,
+        "supermarket_count": 0,
+        "convenience_count": 0,
+        "is_lila": true
+      },
+      "low_gap": {
+        "neighborhood": "Georgia Tech",
+        "tract_name": "Census Tract 19.01",
+        "food_access_gap": 0,
+        "median_income": 56204,
+        "supermarket_count": 0,
+        "convenience_count": 0,
+        "is_lila": false
+      },
+      "gap_difference": 65
+    },
+    {
+      "income_band": "$80,000 \u2013 $89,999",
+      "high_gap": {
+        "neighborhood": "College Park",
+        "tract_name": "Census Tract 105.37",
+        "food_access_gap": 67,
+        "median_income": 83291,
+        "supermarket_count": 0,
+        "convenience_count": 0,
+        "is_lila": true
+      },
+      "low_gap": {
+        "neighborhood": "Lindbergh",
+        "tract_name": "Census Tract 92.03",
+        "food_access_gap": 5,
+        "median_income": 81096,
+        "supermarket_count": 0,
+        "convenience_count": 0,
+        "is_lila": false
+      },
+      "gap_difference": 62
+    },
+    {
+      "income_band": "$60,000 \u2013 $69,999",
+      "high_gap": {
+        "neighborhood": "Stone Mountain",
+        "tract_name": "Census Tract 232.12",
+        "food_access_gap": 60,
+        "median_income": 64698,
+        "supermarket_count": 0,
+        "convenience_count": 0,
+        "is_lila": true
+      },
+      "low_gap": {
+        "neighborhood": "Chamblee",
+        "tract_name": "Census Tract 212.25",
+        "food_access_gap": 0,
+        "median_income": 66591,
+        "supermarket_count": 1,
+        "convenience_count": 0,
+        "is_lila": false
+      },
+      "gap_difference": 60
+    },
+    {
+      "income_band": "$20,000 \u2013 $29,999",
+      "high_gap": {
+        "neighborhood": "College Park",
+        "tract_name": "Census Tract 106.04",
+        "food_access_gap": 75,
+        "median_income": 28239,
+        "supermarket_count": 0,
+        "convenience_count": 3,
+        "is_lila": true
+      },
+      "low_gap": {
+        "neighborhood": "Capitol View",
+        "tract_name": "Census Tract 67.01",
+        "food_access_gap": 17,
+        "median_income": 27946,
+        "supermarket_count": 0,
+        "convenience_count": 0,
+        "is_lila": false
+      },
+      "gap_difference": 58
+    }
+  ],
+  "correlations": {
+    "vs_food_access_gap": [
+      {
+        "predictor": "poverty_rate",
+        "n": 528,
+        "pearson_r": 0.377,
+        "spearman_rho": 0.414,
+        "p_value": 2.767834039037338e-19,
+        "r_squared": 0.142
+      },
+      {
+        "predictor": "obesity_rate",
+        "n": 528,
+        "pearson_r": 0.369,
+        "spearman_rho": 0.367,
+        "p_value": 1.6504242409037339e-18,
+        "r_squared": 0.136
+      },
+      {
+        "predictor": "convenience_count",
+        "n": 530,
+        "pearson_r": 0.366,
+        "spearman_rho": 0.376,
+        "p_value": 3.148443006306687e-18,
+        "r_squared": 0.134
+      },
+      {
+        "predictor": "food_insecurity_rate",
+        "n": 528,
+        "pearson_r": 0.354,
+        "spearman_rho": 0.385,
+        "p_value": 4.561754992312177e-17,
+        "r_squared": 0.126
+      },
+      {
+        "predictor": "median_income",
+        "n": 519,
+        "pearson_r": -0.338,
+        "spearman_rho": -0.398,
+        "p_value": 2.5608772674221868e-15,
+        "r_squared": 0.114
+      },
+      {
+        "predictor": "diabetes_rate",
+        "n": 528,
+        "pearson_r": 0.33,
+        "spearman_rho": 0.374,
+        "p_value": 7.476337880907444e-15,
+        "r_squared": 0.109
+      },
+      {
+        "predictor": "nearest_healthy_miles",
+        "n": 530,
+        "pearson_r": 0.324,
+        "spearman_rho": 0.291,
+        "p_value": 1.9368235666523292e-14,
+        "r_squared": 0.105
+      },
+      {
+        "predictor": "snap_rate",
+        "n": 526,
+        "pearson_r": 0.295,
+        "spearman_rho": 0.357,
+        "p_value": 5.457370714966307e-12,
+        "r_squared": 0.087
+      },
+      {
+        "predictor": "supermarket_count",
+        "n": 530,
+        "pearson_r": -0.277,
+        "spearman_rho": -0.284,
+        "p_value": 8.171631564721814e-11,
+        "r_squared": 0.077
+      },
+      {
+        "predictor": "pct_no_vehicle",
+        "n": 526,
+        "pearson_r": 0.267,
+        "spearman_rho": 0.26,
+        "p_value": 4.6502183621491715e-10,
+        "r_squared": 0.071
+      },
+      {
+        "predictor": "fastfood_count",
+        "n": 530,
+        "pearson_r": 0.189,
+        "spearman_rho": 0.272,
+        "p_value": 1.1833661884969168e-05,
+        "r_squared": 0.036
+      },
+      {
+        "predictor": "unemployment_rate",
+        "n": 527,
+        "pearson_r": 0.184,
+        "spearman_rho": 0.27,
+        "p_value": 2.1151689903456352e-05,
+        "r_squared": 0.034
+      },
+      {
+        "predictor": "grocery_count",
+        "n": 530,
+        "pearson_r": -0.17,
+        "spearman_rho": -0.252,
+        "p_value": 8.661256224091792e-05,
+        "r_squared": 0.029
+      },
+      {
+        "predictor": "farmers_market_count",
+        "n": 530,
+        "pearson_r": -0.076,
+        "spearman_rho": -0.073,
+        "p_value": 0.08224726855590912,
+        "r_squared": 0.006
+      }
+    ],
+    "vs_mrfei": [
+      {
+        "predictor": "grocery_count",
+        "n": 363,
+        "pearson_r": 0.438,
+        "spearman_rho": 0.615,
+        "p_value": 1.7431172777603258e-18,
+        "r_squared": 0.192
+      },
+      {
+        "predictor": "convenience_count",
+        "n": 363,
+        "pearson_r": -0.37,
+        "spearman_rho": -0.373,
+        "p_value": 3.0856572381638984e-13,
+        "r_squared": 0.137
+      },
+      {
+        "predictor": "fastfood_count",
+        "n": 363,
+        "pearson_r": -0.309,
+        "spearman_rho": -0.403,
+        "p_value": 1.8860283367068716e-09,
+        "r_squared": 0.095
+      },
+      {
+        "predictor": "nearest_healthy_miles",
+        "n": 363,
+        "pearson_r": -0.3,
+        "spearman_rho": -0.379,
+        "p_value": 5.427019724334484e-09,
+        "r_squared": 0.09
+      },
+      {
+        "predictor": "supermarket_count",
+        "n": 363,
+        "pearson_r": 0.297,
+        "spearman_rho": 0.375,
+        "p_value": 7.497679110909352e-09,
+        "r_squared": 0.088
+      },
+      {
+        "predictor": "farmers_market_count",
+        "n": 363,
+        "pearson_r": 0.186,
+        "spearman_rho": 0.2,
+        "p_value": 0.00037318491304393954,
+        "r_squared": 0.035
+      },
+      {
+        "predictor": "food_insecurity_rate",
+        "n": 363,
+        "pearson_r": 0.121,
+        "spearman_rho": 0.057,
+        "p_value": 0.021280073807335917,
+        "r_squared": 0.015
+      },
+      {
+        "predictor": "poverty_rate",
+        "n": 363,
+        "pearson_r": 0.118,
+        "spearman_rho": 0.066,
+        "p_value": 0.024152456668381908,
+        "r_squared": 0.014
+      },
+      {
+        "predictor": "pct_no_vehicle",
+        "n": 363,
+        "pearson_r": 0.106,
+        "spearman_rho": 0.068,
+        "p_value": 0.04339380734385811,
+        "r_squared": 0.011
+      },
+      {
+        "predictor": "snap_rate",
+        "n": 363,
+        "pearson_r": 0.102,
+        "spearman_rho": 0.048,
+        "p_value": 0.05108974139999603,
+        "r_squared": 0.011
+      },
+      {
+        "predictor": "diabetes_rate",
+        "n": 363,
+        "pearson_r": 0.09,
+        "spearman_rho": 0.035,
+        "p_value": 0.08637737858174971,
+        "r_squared": 0.008
+      },
+      {
+        "predictor": "obesity_rate",
+        "n": 363,
+        "pearson_r": 0.082,
+        "spearman_rho": 0.06,
+        "p_value": 0.11844473937860679,
+        "r_squared": 0.007
+      },
+      {
+        "predictor": "median_income",
+        "n": 358,
+        "pearson_r": 0.047,
+        "spearman_rho": 0.016,
+        "p_value": 0.37076250628865043,
+        "r_squared": 0.002
+      },
+      {
+        "predictor": "unemployment_rate",
+        "n": 363,
+        "pearson_r": 0.046,
+        "spearman_rho": -0.016,
+        "p_value": 0.3800801148466439,
+        "r_squared": 0.002
+      }
+    ],
+    "vs_food_insecurity": [
+      {
+        "predictor": "obesity_rate",
+        "n": 528,
+        "pearson_r": 0.919,
+        "spearman_rho": 0.922,
+        "p_value": 9.422505175054468e-215,
+        "r_squared": 0.845
+      },
+      {
+        "predictor": "diabetes_rate",
+        "n": 528,
+        "pearson_r": 0.813,
+        "spearman_rho": 0.787,
+        "p_value": 1.235174254555993e-125,
+        "r_squared": 0.661
+      },
+      {
+        "predictor": "snap_rate",
+        "n": 526,
+        "pearson_r": 0.803,
+        "spearman_rho": 0.839,
+        "p_value": 5.41999597465964e-120,
+        "r_squared": 0.645
+      },
+      {
+        "predictor": "poverty_rate",
+        "n": 528,
+        "pearson_r": 0.78,
+        "spearman_rho": 0.759,
+        "p_value": 2.266457543320709e-109,
+        "r_squared": 0.609
+      },
+      {
+        "predictor": "median_income",
+        "n": 519,
+        "pearson_r": -0.729,
+        "spearman_rho": -0.873,
+        "p_value": 4.0367259815020095e-87,
+        "r_squared": 0.531
+      },
+      {
+        "predictor": "pct_no_vehicle",
+        "n": 526,
+        "pearson_r": 0.537,
+        "spearman_rho": 0.44,
+        "p_value": 1.4893893694019223e-40,
+        "r_squared": 0.288
+      },
+      {
+        "predictor": "unemployment_rate",
+        "n": 527,
+        "pearson_r": 0.44,
+        "spearman_rho": 0.464,
+        "p_value": 2.0571114766942467e-26,
+        "r_squared": 0.194
+      },
+      {
+        "predictor": "grocery_count",
+        "n": 528,
+        "pearson_r": 0.212,
+        "spearman_rho": 0.147,
+        "p_value": 9.358234552102337e-07,
+        "r_squared": 0.045
+      },
+      {
+        "predictor": "supermarket_count",
+        "n": 528,
+        "pearson_r": -0.186,
+        "spearman_rho": -0.189,
+        "p_value": 1.6929560367701195e-05,
+        "r_squared": 0.035
+      },
+      {
+        "predictor": "convenience_count",
+        "n": 528,
+        "pearson_r": 0.153,
+        "spearman_rho": 0.166,
+        "p_value": 0.0004356235623488222,
+        "r_squared": 0.023
+      },
+      {
+        "predictor": "fastfood_count",
+        "n": 528,
+        "pearson_r": -0.124,
+        "spearman_rho": -0.161,
+        "p_value": 0.004252086846827274,
+        "r_squared": 0.015
+      },
+      {
+        "predictor": "farmers_market_count",
+        "n": 528,
+        "pearson_r": -0.009,
+        "spearman_rho": -0.018,
+        "p_value": 0.8398872435277167,
+        "r_squared": 0.0
+      },
+      {
+        "predictor": "nearest_healthy_miles",
+        "n": 528,
+        "pearson_r": 0.009,
+        "spearman_rho": -0.011,
+        "p_value": 0.8330446337959135,
+        "r_squared": 0.0
+      }
+    ]
+  },
+  "anova_by_gap_label": [
+    {
+      "predictor": "nearest_healthy_miles",
+      "F": 23.33,
+      "p_value": 9.009886356795312e-18,
+      "means_by_group": {
+        "Adequate": 0.5225333333333334,
+        "Low": 0.9911111111111113,
+        "Moderate": 0.870492957746479,
+        "Severe": 1.4093478260869565,
+        "Critical": 1.5499999999999998
+      }
+    },
+    {
+      "predictor": "obesity_rate",
+      "F": 22.36,
+      "p_value": 4.627343586306047e-17,
+      "means_by_group": {
+        "Adequate": 26.160810810810812,
+        "Low": 30.580952380952375,
+        "Moderate": 31.179577464788732,
+        "Severe": 35.36304347826087,
+        "Critical": 43.26666666666667
+      }
+    },
+    {
+      "predictor": "poverty_rate",
+      "F": 21.34,
+      "p_value": 2.52910641512186e-16,
+      "means_by_group": {
+        "Adequate": 7.80608108108108,
+        "Low": 13.725925925925928,
+        "Moderate": 17.469718309859154,
+        "Severe": 20.026086956521738,
+        "Critical": 39.86666666666667
+      }
+    },
+    {
+      "predictor": "food_insecurity_rate",
+      "F": 21.09,
+      "p_value": 3.860897415349219e-16,
+      "means_by_group": {
+        "Adequate": 12.224324324324323,
+        "Low": 19.401587301587305,
+        "Moderate": 21.212676056338026,
+        "Severe": 26.076086956521735,
+        "Critical": 44.9
+      }
+    },
+    {
+      "predictor": "diabetes_rate",
+      "F": 19.48,
+      "p_value": 5.9413666550777315e-15,
+      "means_by_group": {
+        "Adequate": 9.155405405405405,
+        "Low": 12.290476190476191,
+        "Moderate": 12.382394366197182,
+        "Severe": 14.621739130434783,
+        "Critical": 20.166666666666668
+      }
+    },
+    {
+      "predictor": "convenience_count",
+      "F": 18.86,
+      "p_value": 1.6751330377760937e-14,
+      "means_by_group": {
+        "Adequate": 0.28,
+        "Low": 0.4021164021164021,
+        "Moderate": 0.8661971830985915,
+        "Severe": 1.391304347826087,
+        "Critical": 1.6666666666666667
+      }
+    },
+    {
+      "predictor": "median_income",
+      "F": 17.8,
+      "p_value": 5.2875556757610564e-11,
+      "means_by_group": {
+        "Adequate": 114423.61224489796,
+        "Low": 97042.61081081082,
+        "Moderate": 84144.5035971223,
+        "Severe": 58210.30434782609,
+        "Critical": 35950.0
+      }
+    },
+    {
+      "predictor": "snap_rate",
+      "F": 14.64,
+      "p_value": 2.43368123691983e-11,
+      "means_by_group": {
+        "Adequate": 6.946621621621621,
+        "Low": 13.683510638297872,
+        "Moderate": 15.05177304964539,
+        "Severe": 19.854347826086958,
+        "Critical": 37.9
+      }
+    },
+    {
+      "predictor": "supermarket_count",
+      "F": 12.32,
+      "p_value": 1.3964698741003307e-09,
+      "means_by_group": {
+        "Adequate": 0.38666666666666666,
+        "Low": 0.26455026455026454,
+        "Moderate": 0.06338028169014084,
+        "Severe": 0.0,
+        "Critical": 0.0
+      }
+    },
+    {
+      "predictor": "pct_no_vehicle",
+      "F": 11.59,
+      "p_value": 5.043747074144992e-09,
+      "means_by_group": {
+        "Adequate": 3.347297297297297,
+        "Low": 5.4,
+        "Moderate": 8.452482269503548,
+        "Severe": 9.48913043478261,
+        "Critical": 20.933333333333334
+      }
+    },
+    {
+      "predictor": "unemployment_rate",
+      "F": 7.0,
+      "p_value": 1.6985808690968246e-05,
+      "means_by_group": {
+        "Adequate": 4.256756756756757,
+        "Low": 6.47037037037037,
+        "Moderate": 6.478014184397163,
+        "Severe": 8.43695652173913,
+        "Critical": 14.366666666666667
+      }
+    },
+    {
+      "predictor": "fastfood_count",
+      "F": 5.77,
+      "p_value": 0.00015097800871725244,
+      "means_by_group": {
+        "Adequate": 0.6,
+        "Low": 0.7037037037037037,
+        "Moderate": 1.4929577464788732,
+        "Severe": 1.6521739130434783,
+        "Critical": 0.0
+      }
+    },
+    {
+      "predictor": "grocery_count",
+      "F": 4.15,
+      "p_value": 0.0025408457952663956,
+      "means_by_group": {
+        "Adequate": 0.8,
+        "Low": 0.5079365079365079,
+        "Moderate": 0.4507042253521127,
+        "Severe": 0.08695652173913043,
+        "Critical": 0.0
+      }
+    },
+    {
+      "predictor": "farmers_market_count",
+      "F": 1.19,
+      "p_value": 0.3161300120089953,
+      "means_by_group": {
+        "Adequate": 0.06666666666666667,
+        "Low": 0.037037037037037035,
+        "Moderate": 0.035211267605633804,
+        "Severe": 0.0,
+        "Critical": 0.0
+      }
+    }
+  ],
+  "lila_vs_nonlila_ttests": [
+    {
+      "predictor": "obesity_rate",
+      "lila_mean": 38.12,
+      "non_lila_mean": 29.01,
+      "diff": 9.11,
+      "cohen_d": 1.548,
+      "t": 14.03,
+      "p_value": 2.1347696157697254e-25,
+      "n_lila": 57,
+      "n_non_lila": 471
+    },
+    {
+      "predictor": "nearest_healthy_miles",
+      "lila_mean": 1.68,
+      "non_lila_mean": 0.77,
+      "diff": 0.91,
+      "cohen_d": 1.475,
+      "t": 10.31,
+      "p_value": 1.4087232855695782e-15,
+      "n_lila": 57,
+      "n_non_lila": 473
+    },
+    {
+      "predictor": "diabetes_rate",
+      "lila_mean": 16.62,
+      "non_lila_mean": 11.09,
+      "diff": 5.53,
+      "cohen_d": 1.349,
+      "t": 11.51,
+      "p_value": 2.233266470352113e-19,
+      "n_lila": 57,
+      "n_non_lila": 471
+    },
+    {
+      "predictor": "median_income",
+      "lila_mean": 50233.45,
+      "non_lila_mean": 100120.63,
+      "diff": -49887.18,
+      "cohen_d": -1.295,
+      "t": -16.93,
+      "p_value": 6.155125601252609e-48,
+      "n_lila": 55,
+      "n_non_lila": 464
+    },
+    {
+      "predictor": "food_insecurity_rate",
+      "lila_mean": 29.61,
+      "non_lila_mean": 17.27,
+      "diff": 12.34,
+      "cohen_d": 1.14,
+      "t": 9.36,
+      "p_value": 1.0447058618930705e-14,
+      "n_lila": 57,
+      "n_non_lila": 471
+    },
+    {
+      "predictor": "snap_rate",
+      "lila_mean": 23.29,
+      "non_lila_mean": 11.59,
+      "diff": 11.71,
+      "cohen_d": 0.958,
+      "t": 7.54,
+      "p_value": 7.282148167176848e-11,
+      "n_lila": 56,
+      "n_non_lila": 470
+    },
+    {
+      "predictor": "grocery_count",
+      "lila_mean": 0.02,
+      "non_lila_mean": 0.6,
+      "diff": -0.58,
+      "cohen_d": -0.674,
+      "t": -9.95,
+      "p_value": 1.707929676087468e-21,
+      "n_lila": 57,
+      "n_non_lila": 473
+    },
+    {
+      "predictor": "poverty_rate",
+      "lila_mean": 19.91,
+      "non_lila_mean": 13.03,
+      "diff": 6.88,
+      "cohen_d": 0.614,
+      "t": 4.76,
+      "p_value": 8.67466816460562e-06,
+      "n_lila": 57,
+      "n_non_lila": 471
+    },
+    {
+      "predictor": "unemployment_rate",
+      "lila_mean": 9.29,
+      "non_lila_mean": 5.68,
+      "diff": 3.61,
+      "cohen_d": 0.604,
+      "t": 4.31,
+      "p_value": 5.353662395991624e-05,
+      "n_lila": 56,
+      "n_non_lila": 471
+    },
+    {
+      "predictor": "supermarket_count",
+      "lila_mean": 0.05,
+      "non_lila_mean": 0.24,
+      "diff": -0.19,
+      "cohen_d": -0.464,
+      "t": -4.18,
+      "p_value": 6.272051875593505e-05,
+      "n_lila": 57,
+      "n_non_lila": 473
+    },
+    {
+      "predictor": "convenience_count",
+      "lila_mean": 0.89,
+      "non_lila_mean": 0.55,
+      "diff": 0.35,
+      "cohen_d": 0.311,
+      "t": 2.01,
+      "p_value": 0.04885571699757576,
+      "n_lila": 57,
+      "n_non_lila": 473
+    },
+    {
+      "predictor": "fastfood_count",
+      "lila_mean": 0.63,
+      "non_lila_mean": 1.0,
+      "diff": -0.37,
+      "cohen_d": -0.213,
+      "t": -2.0,
+      "p_value": 0.04817385373546368,
+      "n_lila": 57,
+      "n_non_lila": 473
+    },
+    {
+      "predictor": "pct_no_vehicle",
+      "lila_mean": 7.02,
+      "non_lila_mean": 5.98,
+      "diff": 1.04,
+      "cohen_d": 0.13,
+      "t": 0.99,
+      "p_value": 0.32316942780238916,
+      "n_lila": 56,
+      "n_non_lila": 470
+    },
+    {
+      "predictor": "farmers_market_count",
+      "lila_mean": 0.05,
+      "non_lila_mean": 0.04,
+      "diff": 0.01,
+      "cohen_d": 0.059,
+      "t": 0.4,
+      "p_value": 0.690641142302999,
+      "n_lila": 57,
+      "n_non_lila": 473
+    }
+  ],
+  "ols_food_access_gap": {
+    "n": 519,
+    "r_squared": 0.309,
+    "adj_r_squared": 0.302,
+    "coefficients": {
+      "(intercept)": 26.46,
+      "fastfood_count": 1.437,
+      "convenience_count": 4.433,
+      "supermarket_count": -9.68,
+      "pct_no_vehicle": 0.192,
+      "median_income": -0.0
+    }
+  },
+  "ols_food_access_gap_simple": {
+    "n": 526,
+    "r_squared": 0.193,
+    "adj_r_squared": 0.188,
+    "coefficients": {
+      "(intercept)": 21.542,
+      "fastfood_count": 1.835,
+      "supermarket_count": -10.548,
+      "pct_no_vehicle": 0.44
+    }
+  },
+  "ols_food_insecurity": {
+    "n": 519,
+    "r_squared": 0.614,
+    "adj_r_squared": 0.609,
+    "coefficients": {
+      "(intercept)": 28.008,
+      "food_access_gap": 0.085,
+      "fastfood_count": -0.858,
+      "convenience_count": -0.125,
+      "supermarket_count": -0.801,
+      "median_income": -0.0,
+      "pct_no_vehicle": 0.362
+    }
+  }
+}

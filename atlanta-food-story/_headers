@@ -1,0 +1,20 @@
+# GeoJSON tiles can be cached aggressively — they only change when we
+# re-publish, and the build pipeline replaces the whole bundle.
+/geojson/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+  Access-Control-Allow-Origin: *
+
+/data/*
+  Cache-Control: public, max-age=600, stale-while-revalidate=3600
+  Access-Control-Allow-Origin: *
+
+# HTML / JS / CSS — short cache so updates show up quickly
+/*.html
+  Cache-Control: public, max-age=60
+/*.css
+  Cache-Control: public, max-age=300
+/*.js
+  Cache-Control: public, max-age=300
+
+/config.json
+  Cache-Control: public, max-age=300
